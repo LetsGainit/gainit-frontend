@@ -1,0 +1,93 @@
+<<<<<<< HEAD
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+=======
+# 🔧 Visual Studio
+.vs/
+*.user
+*.suo
+*.sln.docstates
+
+# 🏗️ Build directories
+bin/
+obj/
+TestResults/
+out/
+
+# 📦 NuGet
+*.nupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+
+# 📁 Logs
+*.log
+
+# 🔒 Secrets
+*.env
+secrets.json
+
+# 🌐 ASP.NET Configuration
+appsettings.Development.json
+appsettings.Production.json
+appsettings.*.local.json
+
+# 📄 OS files
+Thumbs.db
+ehthumbs.db
+*.DS_Store
+.DS_Store
+
+# 🖼️ VS Code settings (optional)
+.vscode/
+
+# ⚛️ Frontend (React or Node)
+node_modules/
+dist/
+build/
+
+# 💡 SQLite or other local DBs
+*.db
+*.sqlite
+
+# 🧪 Coverage / testing
+coverage/
+*.coverage
+*.coveragexml
+
+# 💾 Docker / containers
+*.pid
+*.pid.lock
+*.tar
+*.img
+*.container
+
+# 💼 Misc
+*.exe
+*.dll
+*.pdb
+*.tmp
+*.bak
+>>>>>>> b34d4bded4212cebc6d946fe4e7c44f0fedc781e
