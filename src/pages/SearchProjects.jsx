@@ -1,7 +1,34 @@
-function SearchProject(){
-    return <div className="serach-project">
-        <h2>Here You Can Find Projects</h2>
-    </div>
+import { Link } from "react-router-dom";
+import ProjectOption from "../components/ProjectOption";
+import "../css/PlatformNavBar.css";
+import "../css/SearchProjects.css";
+import "../css/ProjectOption.css";
+
+function SearchProjects() {
+  const options = [
+    {
+      title: "Nonprofit Project",
+      description:
+        "Collaborate with a real nonprofit and build something that makes an impact.",
+      image: "/NonprofitPhoto.png",
+    },
+    {
+      title: "Learning Project",
+      description:
+        "Sharpen your skills by working on a guided project designed for growth.",
+      image: "/LearningPhoto.png",
+    },
+  ];
+
+  return (
+    <>
+      <div className="project-options-wrapper">
+        {options.map((option, index) => (
+          <ProjectOption key={index} option={option} />
+        ))}
+      </div>
+    </>
+  );
 }
 
-export default SearchProject
+export default SearchProjects;
