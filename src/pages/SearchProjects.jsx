@@ -1,7 +1,6 @@
-import { Link } from "react-router-dom";
 import ProjectOption from "../components/ProjectOption";
 import "../css/PlatformNavBar.css";
-import "../css/SearchProjects.css";
+
 import "../css/ProjectOption.css";
 
 function SearchProjects() {
@@ -21,13 +20,13 @@ function SearchProjects() {
   ];
 
   return (
-    <>
+    <div className="project-options-section">
       <div className="project-options-wrapper">
         {options.map((option, index) => (
           <ProjectOption key={index} option={option} />
         ))}
       </div>
-    </>
+    </div>
   );
 }
 
