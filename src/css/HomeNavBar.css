@@ -1,4 +1,4 @@
-.NavBar {
+.HomeNavBar {
   position: fixed;
   top: 0;
   left: 0;
@@ -14,7 +14,7 @@
   font-family: Arial, sans-serif;
 }
   
-  .navbar-brand a {
+  .Homenavbar-brand a {
     font-size: 2rem;
     font-weight: bold;
     color: #ffffff;
@@ -22,13 +22,13 @@
     padding-left: 2rem;
   }
   
-  .navbar-links {
+  .Homenavbar-links {
     display: flex;
     gap: 1.5rem;
     padding-right: 3rem;
 }
   
-  .nav-link {
+  .Homenav-link {
     color: #ffffff;
     text-decoration: none;
     font-weight: 600;
@@ -37,7 +37,7 @@
     border-radius: 999px;
   }
 
-  .nav-link:hover {
+  .Homenav-link:hover {
     background-color: rgba(255, 255, 255, 255);
     color: #490476;
   }
