@@ -1,10 +1,10 @@
 import "./css/App.css";
 import ProjectCard from "./components/ProjectCard";
-import Home from "./pages/home";
-import SearchProjects from "./pages/SearchProjects";
+import Home from "./pages/Home/Home";
+import SearchProjects from "./pages/SearchProjects/SearchProjects";
 import { Routes, Route, useLocation } from "react-router-dom";
 import NavBar from "./components/NavigatorBar";
-import About from "./pages/About";
+import About from "./pages/About/About";
 import PlatformNavBar from "./components/PlatformNavBar";
 
 function App() {

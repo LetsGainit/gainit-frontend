@@ -1,8 +1,7 @@
-import '../css/Home.css';
+import "../../css/Home.css";
 
-function Home(){
-    return <div className="home">
-    </div>
+function Home() {
+  return <div className="home"></div>;
 }
 
-export default Home
+export default Home;

@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import ProjectOption from "../../components/ProjectOption";
-import "../css/PlatformNavBar.css";
-import "../css/SearchProjects.css";
-import "../css/ProjectOption.css";
+import "../../css/PlatformNavBar.css";
+import "../../css/SearchProjects.css";
+import "../../css/ProjectOption.css";
 
 function SearchProjects() {
   const options = [
