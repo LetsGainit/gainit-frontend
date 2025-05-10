@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { Bell, CircleUserRound, ChevronDown } from "lucide-react";
 import "../css/PlatformNavBar.css";
 
 function PlatformNavBar() {
@@ -23,7 +24,7 @@ function PlatformNavBar() {
             onClick={() => setIsProjectsOpen(!isProjectsOpen)}
             onBlur={() => setTimeout(() => setIsProjectsOpen(false), 200)}
           >
-            Projects ▼
+            Projects <ChevronDown size={16} />
           </button>
           {isProjectsOpen && (
             <div className="dropdown-menu">
@@ -38,11 +39,12 @@ function PlatformNavBar() {
       {/* Right Section - User Actions */}
       <div className="platform-controls">
         <button className="icon-button" aria-label="Notifications">
-          🔔
+          <Bell size={20} />
         </button>
+        <div className="vertical-separator"></div>
         <div className="user-profile">
           <button className="avatar-button" aria-label="User Profile">
-            👤
+            <CircleUserRound size={20} />
           </button>
           <span className="username">Gainer</span>
         </div>

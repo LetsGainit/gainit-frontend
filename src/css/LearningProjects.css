@@ -1,0 +1,105 @@
+.learning-projects {
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(to bottom right, #ffffff, #e0e7ff);
+  padding: 4rem 1rem;
+  text-align: center;
+}
+
+.hero-headline {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 800;
+  color: #000000;
+  text-align: center;
+}
+
+.hero-subheading {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  color: #6366f1;
+  text-align: center;
+  margin-top: 1rem;
+  font-weight: bold;
+}
+
+/* Projects Section */
+.projects-section {
+    padding: 2rem 1rem;
+  }
+
+.projects-title {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* Search Bar */
+.search-container {
+  display: flex;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.search-input {
+  flex-grow: 1;
+  border-radius: 9999px;
+  background-color: #f3f4f6;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: none;
+  outline: none;
+}
+
+.search-button {
+  margin-left: 0.5rem;
+  padding: 0.5rem;
+  background-color: #6366f1;
+  color: white;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.search-button:hover {
+  background-color: #4f46e5;
+}
+
+/* Projects Grid */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  padding: 0 1.5rem;
+}
+
+/* Responsive Design */
+@media (min-width: 640px) {
+  .hero-headline {
+    font-size: 3.75rem;
+    line-height: 1;
+  }
+
+  .projects-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .projects-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+} 
