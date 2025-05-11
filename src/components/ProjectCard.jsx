@@ -1,6 +1,10 @@
+import { useNavigate } from "react-router-dom";
+
 function ProjectCard({ project }) {
+  const navigate = useNavigate();
+
   function onSeeMoreClick() {
-    alert("clicked");
+    navigate(`/project/${project.id}`);
   }
 
   return (

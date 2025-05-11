@@ -1,0 +1,418 @@
+.project-page {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  background-color: #ffffff;
+}
+
+.project-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  padding: 1rem;
+}
+
+/* Left Column - Project Content */
+.project-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.project-tagline {
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  color: #6b7280;
+  letter-spacing: 0.05em;
+}
+
+.project-title {
+  font-weight: 700;
+  font-size: 2.25rem;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.project-description {
+  color: #374151;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.project-metadata {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.metadata-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #4b5563;
+  font-size: 0.875rem;
+}
+
+.cta-button {
+  background-color: #6366f1;
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  align-self: flex-start;
+}
+
+.cta-button:hover {
+  background-color: #4f46e5;
+}
+
+/* Right Column - Project Visual */
+.project-visual {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.visual-container {
+  width: 100%;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background-color: #f9fafb;
+  padding: 1rem;
+}
+
+.project-showcase {
+  width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  object-fit: cover;
+}
+
+/* Project Overview Section */
+.project-overview {
+  max-width: 1200px;
+  margin: 4rem auto 0;
+  padding: 0 1rem;
+}
+
+.overview-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+/* Goals Section */
+.goals-section {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.goals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.goal-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.goal-number {
+  background-color: #818cf8;
+  color: white;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.goal-text {
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+/* Roles Section */
+.roles-section {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.roles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.role-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: #f3f4f6;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  color: #4b5563;
+}
+
+.contact-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #6366f1;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 1.5rem;
+  font-weight: 500;
+}
+
+.contact-button:hover {
+  background-color: #4f46e5;
+}
+
+/* Project Tech Section */
+.project-tech {
+  max-width: 1200px;
+  margin: 4rem auto 0;
+  padding: 0 1rem;
+}
+
+.tech-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.tech-section {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.details-section {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.tech-subsection {
+  margin-bottom: 1.5rem;
+}
+
+.tech-subsection:last-child {
+  margin-bottom: 0;
+}
+
+.subsection-title {
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.tech-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.tech-pill {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+}
+
+.lang-pill {
+  border: 1px solid #e5e7eb;
+  color: #6366f1;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+}
+
+.details-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.detail-value {
+  color: #111827;
+  font-weight: 500;
+}
+
+/* Team Section */
+.team-section {
+  max-width: 1200px;
+  margin: 4rem auto 0;
+  padding: 0 1rem;
+}
+
+.team-container {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.team-member {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.member-image {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.member-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.member-name {
+  font-weight: 600;
+  color: #111827;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.member-role {
+  color: #6366f1;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.profile-link {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.profile-link:hover {
+  color: #4b5563;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .project-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .project-title {
+    font-size: 3rem;
+  }
+
+  .project-description {
+    font-size: 1.125rem;
+  }
+
+  .overview-container {
+    grid-template-columns: 2fr 1fr;
+  }
+
+  .goals-section {
+    margin-bottom: 0;
+  }
+
+  .tech-container {
+    grid-template-columns: 2fr 1fr;
+  }
+
+  .tech-section {
+    margin-bottom: 0;
+  }
+
+  .team-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.back-button-container {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  padding: 0 1rem;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: transparent;
+  color: #6b7280;
+  border: none;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.back-button:hover {
+  color: #4b5563;
+} 

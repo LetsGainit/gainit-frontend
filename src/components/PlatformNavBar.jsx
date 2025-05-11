@@ -1,11 +1,18 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Bell, CircleUserRound, ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import "../css/PlatformNavBar.css";
 
 function PlatformNavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProjectsOpen, setIsProjectsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleUserClick = () => {
+    // For example, navigate to profile with ID 1
+    navigate("/profile/1");
+  };
 
   return (
     <nav className="platform-NavBar">
@@ -43,7 +50,7 @@ function PlatformNavBar() {
         </button>
         <div className="vertical-separator"></div>
         <div className="user-profile">
-          <button className="avatar-button" aria-label="User Profile">
+          <button className="avatar-button" aria-label="User Profile" onClick={handleUserClick}>
             <CircleUserRound size={20} />
           </button>
           <span className="username">Gainer</span>
