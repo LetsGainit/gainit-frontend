@@ -21,7 +21,7 @@ function ProfilePage() {
 
   const user = {
     name: "Ziv Francis",
-    badge: "Builder",
+    badge: "Gainer",
     subtitle: "Final Year Computer Science Student",
     image: "/avatar-default-image.png",
     social: {

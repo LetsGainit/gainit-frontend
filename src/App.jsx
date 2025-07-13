@@ -12,15 +12,14 @@ import ProfilePage from "./pages/ProfilePage/ProfilePage";
 
 function App() {
   const location = useLocation();
-  const isHomePage = location.pathname === "/";
 
   return (
     <div>
-      {isHomePage ? <HomeNavBar /> : <PlatformNavBar />}
+      <PlatformNavBar />
 
       <main className="main-content">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<LearningProjects />} />
           <Route path="/about" element={<About />} />
           <Route path="/search-projects" element={<SearchProjects />} />
           <Route path="/learning-projects" element={<LearningProjects />} />

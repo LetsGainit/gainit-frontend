@@ -1,5 +1,6 @@
 import { Search } from "lucide-react";
 import ProjectCard from "../../components/ProjectCard";
+import Footer from "../../components/Footer";
 import "../../css/LearningProjects.css";
 
 function LearningProjects() {
@@ -35,17 +36,12 @@ function LearningProjects() {
     <div className="learning-projects">
       {/* Hero Section */}
       <div className="hero-section">
-        <h1 className="hero-headline">Start gaining experience today.</h1>
+        <h1 className="hero-headline">Let’s make your skills shine. Gain real experience today.</h1>
         <p className="hero-subheading">
           Discover projects that match your interests and skills
         </p>
-      </div>
-
-      {/* Projects Section */}
-      <div className="projects-section">
-        
-        {/* Search Bar */}
-        <div className="search-container">
+          {/* Search Bar */}
+          <div className="search-container">
           <input
             type="text"
             placeholder="Search projects, technologies..."
@@ -55,7 +51,11 @@ function LearningProjects() {
             <Search size={20} />
           </button>
         </div>
+      </div>
 
+      {/* Projects Section */}
+      <div className="projects-section">
+      
         {/* Projects Grid */}
         <div className="projects-grid">
           {projects.map((project) => (
@@ -63,6 +63,9 @@ function LearningProjects() {
           ))}
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

@@ -1,29 +1,63 @@
 import { useNavigate } from "react-router-dom";
+import { FaArrowRight } from "react-icons/fa";
 
 function ProjectCard({ project }) {
   const navigate = useNavigate();
 
-  function onSeeMoreClick() {
+  const handleCardClick = () => {
     navigate(`/project/${project.id}`);
-  }
+  };
 
   return (
-    <div className="project-card">
-      <div className="project-image">
+    <div 
+      className="project-card"
+      onClick={handleCardClick}
+    >
+      {/* Image Container */}
+      <div className="project-image-container">
         <img 
           src={project.image || "/default-featured-image.png"}
           alt={project.title || "Project Image"}
           className="project-image"
         />
       </div>
-      <div className="project-seeMoreButton">
-        <button className="seeMore-button" onClick={onSeeMoreClick}>
-          see more
-        </button>
-      </div>
-      <div className="project-info">
-        <h3>{project.title}</h3>
-        <p>{project.description}</p>
+
+      {/* Content */}
+      <div className="project-content">
+        {/* Duration and Positions */}
+        <div className="project-meta">
+          <span className="duration">🗓️ {project.duration || "3 Months"}</span>
+          <span className="positions">👥 {project.openPositions || "1"} Position{(project.openPositions || 1) !== 1 ? 's' : ''} Open</span>
+        </div>
+
+        {/* Title */}
+        <h3 className="project-title">
+          {project.title}
+        </h3>
+
+        {/* Description */}
+        <p className="project-description">
+          {project.description}
+        </p>
+
+        {/* Tech Stack */}
+        <div className="tech-stack">
+          {project.technologies?.slice(0, 4).map((tech, index) => (
+            <span key={index} className="tech-item">
+              {tech}
+            </span>
+          ))}
+          {project.technologies && project.technologies.length > 4 && (
+            <span className="tech-more">+{project.technologies.length - 4} more</span>
+          )}
+        </div>
+
+        {/* CTA Link */}
+        <div className="project-cta">
+          <span className="view-project-link">
+            View Project <FaArrowRight className="arrow-icon" />
+          </span>
+        </div>
       </div>
     </div>
   );

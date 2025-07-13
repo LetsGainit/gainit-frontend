@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import "../css/ProjectOption.css";
+import OptionCard from "./OptionCard";
 
 function ProjectOption({ option }) {
   const navigate = useNavigate();
@@ -11,11 +11,12 @@ function ProjectOption({ option }) {
   };
 
   return (
-    <div className="project-option" onClick={handleClick} style={{ cursor: "pointer" }}>
-      <img src={option.image} alt={option.title} className="project-image" />
-      <h2>{option.title}</h2>
-      <p>{option.description}</p>
-    </div>
+    <OptionCard
+      title={option.title}
+      description={option.description}
+      imageSrc={option.image}
+      onClick={handleClick}
+    />
   );
 }
 
