@@ -10,8 +10,23 @@ function PlatformNavBar() {
   const navigate = useNavigate();
 
   const handleUserClick = () => {
-    // For example, navigate to profile with ID 1
-    navigate("/profile/1");
+    try {
+      const userStr = localStorage.getItem("currentUser");
+      if (!userStr) {
+        navigate("/login");
+        return;
+      }
+      const user = JSON.parse(userStr);
+      // Try common id keys
+      const userId = user.id || user.userId || user._id;
+      if (userId) {
+        navigate(`/profile/${userId}`);
+      } else {
+        navigate("/login");
+      }
+    } catch (e) {
+      navigate("/login");
+    }
   };
 
   return (

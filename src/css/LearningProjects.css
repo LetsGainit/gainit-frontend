@@ -44,43 +44,62 @@
 }
 
 /* Search Bar */
-.search-container {
+.search-bar-bubble {
+  position: relative;
   display: flex;
+  align-items: center;
   max-width: 700px;
-  height: 70px;
   margin: 0 auto;
   margin-top: 5rem;
   padding: 0 1rem;
 }
 
-.search-input {
-  flex-grow: 1;
+.search-bar-bubble .search-input {
+  width: 100%;
   border-radius: 9999px;
-  background-color: #fafbfb;
-  padding: 0.75rem 1rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  background: #fff;
+  padding: 0.75rem 3.5rem 0.75rem 1.25rem;
+  box-shadow: 0 2px 12px 0 rgba(99, 102, 241, 0.08), 0 1.5px 4px rgba(0,0,0,0.04);
   border: none;
   outline: none;
   font-size: 1rem;
+  color: #222;
+  transition: box-shadow 0.2s;
 }
 
-.search-button {
-  margin-left: 0.5rem;
-  padding: 0.5rem;
+.search-bar-bubble .search-input:focus {
+  box-shadow: 0 4px 16px 0 rgba(99, 102, 241, 0.13), 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.search-button-inside {
+  position: absolute;
+  right: 2.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
   height: 40px;
-  background-color: #6366f1;
-  color: white;
-  border-radius: 9999px;
+  background: #6366f1;
+  color: #fff;
   border: none;
-  cursor: pointer;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s;
+  box-shadow: 0 2px 8px 0 rgba(99, 102, 241, 0.10);
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  z-index: 2;
+  font-size: 1.1rem;
 }
 
-.search-button:hover {
-  background-color: #4f46e5;
+.search-button-inside:hover {
+  background: #4f46e5;
+  box-shadow: 0 4px 16px 0 rgba(99, 102, 241, 0.18);
+}
+
+/* Remove old search-button margin and layout for new design */
+.search-button {
+  display: none;
 }
 
 /* Projects Grid */

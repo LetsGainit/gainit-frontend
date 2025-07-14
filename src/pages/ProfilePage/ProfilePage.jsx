@@ -11,114 +11,69 @@ import {
   Terminal,
   ArrowRight
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import "../../css/ProfilePage.css";
 
 function ProfilePage() {
   const navigate = useNavigate();
+  const { id: userId } = useParams();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("technologies");
 
-  const user = {
-    name: "Ziv Francis",
-    badge: "Gainer",
-    subtitle: "Final Year Computer Science Student",
-    image: "/avatar-default-image.png",
-    social: {
-      facebook: "https://facebook.com/maya.cohen",
-      github: "https://github.com/mayacohen",
-      linkedin: "https://linkedin.com/in/maya-cohen",
-      email: "mailto:maya.cohen@example.com"
-    },
-    about: `I'm a passionate computer science student with a keen interest in artificial intelligence and web development. Currently in my final year, I'm focusing on building innovative solutions that make a real impact.
-
-My journey in tech began with simple HTML websites, and now I'm diving deep into machine learning and full-stack development. I love collaborating on open-source projects and contributing to the tech community.
-
-When I'm not coding, you'll find me participating in hackathons, mentoring junior developers, or exploring new technologies. I believe in continuous learning and sharing knowledge with others.`,
-    expertise: {
-      languages: ["JavaScript", "Python", "TypeScript", "Java", "C++"],
-      technologies: ["React", "Redux", "Tailwind CSS", "Next.js", "Node.js", "Express"],
-      tools: ["Git", "Docker", "VS Code", "Figma", "Postman"]
-    },
-    interests: [
-      "Frontend Development",
-      "Clean Code",
-      "UX/UI Integration",
-      "Social Impact Projects",
-      "Open Source",
-      "Machine Learning"
-    ],
-    achievements: [
-      {
-        icon: "🏆",
-        title: "Ready to Work",
-        description: "Completed 5 major projects",
-        locked: false
-      },
-      {
-        icon: "🚀",
-        title: "First Steps",
-        description: "Joined the platform",
-        locked: false
-      },
-      {
-        icon: "👥",
-        title: "Team Player",
-        description: "Collaborated on 3 projects",
-        locked: true
-      },
-      {
-        icon: "⭐",
-        title: "Community Star",
-        description: "Helped 10+ developers",
-        locked: true
+  useEffect(() => {
+    async function fetchUser() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/users/gainer/${userId}/profile`
+        );
+        if (!res.ok) throw new Error("Failed to fetch user profile.");
+        const data = await res.json();
+        setUser(data);
+      } catch (err) {
+        setError(err.message || "Failed to load profile.");
+      } finally {
+        setLoading(false);
       }
-    ],
-    projects: [
-      {
-        id: 1,
-        title: "AI-Powered Text Simplification",
-        description: "Making complex educational content accessible through AI-powered text simplification.",
-        image: "/default-featured-image.png",
-        status: "In Progress",
-        role: "Frontend Developer",
-        team: [
-          { id: 1, image: "/avatar-default-image.png" },
-          { id: 2, image: "/avatar-default-image.png" },
-          { id: 3, image: "/avatar-default-image.png" },
-          { id: 4, image: "/avatar-default-image.png" }
-        ],
-        technologies: ["React", "Node.js", "Python", "TensorFlow"]
-      },
-      {
-        id: 2,
-        title: "Community Learning Platform",
-        description: "A platform connecting learners with mentors in their local community.",
-        image: "/default-featured-image.png",
-        status: "Completed",
-        role: "Full Stack Developer",
-        team: [
-          { id: 1, image: "/avatar-default-image.png" },
-          { id: 2, image: "/avatar-default-image.png" }
-        ],
-        technologies: ["React", "Express", "MongoDB", "Socket.io"]
-      },
-      {
-        id: 3,
-        title: "Smart Study Scheduler",
-        description: "AI-powered study schedule optimization for students.",
-        image: "/default-featured-image.png",
-        status: "In Progress",
-        role: "Backend Developer",
-        team: [
-          { id: 1, image: "/avatar-default-image.png" },
-          { id: 2, image: "/avatar-default-image.png" },
-          { id: 3, image: "/avatar-default-image.png" }
-        ],
-        technologies: ["Python", "Django", "PostgreSQL", "Redis"]
-      }
-    ]
-  };
+    }
+    fetchUser();
+  }, [userId]);
+
+  if (loading) {
+    return (
+      <div className="profile-page" style={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="spinner" style={{ fontSize: 24 }}>Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="profile-page" style={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d32f2f' }}>
+        <div>Error: {error}</div>
+      </div>
+    );
+  }
+
+  // Fallbacks for missing fields
+  const fullName = user.fullName || user.name || "Unnamed User";
+  const badge = user.badge || "Gainer";
+  const educationStatus = user.educationStatus || user.subtitle || "";
+  const biography = user.biography || user.about || "";
+  const profilePictureUrl = user.profilePictureUrl || user.image || "/avatar-default-image.png";
+  const areasOfInterest = user.areasOfInterest || user.interests || [];
+  const facebook = user.facebookPageURL || (user.social && user.social.facebook);
+  const github = user.gitHubURL || (user.social && user.social.github);
+  const linkedin = user.linkedInURL || (user.social && user.social.linkedin);
+  const email = user.email || (user.social && user.social.email);
+  // Use techExpertise from API
+  const techExpertise = user.techExpertise || { programmingLanguages: [], technologies: [], tools: [] };
+  const achievements = user.achievements || [];
+  const projects = user.projects || [];
 
   return (
     <div className="profile-page">
@@ -134,32 +89,40 @@ When I'm not coding, you'll find me participating in hackathons, mentoring junio
         <div className="header-content">
           <div className="profile-image-container">
             <img 
-              src={user.image} 
-              alt={user.name}
+              src={profilePictureUrl} 
+              alt={fullName}
               className="profile-image"
+              onError={e => { e.target.src = "/avatar-default-image.png"; }}
             />
           </div>
           
           <div className="profile-info">
             <div className="name-badge">
-              <h1 className="profile-name">{user.name}</h1>
-              <span className="profile-badge">{user.badge}</span>
+              <h1 className="profile-name">{fullName}</h1>
+              <span className="profile-badge">{badge}</span>
             </div>
-            <p className="profile-subtitle">{user.subtitle}</p>
-            
+            <p className="profile-subtitle">{educationStatus}</p>
             <div className="social-icons">
-              <a href={user.social.facebook} target="_blank" rel="noopener noreferrer" className="social-icon">
-                <Facebook size={20} />
-              </a>
-              <a href={user.social.github} target="_blank" rel="noopener noreferrer" className="social-icon">
-                <Github size={20} />
-              </a>
-              <a href={user.social.linkedin} target="_blank" rel="noopener noreferrer" className="social-icon">
-                <Linkedin size={20} />
-              </a>
-              <a href={user.social.email} className="social-icon">
-                <Mail size={20} />
-              </a>
+              {facebook && (
+                <a href={facebook} target="_blank" rel="noopener noreferrer" className="social-icon">
+                  <Facebook size={20} />
+                </a>
+              )}
+              {github && (
+                <a href={github} target="_blank" rel="noopener noreferrer" className="social-icon">
+                  <Github size={20} />
+                </a>
+              )}
+              {linkedin && (
+                <a href={linkedin} target="_blank" rel="noopener noreferrer" className="social-icon">
+                  <Linkedin size={20} />
+                </a>
+              )}
+              {email && (
+                <a href={`mailto:${email}`} className="social-icon">
+                  <Mail size={20} />
+                </a>
+              )}
             </div>
           </div>
 
@@ -182,7 +145,7 @@ When I'm not coding, you'll find me participating in hackathons, mentoring junio
         <div className="about-container">
           <h2 className="section-title">About Me</h2>
           <div className="about-content">
-            {user.about.split('\n\n').map((paragraph, index) => (
+            {biography.split('\n\n').map((paragraph, index) => (
               <p key={index} className="about-paragraph">
                 {paragraph}
               </p>
@@ -195,7 +158,6 @@ When I'm not coding, you'll find me participating in hackathons, mentoring junio
       <div className="expertise-section">
         <div className="expertise-container">
           <h2 className="section-title">Expertise</h2>
-          
           <div className="tabs">
             <button 
               className={`tab ${activeTab === 'languages' ? 'active' : ''}`}
@@ -219,27 +181,26 @@ When I'm not coding, you'll find me participating in hackathons, mentoring junio
               <span>Tools</span>
             </button>
           </div>
-
           <div className="expertise-content">
             {activeTab === 'languages' && (
               <div className="badge-list">
-                {user.expertise.languages.map((lang, index) => (
+                {techExpertise.programmingLanguages && techExpertise.programmingLanguages.length > 0 ? techExpertise.programmingLanguages.map((lang, index) => (
                   <span key={index} className="expertise-badge">{lang}</span>
-                ))}
+                )) : <span>No data</span>}
               </div>
             )}
             {activeTab === 'technologies' && (
               <div className="badge-list">
-                {user.expertise.technologies.map((tech, index) => (
+                {techExpertise.technologies && techExpertise.technologies.length > 0 ? techExpertise.technologies.map((tech, index) => (
                   <span key={index} className="expertise-badge">{tech}</span>
-                ))}
+                )) : <span>No data</span>}
               </div>
             )}
             {activeTab === 'tools' && (
               <div className="badge-list">
-                {user.expertise.tools.map((tool, index) => (
+                {techExpertise.tools && techExpertise.tools.length > 0 ? techExpertise.tools.map((tool, index) => (
                   <span key={index} className="expertise-badge">{tool}</span>
-                ))}
+                )) : <span>No data</span>}
               </div>
             )}
           </div>
@@ -251,9 +212,9 @@ When I'm not coding, you'll find me participating in hackathons, mentoring junio
         <div className="interests-container">
           <h2 className="section-title">Areas of Interest</h2>
           <div className="interests-list">
-            {user.interests.map((interest, index) => (
+            {areasOfInterest && areasOfInterest.length > 0 ? areasOfInterest.map((interest, index) => (
               <span key={index} className="interest-tag">{interest}</span>
-            ))}
+            )) : <span>No data</span>}
           </div>
         </div>
       </div>
@@ -261,16 +222,16 @@ When I'm not coding, you'll find me participating in hackathons, mentoring junio
       {/* Achievements Section */}
       <div className="achievements-section">
         <div className="achievements-container">
-          <h2 className="section-title">Achievements ({user.achievements.length})</h2>
+          <h2 className="section-title">Achievements ({achievements.length})</h2>
           <div className="achievements-grid">
-            {user.achievements.map((achievement, index) => (
+            {achievements.length > 0 ? achievements.map((achievement, index) => (
               <div key={index} className={`achievement-card ${achievement.locked ? 'locked' : ''}`}>
                 <span className="achievement-icon">{achievement.icon}</span>
                 <h3 className="achievement-title">{achievement.title}</h3>
                 <p className="achievement-description">{achievement.description}</p>
                 {achievement.locked && <span className="locked-badge">Locked</span>}
               </div>
-            ))}
+            )) : <span>No data</span>}
           </div>
         </div>
       </div>
@@ -280,43 +241,43 @@ When I'm not coding, you'll find me participating in hackathons, mentoring junio
         <div className="projects-container">
           <h2 className="section-title">Projects</h2>
           <div className="projects-grid">
-            {user.projects.map((project) => (
-              <div key={project.id} className="project-card">
+            {projects.length > 0 ? projects.map((project) => (
+              <div key={project.id || project.projectId} className="project-card">
                 <div className="project-image-container">
                   <img 
-                    src={project.image} 
-                    alt={project.title}
+                    src={project.image || project.projectPictureUrl || "/default-featured-image.png"} 
+                    alt={project.title || project.projectName}
                     className="project-image"
+                    onError={e => { e.target.src = "/default-featured-image.png"; }}
                   />
                   <span className={`status-badge ${project.status === 'completed' ? 'completed' : 'in-progress'}`}>
                     {project.status === 'completed' ? 'Completed' : 'In Progress'}
                   </span>
                 </div>
-                
                 <div className="project-content">
                   <div className="project-info">
-                    <h3 className="project-title">{project.title}</h3>
-                    <p className="project-description">{project.description}</p>
+                    <h3 className="project-title">{project.title || project.projectName}</h3>
+                    <p className="project-description">{project.description || project.projectDescription}</p>
                     <p className="project-role">
-                      Role: <span className="role-text">{project.role}</span>
+                      Role: <span className="role-text">{project.role || ""}</span>
                     </p>
                     <div className="project-team">
                       <div className="team-avatars">
-                        {project.team.slice(0, 3).map((member, index) => (
+                        {project.team && project.team.slice(0, 3).map((member, index) => (
                           <img
                             key={index}
-                            src={member.image}
+                            src={member.image || "/avatar-default-image.png"}
                             alt={`Team member ${index + 1}`}
                             className="team-avatar"
                           />
                         ))}
-                        {project.team.length > 3 && (
+                        {project.team && project.team.length > 3 && (
                           <span className="more-members">+{project.team.length - 3}</span>
                         )}
                       </div>
                     </div>
                     <div className="project-technologies">
-                      {project.technologies.map((tech, index) => (
+                      {project.technologies && project.technologies.map((tech, index) => (
                         <span key={index} className="tech-badge">
                           {tech}
                         </span>
@@ -326,7 +287,7 @@ When I'm not coding, you'll find me participating in hackathons, mentoring junio
                   <div className="button-container">
                     <button 
                       className="view-project-button"
-                      onClick={() => navigate(`/project/${project.id}`)}
+                      onClick={() => navigate(`/project/${project.id || project.projectId}`)}
                     >
                       <ArrowRight size={16} />
                       View Project
@@ -334,7 +295,7 @@ When I'm not coding, you'll find me participating in hackathons, mentoring junio
                   </div>
                 </div>
               </div>
-            ))}
+            )) : <span>No data</span>}
           </div>
         </div>
       </div>

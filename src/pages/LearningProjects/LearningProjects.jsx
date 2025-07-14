@@ -71,16 +71,17 @@ function LearningProjects() {
         Gain hands-on experience, build real projects, and let your portfolio speak for you
         </p>
           {/* Search Bar */}
-          <div className="search-container">
-          <input
-            type="text"
-            placeholder="Tell us your dream role and we’ll find the perfect project for you"
-            className="search-input"
-          />
-          <button className="search-button">
-            <Search size={20} />
-          </button>
-        </div>
+          <div className="search-container search-bar-bubble">
+            <input
+              type="text"
+              placeholder="Tell us your dream role and we’ll find the perfect project for you"
+              className="search-input"
+              style={{ paddingRight: 56 }} // extra right padding for button
+            />
+            <button className="search-button-inside" type="button" aria-label="Search" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
+              <Search size={22} color="white" stroke="white" fill="none" style={{ display: 'block' }} />
+            </button>
+          </div>
       </div>
 
       {/* Projects Section */}

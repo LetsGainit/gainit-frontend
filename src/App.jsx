@@ -9,6 +9,7 @@ import HomeNavBar from "./components/HomeNavBar";
 import About from "./pages/About/About";
 import PlatformNavBar from "./components/PlatformNavBar";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
+import Login from "./pages/Login";
 
 function App() {
   const location = useLocation();
@@ -25,6 +26,7 @@ function App() {
           <Route path="/learning-projects" element={<LearningProjects />} />
           <Route path="/project/:id" element={<ProjectPage />} />
           <Route path="/profile/:id" element={<ProfilePage />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </main>
     </div>
