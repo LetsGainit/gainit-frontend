@@ -33,7 +33,9 @@ function PlatformNavBar() {
     <nav className="platform-NavBar">
       {/* Left Section - Logo */}
       <div className="platform-brand">
-        <Link to="/">Gainit</Link>
+        <Link to="/">
+          <img src="/Gainit_logo.svg" alt="Gainit logo" style={{ height: "40px", width: "auto" }} />
+        </Link>
       </div>
 
       {/* Center Section - Navigation */}

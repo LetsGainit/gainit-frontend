@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const emailToIdMap = {
-  "priya.patel@securecyber.org": "242f9dce-64d4-47cb-947b-1b6f128a3c6e",
-  "maria.rodriguez@futuretech.edu": "462bddec-e645-4b99-9e13-5b8e5a4eb5ad",
-  // Add more emails as needed
+  "priya.patel@securitylearn.dev": "68c02c7b-01b8-4693-8c9a-25077b62aa44",
+  "maria.rodriguez@innovatelearn.net": "3a43c013-41ba-434a-bf58-68a1746b3d04",
 };
 
 const Login = () => {

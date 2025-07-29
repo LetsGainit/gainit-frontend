@@ -13,14 +13,15 @@
 }
 
 /* Brand/Logo */
-.platform-brand a {
-  font-size: 1.8rem;
-  font-weight: bold;
-  text-decoration: none;
-  background: linear-gradient(135deg, #490476, #6b46c1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  padding-left: 1rem;
+.platform-brand {
+  margin-left: -20px;
+  display: flex;
+  align-items: center;
+}
+
+.platform-brand img {
+  transform: scale(1.6); /* משנה את הגודל של הלוגו בלבד */
+  transform-origin: left center; /* יבטיח שהוא לא יברח מהשוליים */
 }
 
 /* Navigation Links */

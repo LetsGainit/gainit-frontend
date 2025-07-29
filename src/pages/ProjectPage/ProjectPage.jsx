@@ -61,7 +61,13 @@ function ProjectPage() {
   const openRoles = project.openRoles || [];
   const technologies = project.technologies || [];
   const programmingLanguages = project.programmingLanguages || [];
-  const team = project.projectTeamMembers || [];
+  const team = (project.projectTeamMembers || []).map(member => ({
+    ...member,
+    name: member.fullName,
+    role: member.roleInProject,
+    // Optionally, add a profileLink if you have a user profile route:
+    // profileLink: `/user/${member.userId}`
+  }));
   const startDate = project.createdAtUtc ? new Date(project.createdAtUtc).toLocaleDateString() : "N/A";
 
   return (
