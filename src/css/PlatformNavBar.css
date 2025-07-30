@@ -20,8 +20,8 @@
 }
 
 .platform-brand img {
-  transform: scale(1.6); /* משנה את הגודל של הלוגו בלבד */
-  transform-origin: left center; /* יבטיח שהוא לא יברח מהשוליים */
+  transform: scale(1.6);
+  transform-origin: left center;
 }
 
 /* Navigation Links */
