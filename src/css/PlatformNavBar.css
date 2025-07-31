@@ -19,9 +19,10 @@
   align-items: center;
 }
 
-.platform-brand img {
-  transform: scale(1.6);
-  transform-origin: left center;
+.platform-brand img.logo {
+  height: 60px;
+  width: auto;
+  transform: none;
 }
 
 /* Navigation Links */
