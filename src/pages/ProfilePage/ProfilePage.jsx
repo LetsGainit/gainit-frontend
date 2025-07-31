@@ -228,7 +228,7 @@ function ProfilePage() {
           <div className="achievements-grid">
             {achievements.length > 0 ? achievements.map((achievement, index) => (
               <div key={index} className={`achievement-card ${achievement.locked ? 'locked' : ''}`}>
-                <span className="achievement-icon">{achievement.icon}</span>
+                <span className="achievement-icon">🏆</span>
                 <h3 className="achievement-title">{achievement.title}</h3>
                 <p className="achievement-description">{achievement.description}</p>
                 {achievement.locked && <span className="locked-badge">Locked</span>}
