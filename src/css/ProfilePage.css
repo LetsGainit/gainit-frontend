@@ -405,23 +405,58 @@
   object-fit: cover;
 }
 
+/* Status Badge Styles */
 .status-badge {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  padding: 0.25rem 0.75rem;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 26px;
+  padding: 0 10px;
+  font-size: 0.875rem;
+  line-height: 1;
+  font-weight: 600;
   border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: white;
+  background: #F8FAFC;
+  color: #0F172A;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
 }
 
-.status-badge.in-progress {
-  background-color: #f59e0b;
+.status-badge .status-icon {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
 }
 
 .status-badge.completed {
-  background-color: #10b981;
+  background: #ECFDF5;
+  color: #065F46;
+  border-color: #34D399;
+}
+
+.status-badge.inprogress {
+  background: #FFF7ED;
+  color: #B45309;
+  border-color: #FDBA74;
+}
+
+.status-badge.pending {
+  background: #EEF2FF;
+  color: #3730A3;
+  border-color: #C7D2FE;
+}
+
+.status-badge.unknown {
+  background: #F3F4F6;
+  color: #64748B;
+  border-color: #CBD5E1;
 }
 
 .project-content {
@@ -588,4 +623,4 @@
   .projects-grid {
     grid-template-columns: 1fr;
   }
-} 
+}

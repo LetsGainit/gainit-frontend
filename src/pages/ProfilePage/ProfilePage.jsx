@@ -9,7 +9,9 @@ import {
   Code2,
   Wrench,
   Terminal,
-  ArrowRight
+  ArrowRight,
+  Check,
+  Hourglass
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -73,7 +75,7 @@ function ProfilePage() {
   // Use techExpertise from API
   const techExpertise = user.techExpertise || { programmingLanguages: [], technologies: [], tools: [] };
   const achievements = user.achievements || [];
-  const projects = user.projects || [];
+  const projects = user.participatedProjects || [];
 
   return (
     <div className="profile-page">
@@ -250,8 +252,14 @@ function ProfilePage() {
                     className="project-image"
                     onError={e => { e.target.src = "/default-featured-image.png"; }}
                   />
-                  <span className={`status-badge ${project.status === 'completed' ? 'completed' : 'in-progress'}`}>
-                    {project.status === 'completed' ? 'Completed' : 'In Progress'}
+                  <span className={`status-badge ${project.projectStatus ? project.projectStatus.toLowerCase() : ''}`}>
+                    {project.projectStatus && project.projectStatus.toLowerCase() === 'completed' && (
+                      <Check className="status-icon" />
+                    )}
+                    {project.projectStatus && project.projectStatus.toLowerCase() === 'inprogress' && (
+                      <Hourglass className="status-icon" />
+                    )}
+                    {project.projectStatus || 'Unknown'}
                   </span>
                 </div>
                 <div className="project-content">
