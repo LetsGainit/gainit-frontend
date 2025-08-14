@@ -10,8 +10,19 @@ import About from "./pages/About/About";
 import PlatformNavBar from "./components/PlatformNavBar";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import Login from "./pages/Login";
+import { useEffect } from "react";
+import { useMsal } from "@azure/msal-react";
+import { ensureCurrentUser } from "./auth/auth";
 
 function App() {
+  const { accounts } = useMsal();
+
+  useEffect(() => {
+    if (accounts.length > 0) {
+      ensureCurrentUser().catch(console.error);
+    }
+  }, [accounts.length]);
+
   return (
     <div>
       <PlatformNavBar />

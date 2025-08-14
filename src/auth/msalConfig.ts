@@ -6,10 +6,40 @@ export const msalConfig: Configuration = {
     authority: "https://gainitauth.ciamlogin.com/gainitauth.onmicrosoft.com/GainitauthUF1",
     knownAuthorities: ["gainitauth.ciamlogin.com"],
     redirectUri: "http://localhost:5173/",
-    postLogoutRedirectUri: "http://localhost:5173/"
+    postLogoutRedirectUri: "http://localhost:5173/",
+    navigateToLoginRequestUrl: true
   },
-  cache: { cacheLocation: "localStorage", storeAuthStateInCookie: false },
-  system: { loggerOptions: { logLevel: LogLevel.Warning, loggerCallback: () => {} } }
+  cache: { 
+    cacheLocation: "localStorage", 
+    storeAuthStateInCookie: false 
+  },
+  system: { 
+    loggerOptions: { 
+      logLevel: LogLevel.Verbose, 
+      loggerCallback: (level, message, containsPii) => {
+        if (containsPii) {
+          return;
+        }
+        switch (level) {
+          case LogLevel.Error:
+            console.error(message);
+            return;
+          case LogLevel.Info:
+            console.info(message);
+            return;
+          case LogLevel.Verbose:
+            console.debug(message);
+            return;
+          case LogLevel.Warning:
+            console.warn(message);
+            return;
+          default:
+            console.log(message);
+            return;
+        }
+      }
+    } 
+  }
 };
 
 export const apiScopes = [
