@@ -6,7 +6,7 @@ function ProjectOption({ option }) {
 
   const handleClick = () => {
     if (option.title === "Learning Project") {
-      navigate("/learning-projects");
+      navigate("/home-page");
     }
   };
 

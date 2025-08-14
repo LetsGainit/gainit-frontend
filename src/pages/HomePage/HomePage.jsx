@@ -1,11 +1,11 @@
 import { Search } from "lucide-react";
 import ProjectCard from "../../components/ProjectCard";
 import Footer from "../../components/Footer";
-import "../../css/LearningProjects.css";
+import "../../css/HomePage.css";
 import { getAllActiveProjects } from "../../services/projectsService";
 import { useEffect, useState } from "react";
 
-function LearningProjects() {
+function HomePage() {
   const [projects, setProjects] = useState([]);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ function LearningProjects() {
           difficulty: project.difficultyLevel ?? "Unknown",
           duration: project.duration ?? "N/A",
           image: project.projectPictureUrl ?? "/default-featured-image.png",
-          openPositions: project.requiredRoles?.length ?? 0
+          openPositions: project.requiredRoles?.length ?? 0,
         }));
 
         setProjects(mappedProjects.slice(0, 3));
@@ -33,18 +33,21 @@ function LearningProjects() {
   }, []);
 
   return (
-    <div className="learning-projects">
+    <div className="home-page">
       {/* Hero Section */}
       <div className="hero-section">
-        <h1 className="hero-headline">Let your skills shine. Gain real experience today.</h1>
+        <h1 className="hero-headline">
+          Let your skills shine. Gain real experience today.
+        </h1>
         <p className="hero-subheading">
-          Gain hands-on experience, build real projects, and let your portfolio speak for you
+          Gain hands-on experience, build real projects, and let your portfolio
+          speak for you
         </p>
         {/* Search Bar */}
         <div className="search-container search-bar-bubble">
           <input
             type="text"
-            placeholder="Tell us your dream role and we’ll find the perfect project for you"
+            placeholder="Tell us your dream role and we'll find the perfect project for you"
             className="search-input"
             style={{ paddingRight: 56 }} // extra right padding for button
           />
@@ -52,9 +55,20 @@ function LearningProjects() {
             className="search-button-inside"
             type="button"
             aria-label="Search"
-            style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 0,
+            }}
           >
-            <Search size={22} color="white" stroke="white" fill="none" style={{ display: "block" }} />
+            <Search
+              size={22}
+              color="white"
+              stroke="white"
+              fill="none"
+              style={{ display: "block" }}
+            />
           </button>
         </div>
       </div>
@@ -75,4 +89,4 @@ function LearningProjects() {
   );
 }
 
-export default LearningProjects;
+export default HomePage;
