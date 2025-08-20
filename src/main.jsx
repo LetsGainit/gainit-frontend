@@ -11,8 +11,6 @@ const initializeApp = async () => {
   try {
     // Initialize MSAL first
     await initializeMsal();
-    // Handle any redirect response
-    await msal.handleRedirectPromise();
   } catch (error) {
     console.error("MSAL initialization failed:", error);
   }

@@ -10,18 +10,11 @@ import About from "./pages/About/About";
 import PlatformNavBar from "./components/PlatformNavBar";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import Login from "./pages/Login";
-import { useEffect } from "react";
 import { useMsal } from "@azure/msal-react";
-import { ensureCurrentUser } from "./auth/auth";
+import AuthCallback from "./auth/AuthCallback";
 
 function App() {
   const { accounts } = useMsal();
-
-  useEffect(() => {
-    if (accounts.length > 0) {
-      ensureCurrentUser().catch(console.error);
-    }
-  }, [accounts.length]);
 
   return (
     <div>
@@ -36,6 +29,7 @@ function App() {
           <Route path="/project/:id" element={<ProjectPage />} />
           <Route path="/profile/:id" element={<ProfilePage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/auth-callback" element={<AuthCallback />} />
         </Routes>
       </main>
     </div>

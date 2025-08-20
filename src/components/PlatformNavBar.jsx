@@ -17,8 +17,8 @@ function PlatformNavBar() {
       try {
         // After login, return to profile page. We'll use 'me' temporarily if you don't know the id yet.
         await instance.loginRedirect({
-          scopes: apiScopes,
-          redirectStartPage: `${window.location.origin}/profile/me`,
+          scopes: ["openid", "profile", "offline_access", ...apiScopes],
+          redirectStartPage: "/", // always return to Home after /auth-callback
         });
       } catch (error) {
         console.error("Login redirect failed:", error);
