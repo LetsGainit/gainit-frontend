@@ -1,6 +1,6 @@
-import { Search } from "lucide-react";
 import ProjectCard from "../../components/ProjectCard";
 import Footer from "../../components/Footer";
+import SearchHero from "../../components/SearchHero";
 import "../../css/HomePage.css";
 import { getAllActiveProjects } from "../../services/projectsService";
 import { useEffect, useState } from "react";
@@ -32,6 +32,12 @@ function HomePage() {
     fetchProjects();
   }, []);
 
+  const handleSearch = (query) => {
+    console.log("Search query:", query);
+    // TODO: Implement search functionality
+    // For now, just log the query
+  };
+
   return (
     <div className="home-page">
       {/* Hero Section */}
@@ -43,34 +49,8 @@ function HomePage() {
           Gain hands-on experience, build real projects, and let your portfolio
           speak for you
         </p>
-        {/* Search Bar */}
-        <div className="search-container search-bar-bubble">
-          <input
-            type="text"
-            placeholder="Tell us your dream role and we'll find the perfect project for you"
-            className="search-input"
-            style={{ paddingRight: 56 }} // extra right padding for button
-          />
-          <button
-            className="search-button-inside"
-            type="button"
-            aria-label="Search"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 0,
-            }}
-          >
-            <Search
-              size={22}
-              color="white"
-              stroke="white"
-              fill="none"
-              style={{ display: "block" }}
-            />
-          </button>
-        </div>
+        {/* New Search Hero Component */}
+        <SearchHero onSearch={handleSearch} />
       </div>
 
       {/* Projects Section */}

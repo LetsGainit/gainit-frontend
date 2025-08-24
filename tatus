@@ -1,0 +1,195 @@
+[1mdiff --git a/package-lock.json b/package-lock.json[m
+[1mindex f17ee57..b37fc03 100644[m
+[1m--- a/package-lock.json[m
+[1m+++ b/package-lock.json[m
+[36m@@ -9,6 +9,7 @@[m
+       "version": "0.0.0",[m
+       "dependencies": {[m
+         "@azure/msal-browser": "^4.20.0",[m
+[32m+[m[32m        "@azure/msal-react": "^3.0.18",[m
+         "axios": "^1.10.0",[m
+         "lucide-react": "^0.508.0",[m
+         "react": "^19.0.0",[m
+[36m@@ -61,6 +62,18 @@[m
+         "node": ">=0.8.0"[m
+       }[m
+     },[m
+[32m+[m[32m    "node_modules/@azure/msal-react": {[m
+[32m+[m[32m      "version": "3.0.18",[m
+[32m+[m[32m      "resolved": "https://registry.npmjs.org/@azure/msal-react/-/msal-react-3.0.18.tgz",[m
+[32m+[m[32m      "integrity": "sha512-iu8Ri47ni3Z+MdxeGqvt+7AujtVkdw4lgM9PqlQRL7K0I340uwySaccwVdo1McRmKyRn0118hmy+sNjLzQoBcg==",[m
+[32m+[m[32m      "engines": {[m
+[32m+[m[32m        "node": ">=10"[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "peerDependencies": {[m
+[32m+[m[32m        "@azure/msal-browser": "^4.20.0",[m
+[32m+[m[32m        "react": "^16.8.0 || ^17 || ^18 || ^19"[m
+[32m+[m[32m      }[m
+[32m+[m[32m    },[m
+     "node_modules/@babel/code-frame": {[m
+       "version": "7.26.2",[m
+       "resolved": "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.26.2.tgz",[m
+[1mdiff --git a/package.json b/package.json[m
+[1mindex 197f819..66b9d96 100644[m
+[1m--- a/package.json[m
+[1m+++ b/package.json[m
+[36m@@ -11,6 +11,7 @@[m
+   },[m
+   "dependencies": {[m
+     "@azure/msal-browser": "^4.20.0",[m
+[32m+[m[32m    "@azure/msal-react": "^3.0.18",[m
+     "axios": "^1.10.0",[m
+     "lucide-react": "^0.508.0",[m
+     "react": "^19.0.0",[m
+[1mdiff --git a/src/App.jsx b/src/App.jsx[m
+[1mindex 9c9ada2..721bedc 100644[m
+[1m--- a/src/App.jsx[m
+[1m+++ b/src/App.jsx[m
+[36m@@ -10,8 +10,19 @@[m [mimport About from "./pages/About/About";[m
+ import PlatformNavBar from "./components/PlatformNavBar";[m
+ import ProfilePage from "./pages/ProfilePage/ProfilePage";[m
+ import Login from "./pages/Login";[m
+[32m+[m[32mimport { useEffect } from "react";[m
+[32m+[m[32mimport { useMsal } from "@azure/msal-react";[m
+[32m+[m[32mimport { ensureCurrentUser } from "./auth/auth";[m
+ [m
+ function App() {[m
+[32m+[m[32m  const { accounts } = useMsal();[m
+[32m+[m
+[32m+[m[32m  useEffect(() => {[m
+[32m+[m[32m    if (accounts.length > 0) {[m
+[32m+[m[32m      ensureCurrentUser().catch(console.error);[m
+[32m+[m[32m    }[m
+[32m+[m[32m  }, [accounts.length]);[m
+[32m+[m
+   return ([m
+     <div>[m
+       <PlatformNavBar />[m
+[1mdiff --git a/src/auth/auth.ts b/src/auth/auth.ts[m
+[1mindex 9fe7396..896bab4 100644[m
+[1m--- a/src/auth/auth.ts[m
+[1m+++ b/src/auth/auth.ts[m
+[36m@@ -1,54 +1,90 @@[m
+ import {[m
+[31m-    PublicClientApplication,[m
+[31m-    InteractionRequiredAuthError,[m
+[31m-    AccountInfo[m
+[31m-  } from "@azure/msal-browser";[m
+[31m-  import { msalConfig, apiScopes, API_BASE } from "./msalConfig";[m
+[32m+[m[32m  PublicClientApplication,[m
+[32m+[m[32m  InteractionRequiredAuthError,[m
+[32m+[m[32m  AccountInfo,[m
+[32m+[m[32m  BrowserAuthError[m
+[32m+[m[32m} from "@azure/msal-browser";[m
+[32m+[m[32mimport { msalConfig, apiScopes, API_BASE } from "./msalConfig";[m
+[32m+[m
+[32m+[m[32mexport const msal = new PublicClientApplication(msalConfig);[m
+[32m+[m
+[32m+[m[32m// Flag to track if MSAL is initialized[m
+[32m+[m[32mlet isInitialized = false;[m
+[32m+[m
+[32m+[m[32m// Initialize MSAL[m
+[32m+[m[32mexport async function initializeMsal(): Promise<void> {[m
+[32m+[m[32m  if (isInitialized) return;[m
+   [m
+[31m-  export const msal = new PublicClientApplication(msalConfig);[m
+[32m+[m[32m  try {[m
+[32m+[m[32m    await msal.initialize();[m
+[32m+[m[32m    isInitialized = true;[m
+[32m+[m[32m  } catch (error) {[m
+[32m+[m[32m    console.error("Failed to initialize MSAL:", error);[m
+[32m+[m[32m    throw error;[m
+[32m+[m[32m  }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mexport async function signIn(): Promise<AccountInfo> {[m
+[32m+[m[32m  if (!isInitialized) {[m
+[32m+[m[32m    await initializeMsal();[m
+[32m+[m[32m  }[m
+   [m
+[31m-  export async function signIn(): Promise<AccountInfo> {[m
+[31m-    const accounts = msal.getAllAccounts();[m
+[31m-    if (accounts.length) {[m
+[31m-      msal.setActiveAccount(accounts[0]);[m
+[31m-      return accounts[0];[m
+[31m-    }[m
+[31m-    const res = await msal.loginPopup({ scopes: apiScopes });[m
+[31m-    if (res.account) msal.setActiveAccount(res.account);[m
+[31m-    return res.account!;[m
+[32m+[m[32m  const accounts = msal.getAllAccounts();[m
+[32m+[m[32m  if (accounts.length) {[m
+[32m+[m[32m    msal.setActiveAccount(accounts[0]);[m
+[32m+[m[32m    return accounts[0];[m
+   }[m
+   [m
+[31m-  export async function getAccessToken(): Promise<string> {[m
+[31m-    const account = msal.getActiveAccount() ?? msal.getAllAccounts()[0] ?? (await signIn());[m
+[31m-    try {[m
+[31m-      const res = await msal.acquireTokenSilent({ account, scopes: apiScopes });[m
+[31m-      return res.accessToken;[m
+[31m-    } catch (e) {[m
+[31m-      if (e instanceof InteractionRequiredAuthError) {[m
+[31m-        const res = await msal.acquireTokenPopup({ account, scopes: apiScopes });[m
+[31m-        return res.accessToken;[m
+[31m-      }[m
+[31m-      throw e;[m
+[31m-    }[m
+[32m+[m[32m  // Use loginRedirect instead of loginPopup for better UX[m
+[32m+[m[32m  await msal.loginRedirect({ scopes: apiScopes });[m
+[32m+[m[32m  throw new Error("Login redirect initiated");[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mexport async function getAccessToken(): Promise<string> {[m
+[32m+[m[32m  if (!isInitialized) {[m
+[32m+[m[32m    await initializeMsal();[m
+   }[m
+   [m
+[31m-  /** קורא ל-API שיבטיח/יצור את המשתמש ומחזיר את UserProfileDto */[m
+[31m-  export async function ensureCurrentUser() {[m
+[31m-    const token = await getAccessToken();[m
+[31m-    const res = await fetch(`${API_BASE}/api/users/me/ensure`, {[m
+[31m-      method: "POST",[m
+[31m-      headers: { Authorization: `Bearer ${token}` }[m
+[31m-    });[m
+[31m-    if (!res.ok) {[m
+[31m-      const body = await res.text();[m
+[31m-      throw new Error(`Ensure failed: ${res.status} ${body}`);[m
+[32m+[m[32m  const account = msal.getActiveAccount() ?? msal.getAllAccounts()[0];[m
+[32m+[m[41m  [m
+[32m+[m[32m  if (!account) {[m
+[32m+[m[32m    throw new Error("No account found. User must sign in first.");[m
+[32m+[m[32m  }[m
+[32m+[m[41m  [m
+[32m+[m[32m  try {[m
+[32m+[m[32m    const res = await msal.acquireTokenSilent({ account, scopes: apiScopes });[m
+[32m+[m[32m    return res.accessToken;[m
+[32m+[m[32m  } catch (e) {[m
+[32m+[m[32m    if (e instanceof InteractionRequiredAuthError) {[m
+[32m+[m[32m      // Use loginRedirect instead of popup[m
+[32m+[m[32m      await msal.acquireTokenRedirect({ account, scopes: apiScopes });[m
+[32m+[m[32m      throw new Error("Token acquisition redirect initiated");[m
+     }[m
+[31m-    return (await res.json()) as {[m
+[31m-      userId: string;[m
+[31m-      externalId: string;[m
+[31m-      emailAddress: string;[m
+[31m-      fullName: string;[m
+[31m-      country?: string;[m
+[31m-      isNewUser: boolean;[m
+[31m-    };[m
+[31m-  }  [m
+\ No newline at end of file[m
+[32m+[m[32m    throw e;[m
+[32m+[m[32m  }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m/** קורא ל-API שיבטיח/יצור את המשתמש ומחזיר את UserProfileDto */[m
+[32m+[m[32mexport async function ensureCurrentUser() {[m
+[32m+[m[32m  if (!isInitialized) {[m
+[32m+[m[32m    await initializeMsal();[m
+[32m+[m[32m  }[m
+[32m+[m[41m  [m
+[32m+[m[32m  const token = await getAccessToken();[m
+[32m+[m[32m  const res = await fetch(`${API_BASE}/api/users/me/ensure`, {[m
+[32m+[m[32m    method: "POST",[m
+[32m+[m[32m    headers: { Authorization: `Bearer ${t
