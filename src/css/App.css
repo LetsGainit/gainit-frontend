@@ -16,8 +16,23 @@ html, body, #root {
   padding: 0;
 }
 
+/* Main content wrapper - canonical scroll container */
 .main-content {
   margin: 0;
   padding: 0;
   width: 100%;
+  /* Ensure this is the main scroll container */
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Prevent any scroll restoration interference */
+  scroll-behavior: auto;
+}
+
+/* Ensure no global overflow rules interfere */
+html, body {
+  overflow-x: hidden;
+}
+
+body {
+  overflow-y: auto;
 }

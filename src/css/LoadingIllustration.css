@@ -1,0 +1,164 @@
+.loading-illustration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  min-height: 400px;
+  text-align: center;
+}
+
+.illustration-container {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.glow-background {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, rgba(99, 102, 241, 0.05) 50%, transparent 100%);
+  border-radius: 50%;
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.search-illustration {
+  width: 120px;
+  height: 80px;
+  color: #7c3aed;
+  animation: float-bob 4s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(139, 92, 246, 0.2));
+}
+
+.loading-content {
+  max-width: 400px;
+}
+
+.loading-headline {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.loading-subtext {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.shimmer-line {
+  width: 200px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #7c3aed, transparent);
+  margin: 0 auto;
+  animation: shimmer 2s ease-in-out infinite;
+  border-radius: 1px;
+}
+
+/* Animations */
+@keyframes float-bob {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    opacity: 0.3;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+  100% {
+    opacity: 0.3;
+    transform: translateX(100%);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .loading-illustration {
+    padding: 2rem 1rem;
+    min-height: 300px;
+  }
+  
+  .loading-headline {
+    font-size: 1.25rem;
+  }
+  
+  .loading-subtext {
+    font-size: 0.875rem;
+  }
+  
+  .search-illustration {
+    width: 100px;
+    height: 67px;
+  }
+  
+  .glow-background {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* Loading overlay for subsequent searches */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.loading-overlay .loading-illustration {
+  min-height: auto;
+  padding: 1rem;
+}
+
+.loading-overlay .search-illustration {
+  width: 60px;
+  height: 40px;
+  animation: float-bob 2s ease-in-out infinite;
+}
+
+.loading-overlay .loading-headline {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.loading-overlay .loading-subtext {
+  display: none;
+}
+
+.loading-overlay .shimmer-line {
+  width: 100px;
+  height: 1px;
+}

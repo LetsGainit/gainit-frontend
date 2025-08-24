@@ -127,3 +127,8 @@
   color: white;
   flex-shrink: 0;
 }
+
+.search-hero-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

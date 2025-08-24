@@ -1,5 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
+/* Center the entire header block */
+.page-header {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.search-section {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 2rem;
+}
+
 .page-title.left-align {
   text-align: left;
   font-size: 2.5rem;
@@ -8,16 +21,16 @@
   margin-bottom: 1.5rem;
   margin-left: 0;
   width: 100%;
-  padding-left: 2rem;
+  padding-left: 0;
 }
 
 .search-row {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  width: 90%;
+  width: 100%;
   align-items: center;
-  padding-left: 1rem;
+  padding-left: 0;
 }
 
 .search-container {
@@ -37,6 +50,13 @@
   font-size: 1rem;
   outline: none;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  transition: all 0.2s ease;
+}
+
+.search-input.pill:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #f9fafb;
 }
 
 .search-icon-btn {
@@ -72,13 +92,37 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 1rem;
-  padding-left: 2rem;
+  padding-left: 0;
+}
+
+/* Center the projects section to match header width */
+.projects-section.centered-layout {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 400px;
+  position: relative;
 }
 
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* מצטמצם יותר */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 2rem;
+}
+
+/* Center the no-results section to match header width */
+.no-results {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-size: 1.125rem;
+  width: 100%;
+  max-width: 1200px;
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
 
 @media (max-width: 768px) {
@@ -91,4 +135,45 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+/* Error banner styles */
+/* Center the error banner to match header width */
+.error-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem auto;
+  color: #dc2626;
+  font-size: 0.875rem;
+  width: 100%;
+  max-width: 1200px;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.error-message {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Loading overlay styles */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 8px;
+}
+
+/* Projects section positioning for overlay */
+.projects-section {
+  position: relative;
 }

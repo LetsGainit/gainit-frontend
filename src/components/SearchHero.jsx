@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import "../css/SearchHero.css";
 
 const SearchHero = ({ onSearch }) => {
@@ -8,6 +9,8 @@ const SearchHero = ({ onSearch }) => {
   const [currentExampleIndex, setCurrentExampleIndex] = useState(0);
   const [phase, setPhase] = useState("typing"); // 'typing' | 'pausing' | 'deleting'
   const [charIndex, setCharIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const examples = [
     "I want to be a Frontend Developer and I love fitness",
@@ -64,8 +67,25 @@ const SearchHero = ({ onSearch }) => {
   }, [phase, charIndex, currentExample, query, examples.length]);
 
   const handleSearch = () => {
-    if (onSearch && query.trim()) {
-      onSearch(query.trim());
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery || isLoading) return;
+
+    setIsLoading(true);
+
+    // Clear typewriter hint
+    setTypewriterText("");
+
+    // Navigate to search results page with query parameters
+    const searchParams = new URLSearchParams({
+      q: trimmedQuery,
+      count: "12",
+    });
+
+    navigate(`/search-projects?${searchParams.toString()}`);
+
+    // Call original onSearch if provided
+    if (onSearch) {
+      onSearch(trimmedQuery);
     }
   };
 
@@ -106,6 +126,7 @@ const SearchHero = ({ onSearch }) => {
             onClick={handleSearch}
             className="search-hero-button"
             aria-label="Search projects"
+            disabled={isLoading}
           >
             <Search size={24} strokeWidth={2} />
           </button>

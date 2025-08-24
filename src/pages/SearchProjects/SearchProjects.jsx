@@ -1,71 +1,156 @@
 // Updated SearchProjects.jsx with layout and section header centered
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search, Filter } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import ProjectCard from "../../components/ProjectCard";
+import LoadingIllustration from "../../components/LoadingIllustration";
 import { getAllActiveProjects } from "../../services/projectsService";
 import "../../css/SearchProjects.css";
 
 function SearchProjects() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [loadingInitial, setLoadingInitial] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("All");
   const [filteredProjects, setFilteredProjects] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchInputRef = useRef(null);
 
-  const handleSearch = () => {
-    console.log("Searching for:", searchTerm);
+  // Vector search API function
+  const searchVectorAPI = async (query, count = 12) => {
+    try {
+      setIsSearching(true);
+      setError(null);
+
+      const response = await fetch(
+        `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/search/vector?query=${encodeURIComponent(
+          query
+        )}&count=${count}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Search failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Extract only projects from response, ensure it's an array
+      const projects = data.projects || [];
+      if (!Array.isArray(projects)) {
+        console.warn("API response.projects is not an array:", projects);
+        return { projects: [] };
+      }
+
+      return { projects };
+    } catch (error) {
+      console.error("Vector search error:", error);
+      throw error;
+    } finally {
+      setIsSearching(false);
+    }
   };
 
-  useEffect(() => {
-    setLoading(true);
+  const handleSearch = () => {
+    const trimmedQuery = searchTerm.trim();
+    if (!trimmedQuery || isSearching) return;
+
+    // Clear previous results and errors to avoid flicker
     setError(null);
-    getAllActiveProjects()
-      .then((data) => {
-        setProjects(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError("Failed to load projects.");
-        setLoading(false);
-      });
-  }, []);
+    setProjects([]);
+
+    // Update URL parameters
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set("q", trimmedQuery);
+    newSearchParams.set("count", "12");
+    setSearchParams(newSearchParams);
+  };
+
+  // Initialize search term from URL params
+  useEffect(() => {
+    const urlQuery = searchParams.get("q");
+    const urlCount = searchParams.get("count") || "12";
+
+    if (urlQuery) {
+      setSearchTerm(urlQuery);
+      setLoadingInitial(true);
+      setLoading(false);
+      setError(null);
+
+      // Perform vector search if query exists
+      searchVectorAPI(urlQuery, parseInt(urlCount))
+        .then((data) => {
+          // Ensure we have a valid projects array
+          const projectsArray = data.projects || [];
+          if (!Array.isArray(projectsArray)) {
+            setProjects([]);
+          } else {
+            setProjects(projectsArray);
+          }
+          setLoadingInitial(false);
+        })
+        .catch((searchError) => {
+          setError(searchError.message || "Failed to search projects.");
+          setLoadingInitial(false);
+        });
+    } else {
+      // Load all projects if no search query
+      setLoading(true);
+      setLoadingInitial(false);
+      setError(null);
+      getAllActiveProjects()
+        .then((data) => {
+          setProjects(data);
+          setLoading(false);
+        })
+        .catch(() => {
+          setError("Failed to load projects.");
+          setLoading(false);
+        });
+    }
+  }, [searchParams]);
+
+  // Focus search input after scroll reset is complete
+  useEffect(() => {
+    if (searchInputRef.current && !loadingInitial && !loading) {
+      // Use setTimeout to ensure this runs after scroll reset
+      const timer = setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus({ preventScroll: true });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [loadingInitial, loading]);
 
   useEffect(() => {
+    // Ensure projects is an array before filtering
+    if (!Array.isArray(projects)) {
+      setFilteredProjects([]);
+      return;
+    }
+
     let filtered = projects;
     if (searchTerm) {
-      filtered = filtered.filter((project) =>
-        project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (project.technologies && project.technologies.some((tech) =>
-          tech.toLowerCase().includes(searchTerm.toLowerCase())
-        ))
+      filtered = filtered.filter(
+        (project) =>
+          project.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          project.description
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          (project.technologies &&
+            Array.isArray(project.technologies) &&
+            project.technologies.some((tech) =>
+              tech?.toLowerCase().includes(searchTerm.toLowerCase())
+            ))
       );
     }
     setFilteredProjects(filtered);
   }, [projects, searchTerm, activeTab]);
 
   const tabs = ["All", "Ongoing", "Pending"];
-
-  if (loading) {
-    return (
-      <div className="search-projects-page">
-        <div className="loading-container">
-          <div className="spinner">Loading...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="search-projects-page">
-        <div className="error-container">
-          <div className="error-message">{error}</div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="search-projects-page">
@@ -75,17 +160,20 @@ function SearchProjects() {
           <div className="search-row">
             <div className="search-container">
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search projects, technologies..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 className="search-input pill"
+                disabled={isSearching}
               />
               <button
                 className="search-icon-btn"
                 onClick={handleSearch}
                 aria-label="Search projects"
+                disabled={isSearching}
               >
                 <span className="search-icon-svg-wrapper">
                   <Search size={20} strokeWidth={2.5} color="#fff" />
@@ -111,18 +199,36 @@ function SearchProjects() {
         </div>
       </div>
 
-      <div className="projects-section centered-layout">
-        <div className="projects-grid">
-          {filteredProjects.length > 0 ? (
-            filteredProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
-            ))
-          ) : (
-            <div className="no-projects">
-              <p>No projects found matching your criteria.</p>
-            </div>
-          )}
+      {/* Error banner - inline rendering */}
+      {error && (
+        <div className="error-banner">
+          <div className="error-message">{error}</div>
         </div>
+      )}
+
+      <div className="projects-section centered-layout">
+        {loadingInitial ? (
+          <LoadingIllustration type="initial" />
+        ) : loading ? (
+          <LoadingIllustration type="initial" />
+        ) : Array.isArray(filteredProjects) && filteredProjects.length > 0 ? (
+          <>
+            <div className="projects-grid">
+              {filteredProjects.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+            {isSearching && (
+              <div className="loading-overlay">
+                <LoadingIllustration type="search" />
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="no-results">
+            <p>No results</p>
+          </div>
+        )}
       </div>
       <footer className="footer">
         <div className="footer-content">
