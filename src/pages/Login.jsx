@@ -8,18 +8,30 @@ const Login = () => {
   const { instance, accounts } = useMsal();
 
   useEffect(() => {
+    console.log("🔧 [LOGIN] Login component mounted");
+    console.log("🔧 [LOGIN] Current accounts:", accounts.length);
+    
     // If user is already signed in, redirect to home
     if (accounts.length > 0) {
+      console.log("✅ [LOGIN] User already signed in, redirecting to home");
       navigate("/");
       return;
     }
 
     // If not signed in, redirect to Azure login
     const redirectToLogin = async () => {
-      await instance.loginRedirect({
-        scopes: apiScopes,
-        redirectStartPage: `${window.location.origin}/`,
-      });
+      console.log("🔧 [LOGIN] No accounts found, redirecting to Azure login");
+      console.log("🔧 [LOGIN] Using scopes:", ["openid", "profile", "offline_access", ...apiScopes]);
+      
+      try {
+        await instance.loginRedirect({
+          scopes: ["openid", "profile", "offline_access", ...apiScopes],
+          redirectStartPage: `${window.location.origin}/`,
+        });
+        console.log("✅ [LOGIN] Login redirect initiated");
+      } catch (error) {
+        console.error("❌ [LOGIN] Error initiating login redirect:", error);
+      }
     };
 
     redirectToLogin();

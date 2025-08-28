@@ -1,5 +1,5 @@
 // src/AuthCallback.tsx
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
@@ -11,30 +11,52 @@ export default function AuthCallback() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log("🔄 [AUTH_CALLBACK] useEffect triggered");
+    console.log("🔄 [AUTH_CALLBACK] inProgress:", inProgress);
+    console.log("🔄 [AUTH_CALLBACK] accounts length:", accounts.length);
+    console.log("🔄 [AUTH_CALLBACK] accounts:", accounts);
+
     // 1) Wait until MSAL finished handleRedirectPromise (initialized in initializeMsal)
-    if (inProgress !== InteractionStatus.None) return;
+    if (inProgress !== InteractionStatus.None) {
+      console.log("⏳ [AUTH_CALLBACK] Waiting for MSAL interaction to complete...");
+      return;
+    }
 
     const go = async () => {
+      console.log("🚀 [AUTH_CALLBACK] Starting authentication callback process...");
       try {
         // 2) If we have an account, it's safe to call backend and then redirect
         if (accounts.length > 0) {
+          console.log("✅ [AUTH_CALLBACK] Found account, proceeding with ensureCurrentUser");
+          console.log("✅ [AUTH_CALLBACK] Account details:", {
+            username: accounts[0].username,
+            name: accounts[0].name,
+            homeAccountId: accounts[0].homeAccountId
+          });
+
           try {
-            await ensureCurrentUser(); // optional but recommended for first-run user provisioning
+            
+            console.log("🔧 [AUTH_CALLBACK] Calling ensureCurrentUser...");
+            const userResult = await ensureCurrentUser(); // optional but recommended for first-run user provisioning
+            console.log("✅ [AUTH_CALLBACK] ensureCurrentUser completed successfully:", userResult);
           } catch (e) {
-            console.error("ensureCurrentUser failed:", e);
+            console.error("❌ [AUTH_CALLBACK] ensureCurrentUser failed:", e);
             // We won't block navigation just because ensure failed
           }
 
           // 3) Redirect to the original page if set, otherwise Home
           const start = sessionStorage.getItem("msal.redirectStartPage") || "/";
+          console.log("🔧 [AUTH_CALLBACK] Redirecting to:", start);
           sessionStorage.removeItem("msal.redirectStartPage");
           navigate(start, { replace: true });
         } else {
           // No account => user canceled or an auth error occurred
+          console.error("❌ [AUTH_CALLBACK] No account found after login redirect");
           setError("No account found after login redirect.");
           navigate("/", { replace: true });
         }
       } catch (e: any) {
+        console.error("❌ [AUTH_CALLBACK] Error in authentication callback:", e);
         setError(e.message ?? String(e));
       }
     };

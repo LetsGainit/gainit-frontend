@@ -72,7 +72,7 @@ export async function signIn(): Promise<AccountInfo> {
 }
 
 /**
- * Acquire an access token (silent first, then redirect if needed).
+ * Acquire an access token (silent first, then redirect if needed).מ
  */
 export async function getAccessToken(): Promise<string> {
   await initializeMsal();
@@ -97,25 +97,59 @@ export async function getAccessToken(): Promise<string> {
  * Ensures the current user exists in backend and returns profile.
  */
 export async function ensureCurrentUser() {
+  console.log("🔧 [AUTH] Ensuring current user in backend...");
   await initializeMsal();
 
-  const token = await getAccessToken();
-  const res = await fetch(`${API_BASE}/api/users/me/ensure`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  try {
+    const token = await getAccessToken();
+    console.log("✅ [AUTH] Got access token for ensureCurrentUser");
+    
+    const url = `${API_BASE}/api/users/me/ensure`;
+    console.log("🔧 [AUTH] Making request to:", url);
+    console.log("🔧 [AUTH] Using token:", token ? `${token.substring(0, 20)}...` : 'NO TOKEN');
+    
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+    });
 
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Ensure failed: ${res.status} ${body}`);
+    console.log("🔧 [AUTH] Response status:", res.status);
+    console.log("🔧 [AUTH] Response status text:", res.statusText);
+    console.log("🔧 [AUTH] Response headers:", Object.fromEntries(res.headers.entries()));
+
+    if (!res.ok) {
+      const body = await res.text();
+      console.error("❌ [AUTH] Ensure failed:", res.status, body);
+      console.error("❌ [AUTH] Full error details:", {
+        status: res.status,
+        statusText: res.statusText,
+        url: url,
+        headers: Object.fromEntries(res.headers.entries()),
+        body: body
+      });
+      throw new Error(`Ensure failed: ${res.status} ${body}`);
+    }
+
+    const userData = await res.json();
+    console.log("✅ [AUTH] User ensured successfully:", userData);
+    return userData as {
+      userId: string;
+      externalId: string;
+      emailAddress: string;
+      fullName: string;
+      country?: string;
+      isNewUser: boolean;
+    };
+  } catch (error) {
+    console.error("❌ [AUTH] Error in ensureCurrentUser:", error);
+    console.error("❌ [AUTH] Error details:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+    throw error;
   }
-
-  return (await res.json()) as {
-    userId: string;
-    externalId: string;
-    emailAddress: string;
-    fullName: string;
-    country?: string;
-    isNewUser: boolean;
-  };
 }
