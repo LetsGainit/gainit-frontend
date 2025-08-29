@@ -73,6 +73,11 @@ function HomePage() {
     }
   };
 
+  const handleViewMoreProjects = () => {
+    // Navigate to the full projects page or search page
+    navigate("/search-projects");
+  };
+
   return (
     <div className="home-page">
       {/* Hero Section */}
