@@ -4,9 +4,11 @@ import SearchHero from "../../components/SearchHero";
 import "../../css/HomePage.css";
 import { getAllActiveProjects } from "../../services/projectsService";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function HomePage() {
   const [projects, setProjects] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchProjects() {
@@ -38,6 +40,10 @@ function HomePage() {
     // For now, just log the query
   };
 
+  const handleViewMoreProjects = () => {
+    navigate("/search-projects");
+  };
+
   return (
     <div className="home-page">
       {/* Hero Section */}
@@ -53,6 +59,11 @@ function HomePage() {
         <SearchHero onSearch={handleSearch} />
       </div>
 
+      {/* Section Header */}
+      <div className="section-header">
+        <h2 className="section-title">Explore Projects</h2>
+      </div>
+
       {/* Projects Section */}
       <div className="projects-section">
         {/* Projects Grid */}
@@ -61,6 +72,13 @@ function HomePage() {
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>
+      </div>
+
+      {/* View More Projects Button */}
+      <div className="view-more-container">
+        <button className="view-more-button" onClick={handleViewMoreProjects}>
+          View More Projects
+        </button>
       </div>
 
       {/* Footer */}

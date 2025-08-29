@@ -17,7 +17,6 @@ function PlatformNavBar() {
         return;
       }
       const user = JSON.parse(userStr);
-      // Try common id keys
       const userId = user.id || user.userId || user._id;
       if (userId) {
         navigate(`/profile/${userId}`);
@@ -34,16 +33,20 @@ function PlatformNavBar() {
       {/* Left Section - Logo */}
       <div className="platform-brand">
         <Link to="/">
-          <img src="/Gainit_logo.svg" alt="Gainit logo" className="logo"/>
+          <img src="/Gainit_logo.svg" alt="Gainit logo" className="logo" />
         </Link>
       </div>
 
       {/* Center Section - Navigation */}
       <div className="platform-nav">
-        <Link to="/" className="nav-link">Home</Link>
-        <Link to="/about" className="nav-link">About</Link>
+        <Link to="/" className="nav-link">
+          Home
+        </Link>
+        <Link to="/about" className="nav-link">
+          About
+        </Link>
         <div className="dropdown">
-          <button 
+          <button
             className="nav-link dropdown-trigger"
             onClick={() => setIsProjectsOpen(!isProjectsOpen)}
             onBlur={() => setTimeout(() => setIsProjectsOpen(false), 200)}
@@ -52,12 +55,18 @@ function PlatformNavBar() {
           </button>
           {isProjectsOpen && (
             <div className="dropdown-menu">
-              <Link to="/search-projects" className="dropdown-item">Find Projects</Link>
-              <Link to="/my-projects" className="dropdown-item">My Projects</Link>
+              <Link to="/search-projects" className="dropdown-item">
+                Find Projects
+              </Link>
+              <Link to="/my-projects" className="dropdown-item">
+                My Projects
+              </Link>
             </div>
           )}
         </div>
-        <Link to="/forum" className="nav-link">Forum</Link>
+        <Link to="/Learn" className="nav-link">
+          Learn
+        </Link>
       </div>
 
       {/* Right Section - User Actions */}
@@ -67,7 +76,11 @@ function PlatformNavBar() {
         </button>
         <div className="vertical-separator"></div>
         <div className="user-profile">
-          <button className="avatar-button" aria-label="User Profile" onClick={handleUserClick}>
+          <button
+            className="avatar-button"
+            aria-label="User Profile"
+            onClick={handleUserClick}
+          >
             <CircleUserRound size={20} />
           </button>
           <span className="username">Gainer</span>
@@ -75,7 +88,7 @@ function PlatformNavBar() {
       </div>
 
       {/* Mobile Menu Button */}
-      <button 
+      <button
         className="mobile-menu-button"
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         aria-label="Toggle menu"
@@ -86,11 +99,21 @@ function PlatformNavBar() {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="mobile-menu">
-          <Link to="/" className="mobile-nav-link">Home</Link>
-          <Link to="/about" className="mobile-nav-link">About</Link>
-          <Link to="/search-projects" className="mobile-nav-link">Find Projects</Link>
-          <Link to="/my-projects" className="mobile-nav-link">My Projects</Link>
-          <Link to="/forum" className="mobile-nav-link">Forum</Link>
+          <Link to="/" className="mobile-nav-link">
+            Home
+          </Link>
+          <Link to="/about" className="mobile-nav-link">
+            About
+          </Link>
+          <Link to="/search-projects" className="mobile-nav-link">
+            Find Projects
+          </Link>
+          <Link to="/my-projects" className="mobile-nav-link">
+            My Projects
+          </Link>
+          <Link to="/Learn" className="mobile-nav-link">
+            Learn
+          </Link>
         </div>
       )}
     </nav>
