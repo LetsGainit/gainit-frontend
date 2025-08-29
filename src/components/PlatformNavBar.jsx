@@ -2,12 +2,15 @@ import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Bell, CircleUserRound, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useMsal } from "@azure/msal-react";
+import { apiScopes } from "../auth/msalConfig";
 import "../css/PlatformNavBar.css";
 
 function PlatformNavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProjectsOpen, setIsProjectsOpen] = useState(false);
   const navigate = useNavigate();
+  const { instance, accounts } = useMsal();
   const location = useLocation();
 
   // Close mobile menu when route changes
@@ -16,22 +19,26 @@ function PlatformNavBar() {
     setIsProjectsOpen(false);
   }, [location.pathname]);
 
-  const handleUserClick = () => {
+  const handleUserClick = async () => {
+    if (accounts.length === 0) {
+      try {
+        // After login, return to profile page. We'll use 'me' temporarily if you don't know the id yet.
+        await instance.loginRedirect({
+          scopes: ["openid", "profile", "offline_access", ...apiScopes],
+          redirectStartPage: "/", // always return to Home after /auth-callback
+        });
+      } catch (error) {
+        console.error("Login redirect failed:", error);
+      }
+      return;
+    }
+
     try {
-      const userStr = localStorage.getItem("currentUser");
-      if (!userStr) {
-        navigate("/login");
-        return;
-      }
-      const user = JSON.parse(userStr);
-      const userId = user.id || user.userId || user._id;
-      if (userId) {
-        navigate(`/profile/${userId}`);
-      } else {
-        navigate("/login");
-      }
-    } catch (e) {
-      navigate("/login");
+      const account = accounts[0];
+      const id = account.localAccountId; // change if your route expects a different id
+      navigate(`/profile/${id}`);
+    } catch (error) {
+      console.error("Navigation to profile failed:", error);
     }
   };
 
@@ -90,7 +97,9 @@ function PlatformNavBar() {
           >
             <CircleUserRound size={20} />
           </button>
-          <span className="username">Gainer</span>
+          <span className="username">
+            {accounts.length > 0 ? accounts[0].name || "User" : "Gainer"}
+          </span>
         </div>
       </div>
 

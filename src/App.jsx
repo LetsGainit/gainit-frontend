@@ -7,9 +7,13 @@ import About from "./pages/About/About";
 import PlatformNavBar from "./components/PlatformNavBar";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import Login from "./pages/Login";
+import { useMsal } from "@azure/msal-react";
+import AuthCallback from "./auth/AuthCallback";
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
+  const { accounts } = useMsal();
+
   return (
     <div>
       <PlatformNavBar />
@@ -24,6 +28,7 @@ function App() {
           <Route path="/project/:id" element={<ProjectPage />} />
           <Route path="/profile/:id" element={<ProfilePage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/auth-callback" element={<AuthCallback />} />
         </Routes>
       </main>
     </div>
