@@ -1,5 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
+/* Ensure light background regardless of dark mode */
+.search-projects-page {
+  background-color: #ffffff !important;
+  min-height: 100vh;
+}
+
 /* Center the entire header block */
 .page-header {
   display: flex;
@@ -93,6 +99,31 @@
   gap: 0.5rem;
   margin-top: 1rem;
   padding-left: 0;
+}
+
+/* Tab button styles */
+.tab-btn.pill {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #1f2937;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.tab-btn.pill:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.tab-btn.pill.active {
+  background: #6366f1;
+  color: #ffffff;
+  border-color: #6366f1;
 }
 
 /* Center the projects section to match header width */

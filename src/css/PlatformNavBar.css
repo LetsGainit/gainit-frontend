@@ -125,6 +125,18 @@
   cursor: pointer;
   font-size: 1.5rem;
   padding: 0.25rem;
+  color: #4a5568;
+  transition: color 0.2s ease;
+}
+
+.avatar-button:hover {
+  color: #490476;
+}
+
+.avatar-button svg {
+  color: #4a5568;
+  stroke: #4a5568;
+  fill: none;
 }
 
 .username {

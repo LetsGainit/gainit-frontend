@@ -232,8 +232,20 @@
     line-height: 1;
   }
 
+  .hero-subheading {
+    font-size: 1.5rem;
+    line-height: 1.75rem;
+  }
+
   .projects-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 639px) {
+  .hero-subheading {
+    font-size: 1.125rem;
+    line-height: 1.5rem;
   }
 }
 

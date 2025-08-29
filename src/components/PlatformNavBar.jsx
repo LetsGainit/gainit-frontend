@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Bell, CircleUserRound, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "../css/PlatformNavBar.css";
@@ -8,6 +8,13 @@ function PlatformNavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProjectsOpen, setIsProjectsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setIsProjectsOpen(false);
+  }, [location.pathname]);
 
   const handleUserClick = () => {
     try {
@@ -99,19 +106,39 @@ function PlatformNavBar() {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="mobile-menu">
-          <Link to="/" className="mobile-nav-link">
+          <Link
+            to="/"
+            className="mobile-nav-link"
+            onClick={() => setIsMenuOpen(false)}
+          >
             Home
           </Link>
-          <Link to="/about" className="mobile-nav-link">
+          <Link
+            to="/about"
+            className="mobile-nav-link"
+            onClick={() => setIsMenuOpen(false)}
+          >
             About
           </Link>
-          <Link to="/search-projects" className="mobile-nav-link">
+          <Link
+            to="/search-projects"
+            className="mobile-nav-link"
+            onClick={() => setIsMenuOpen(false)}
+          >
             Find Projects
           </Link>
-          <Link to="/my-projects" className="mobile-nav-link">
+          <Link
+            to="/my-projects"
+            className="mobile-nav-link"
+            onClick={() => setIsMenuOpen(false)}
+          >
             My Projects
           </Link>
-          <Link to="/Learn" className="mobile-nav-link">
+          <Link
+            to="/Learn"
+            className="mobile-nav-link"
+            onClick={() => setIsMenuOpen(false)}
+          >
             Learn
           </Link>
         </div>
