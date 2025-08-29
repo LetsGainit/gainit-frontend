@@ -3,14 +3,6 @@ import Footer from "../../components/Footer";
 import SearchHero from "../../components/SearchHero";
 import "../../css/HomePage.css";
 import { getAllActiveProjects } from "../../services/projectsService";
-<<<<<<< HEAD
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-function HomePage() {
-  const [projects, setProjects] = useState([]);
-  const navigate = useNavigate();
-=======
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
@@ -22,7 +14,6 @@ function HomePage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { instance, accounts } = useMsal();
->>>>>>> Azure_login
 
   useEffect(() => {
     async function fetchProjects() {
@@ -55,16 +46,6 @@ function HomePage() {
     fetchProjects();
   }, []);
 
-<<<<<<< HEAD
-  const handleSearch = (query) => {
-    console.log("Search query:", query);
-    // TODO: Implement search functionality
-    // For now, just log the query
-  };
-
-  const handleViewMoreProjects = () => {
-    navigate("/search-projects");
-=======
   const handleSearch = useCallback(async () => {
     const q = query.trim();
     if (!q) return;
@@ -90,7 +71,6 @@ function HomePage() {
     if (e.key === "Enter") {
       handleSearch();
     }
->>>>>>> Azure_login
   };
 
   return (
@@ -104,7 +84,6 @@ function HomePage() {
           Gain hands-on experience, build real projects, and let your portfolio
           speak for you
         </p>
-<<<<<<< HEAD
         {/* New Search Hero Component */}
         <SearchHero onSearch={handleSearch} />
       </div>
@@ -112,41 +91,6 @@ function HomePage() {
       {/* Section Header */}
       <div className="section-header">
         <h2 className="section-title">Explore Projects</h2>
-=======
-        {/* Search Bar */}
-        <div className="search-container search-bar-bubble">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Tell us your dream role and we'll find the perfect project for you"
-            className="search-input"
-            style={{ paddingRight: 56 }} // extra right padding for button
-          />
-          <button
-            className="search-button-inside"
-            type="button"
-            aria-label="Search"
-            onClick={handleSearch}
-            disabled={loading}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 0,
-            }}
-          >
-            <Search
-              size={22}
-              color="white"
-              stroke="white"
-              fill="none"
-              style={{ display: "block" }}
-            />
-          </button>
-        </div>
->>>>>>> Azure_login
       </div>
 
       {/* Projects Section */}
