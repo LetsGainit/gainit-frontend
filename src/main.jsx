@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { MsalProvider } from "@azure/msal-react";
-import { msal, initializeMsal } from "./auth/auth";
+import { initializeMsal, getMsalInstance } from "./auth/auth";
 import "./css/index.css";
 import App from "./App.jsx";
 
@@ -15,10 +15,13 @@ const initializeApp = async () => {
     console.error("MSAL initialization failed:", error);
   }
 
+  // Get the MSAL instance after initialization
+  const msalInstance = getMsalInstance();
+  
   // Render the app after MSAL is initialized
   createRoot(document.getElementById("root")).render(
     <StrictMode>
-      <MsalProvider instance={msal}>
+      <MsalProvider instance={msalInstance}>
         <BrowserRouter>
           <App />
         </BrowserRouter>
