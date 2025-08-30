@@ -66,7 +66,7 @@ const SearchHero = ({ onSearch }) => {
     return () => clearTimeout(timeoutId);
   }, [phase, charIndex, currentExample, query, examples.length]);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     const trimmedQuery = query.trim();
     if (!trimmedQuery || isLoading) return;
 

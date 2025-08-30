@@ -10,7 +10,6 @@ import { apiScopes } from "../../auth/msalConfig";
 
 function HomePage() {
   const [projects, setProjects] = useState([]);
-  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { instance, accounts } = useMsal();
@@ -46,7 +45,7 @@ function HomePage() {
     fetchProjects();
   }, []);
 
-  const handleSearch = useCallback(async () => {
+  const handleSearch = useCallback(async (query) => {
     const q = query.trim();
     if (!q) return;
 
@@ -65,13 +64,7 @@ function HomePage() {
     }
 
     navigate(target);
-  }, [accounts.length, instance, navigate, query]);
-
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
+  }, [accounts.length, instance, navigate]);
 
   const handleViewMoreProjects = () => {
     // Navigate to the full projects page or search page
