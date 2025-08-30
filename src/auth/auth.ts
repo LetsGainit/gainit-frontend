@@ -127,3 +127,90 @@ export async function ensureCurrentUser() {
     isNewUser: boolean;
   };
 }
+
+export async function getUserInfo() {
+  await initializeMsal();
+  const account = msal.getActiveAccount() ?? msal.getAllAccounts()[0];
+  if (!account) throw new Error("No account found. User must sign in first.");
+
+  try {
+    // Try to get user info from the /me endpoint first
+    const token = await getAccessToken();
+    const url = `${API_BASE}api/users/me`;
+    console.debug("[AUTH] GET:", url);
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    
+    if (res.ok) {
+      const userInfo = await res.json();
+      return {
+        userId: userInfo.userId || account.localAccountId,
+        role: userInfo.role || userInfo.userType || "gainer", // Default to gainer if no role specified
+        email: userInfo.emailAddress || account.username,
+        name: userInfo.fullName || account.name,
+        externalId: userInfo.externalId || account.localAccountId,
+      };
+    } else if (res.status === 401 || res.status === 403) {
+      // Token expired or insufficient permissions, try to refresh
+      throw new InteractionRequiredAuthError();
+    } else {
+      // Other error, fall back to account info
+      console.warn("[AUTH] /me endpoint failed, using account info:", res.status);
+      return {
+        userId: account.localAccountId,
+        role: "gainer", // Default fallback
+        email: account.username,
+        name: account.name,
+        externalId: account.localAccountId,
+      };
+    }
+  } catch (e) {
+    if (e instanceof InteractionRequiredAuthError) {
+      throw e;
+    }
+    console.warn("[AUTH] getUserInfo failed, using account info:", e);
+    // Fallback to account info
+    return {
+      userId: account.localAccountId,
+      role: "gainer", // Default fallback
+      email: account.username,
+      name: account.name,
+      externalId: account.localAccountId,
+    };
+  }
+}
+
+export async function fetchUserProfile(role: string, userId: string) {
+  await initializeMsal();
+  const token = await getAccessToken();
+  
+  // Role to endpoint mapping
+  const roleEndpoints = {
+    gainer: `api/users/gainer/${userId}/profile`,
+    mentor: `api/users/mentor/${userId}/profile`,
+    nonprofit: `api/users/nonprofit/${userId}/profile`,
+  };
+  
+  const endpoint = roleEndpoints[role.toLowerCase()];
+  if (!endpoint) {
+    throw new Error(`Unknown user role: ${role}`);
+  }
+  
+  const url = `${API_BASE}${endpoint}`;
+  console.debug("[AUTH] GET profile:", url);
+  
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  
+  if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      throw new InteractionRequiredAuthError();
+    }
+    const body = await res.text();
+    throw new Error(`Profile fetch failed: ${res.status} ${body}`);
+  }
+  
+  return await res.json();
+}
