@@ -5,7 +5,7 @@ import { getUserInfo, fetchUserProfile } from '../auth/auth';
 
 interface UserInfo {
   userId: string;
-  role: string;
+  role: string | undefined;
   email: string;
   name: string;
   externalId: string;
@@ -38,9 +38,19 @@ export function useAuth() {
       const info = await getUserInfo();
       setUserInfo(info);
       
-      // Fetch profile data
-      const profile = await fetchUserProfile(info.role, info.userId);
-      setProfileData(profile);
+      // Only fetch profile data if user has a role
+      if (info.role) {
+        try {
+          const profile = await fetchUserProfile(info.role, info.userId);
+          setProfileData(profile);
+        } catch (profileError) {
+          console.warn("Failed to fetch profile data:", profileError);
+          // Don't fail completely if profile fetch fails
+        }
+      } else {
+        console.log("User has no role assigned, profile data not fetched");
+        setProfileData(null);
+      }
     } catch (err) {
       if (err instanceof InteractionRequiredAuthError) {
         // Token expired, need to re-authenticate

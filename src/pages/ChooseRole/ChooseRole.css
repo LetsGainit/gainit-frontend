@@ -1,0 +1,242 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+.choose-role-page {
+  background-color: #ffffff;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.choose-role-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.page-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.75rem;
+  font-family: 'Poppins', sans-serif;
+  display: block;
+  width: 100%;
+}
+
+.page-subtitle {
+  font-size: 1.125rem;
+  color: #6b7280;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+  font-family: 'Poppins', sans-serif;
+  display: block;
+  width: 100%;
+}
+
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.role-card {
+  background: #ffffff;
+  border: 2px solid #6366f1;
+  border-radius: 1rem;
+  padding: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+.role-card:hover {
+  background-color: #6366f1;
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.role-card:hover .role-title,
+.role-card:hover .role-subtitle,
+.role-card:hover .role-description {
+  color: #ffffff;
+}
+
+.role-card.selected {
+  background-color: #6366f1;
+  border-color: #6366f1;
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.role-card.selected .role-title,
+.role-card.selected .role-subtitle,
+.role-card.selected .role-description {
+  color: #ffffff;
+}
+
+.role-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.role-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.75rem;
+  font-family: 'Poppins', sans-serif;
+  transition: color 0.3s ease;
+}
+
+.role-subtitle {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 1rem;
+  font-family: 'Poppins', sans-serif;
+  transition: color 0.3s ease;
+  line-height: 1.5;
+}
+
+.role-description {
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.6;
+  font-family: 'Poppins', sans-serif;
+  transition: color 0.3s ease;
+  flex: 1;
+}
+
+.selected-indicator {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background-color: #ffffff;
+  color: #6366f1;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-section {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.action-text {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.submit-button {
+  background-color: #6366f1;
+  color: #ffffff;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+  min-width: 200px;
+}
+
+.submit-button:hover:not(.disabled) {
+  background-color: #4f46e5;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.submit-button:active:not(.disabled) {
+  transform: translateY(0);
+}
+
+.submit-button.disabled {
+  background-color: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .role-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .role-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .page-title {
+    font-size: 1.875rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+  }
+  
+  .page-header {
+    margin-bottom: 2.5rem;
+  }
+  
+  .role-card {
+    padding: 1.5rem;
+    min-height: 240px;
+  }
+  
+  .choose-role-page {
+    padding: 1rem 0.5rem;
+  }
+  
+  .choose-role-container {
+    padding: 0 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.625rem;
+  }
+  
+  .role-card {
+    padding: 1.25rem;
+    min-height: 220px;
+  }
+  
+  .submit-button {
+    min-width: 180px;
+    padding: 0.75rem 1.5rem;
+  }
+}

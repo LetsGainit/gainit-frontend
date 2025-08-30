@@ -146,7 +146,7 @@ export async function getUserInfo() {
       const userInfo = await res.json();
       return {
         userId: userInfo.userId || account.localAccountId,
-        role: userInfo.role || userInfo.userType || "gainer", // Default to gainer if no role specified
+        role: userInfo.role || userInfo.userType, // Remove default fallback - let role be undefined if not provided
         email: userInfo.emailAddress || account.username,
         name: userInfo.fullName || account.name,
         externalId: userInfo.externalId || account.localAccountId,
@@ -159,7 +159,7 @@ export async function getUserInfo() {
       console.warn("[AUTH] /me endpoint failed, using account info:", res.status);
       return {
         userId: account.localAccountId,
-        role: "gainer", // Default fallback
+        role: undefined, // No default role - let user choose
         email: account.username,
         name: account.name,
         externalId: account.localAccountId,
@@ -173,7 +173,7 @@ export async function getUserInfo() {
     // Fallback to account info
     return {
       userId: account.localAccountId,
-      role: "gainer", // Default fallback
+      role: undefined, // No default role - let user choose
       email: account.username,
       name: account.name,
       externalId: account.localAccountId,

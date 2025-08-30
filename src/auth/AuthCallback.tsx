@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
+import { getUserInfo } from "./auth";
 
 export default function AuthCallback() {
   const { inProgress, accounts } = useMsal();
@@ -16,10 +17,27 @@ export default function AuthCallback() {
     const go = async () => {
       try {
         if (accounts.length > 0) {
-          // Redirect to the original page if set, otherwise Home
-          const start = sessionStorage.getItem("msal.redirectStartPage") || "/";
-          sessionStorage.removeItem("msal.redirectStartPage");
-          navigate(start, { replace: true });
+          // Check if user has a role to determine redirect destination
+          try {
+            const userInfo = await getUserInfo();
+            
+            // If user has no role, redirect to role selection
+            if (!userInfo.role) {
+              console.log("[AUTH] User has no role, redirecting to /choose-role");
+              navigate("/choose-role", { replace: true });
+              return;
+            }
+            
+            // User has a role, redirect to original page or home
+            const start = sessionStorage.getItem("msal.redirectStartPage") || "/";
+            sessionStorage.removeItem("msal.redirectStartPage");
+            console.log("[AUTH] User has role, redirecting to:", start);
+            navigate(start, { replace: true });
+          } catch (userInfoError) {
+            console.warn("[AUTH] Failed to get user info, redirecting to home:", userInfoError);
+            // Fallback to home if user info fetch fails
+            navigate("/", { replace: true });
+          }
         } else {
           setError("No account found after login redirect.");
           navigate("/", { replace: true });
