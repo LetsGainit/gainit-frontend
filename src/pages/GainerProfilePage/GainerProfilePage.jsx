@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { getAccessToken } from "../../auth/auth";
+import { API_ENDPOINTS } from "../../config/api";
 import Toast from "../../components/Toast";
 import "./GainerProfilePage.css";
 
@@ -155,29 +156,47 @@ const GainerProfilePage = () => {
 
   const fetchServerUserId = async () => {
     try {
+      console.log("[GAINER] Fetching server user ID...");
       const token = await getAccessToken();
-      const response = await fetch(
-        `${
-          import.meta.env.VITE_API_BASE_URL ||
-          "https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/"
-        }api/users/me`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
+      console.log("[GAINER] Token acquired successfully");
+
+      const url = API_ENDPOINTS.USERS_ME();
+      console.log("[GAINER] Fetching from:", url);
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("[GAINER] Response status:", response.status);
+      console.log(
+        "[GAINER] Response headers:",
+        Object.fromEntries(response.headers.entries())
       );
 
       if (response.ok) {
         const userData = await response.json();
+        console.log("[GAINER] User data received:", {
+          id: userData.id,
+          userId: userData.userId,
+        });
         setServerUserId(userData.id || userData.userId);
       } else {
-        throw new Error("Failed to fetch user ID");
+        const errorText = await response.text();
+        console.error(
+          "[GAINER] Failed to fetch user ID:",
+          response.status,
+          errorText
+        );
+        throw new Error(
+          `Failed to fetch user ID: ${response.status} ${errorText}`
+        );
       }
     } catch (error) {
-      console.error("Error fetching server user ID:", error);
-      setToastMessage("Failed to load user information. Please try again.");
+      console.error("[GAINER] Error fetching server user ID:", error);
+      setToastMessage(`Failed to load user information: ${error.message}`);
       setToastType("error");
       setShowToast(true);
     }
@@ -367,7 +386,11 @@ const GainerProfilePage = () => {
     setIsSubmitting(true);
 
     try {
+      console.log("[GAINER] Starting profile submission...");
+      console.log("[GAINER] Server User ID:", serverUserId);
+
       const token = await getAccessToken();
+      console.log("[GAINER] Token acquired successfully");
 
       const payload = {
         fullName: formData.fullName.trim(),
@@ -386,24 +409,42 @@ const GainerProfilePage = () => {
         tools: formData.tools,
       };
 
-      const response = await fetch(
-        `${
-          import.meta.env.VITE_API_BASE_URL ||
-          "https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/"
-        }api/users/gainer/${serverUserId}/profile`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      console.log("[GAINER] Payload prepared:", payload);
+
+      const url = API_ENDPOINTS.GAINER_PROFILE(serverUserId);
+      console.log("[GAINER] Submitting to:", url);
+      console.log("[GAINER] Request method: PUT");
+      console.log("[GAINER] Request headers:", {
+        Authorization: `Bearer ${token.substring(0, 20)}...`,
+        "Content-Type": "application/json",
+      });
+
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      console.log("[GAINER] Response received:", {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries()),
+      });
 
       if (response.ok) {
+        console.log("[GAINER] Profile creation successful!");
+
         // Update user context and navigate to home
-        await refreshUserData();
+        try {
+          await refreshUserData();
+          console.log("[GAINER] User data refreshed successfully");
+        } catch (refreshError) {
+          console.warn("[GAINER] Failed to refresh user data:", refreshError);
+        }
 
         setToastMessage("Profile created successfully! Redirecting to home...");
         setToastType("success");
@@ -411,12 +452,28 @@ const GainerProfilePage = () => {
 
         // Navigate to home after a short delay
         setTimeout(() => {
+          console.log("[GAINER] Navigating to home...");
           navigate("/");
         }, 1500);
       } else {
-        const errorData = await response.json();
+        console.log(
+          "[GAINER] Profile creation failed with status:",
+          response.status
+        );
+
+        let errorData;
+        try {
+          errorData = await response.json();
+          console.log("[GAINER] Error response body:", errorData);
+        } catch (parseError) {
+          console.error("[GAINER] Failed to parse error response:", parseError);
+          const errorText = await response.text();
+          console.log("[GAINER] Raw error response:", errorText);
+          errorData = { message: `HTTP ${response.status}: ${errorText}` };
+        }
 
         if (response.status === 400 && errorData.errors) {
+          console.log("[GAINER] Backend validation errors:", errorData.errors);
           // Handle validation errors from backend
           const backendErrors = {};
           Object.keys(errorData.errors).forEach((key) => {
@@ -428,17 +485,34 @@ const GainerProfilePage = () => {
           setToastType("error");
           setShowToast(true);
         } else {
-          throw new Error(errorData.message || "Failed to create profile");
+          throw new Error(
+            errorData.message || `Failed to create profile: ${response.status}`
+          );
         }
       }
     } catch (error) {
-      console.error("Error creating profile:", error);
+      console.error("[GAINER] Error creating profile:", error);
+      console.error("[GAINER] Error stack:", error.stack);
+      console.error("[GAINER] Error name:", error.name);
+      console.error("[GAINER] Error message:", error.message);
 
       if (error.message.includes("401")) {
+        console.log("[GAINER] Authentication error detected");
         setToastMessage("Authentication failed. Please sign in again.");
         setToastType("error");
         setShowToast(true);
+      } else if (
+        error.name === "TypeError" &&
+        error.message.includes("fetch")
+      ) {
+        console.log("[GAINER] Network error detected");
+        setToastMessage(
+          "Network error. Please check your connection and try again."
+        );
+        setToastType("error");
+        setShowToast(true);
       } else {
+        console.log("[GAINER] Generic error, showing error message");
         setToastMessage(
           error.message || "Failed to create profile. Please try again."
         );
@@ -446,6 +520,7 @@ const GainerProfilePage = () => {
         setShowToast(true);
       }
     } finally {
+      console.log("[GAINER] Form submission completed, re-enabling button");
       setIsSubmitting(false);
     }
   };
