@@ -184,6 +184,9 @@ const GainerProfilePage = () => {
   };
 
   const validateForm = () => {
+    // Clear previous errors first
+    setErrors({});
+
     const newErrors = {};
 
     // Required fields
@@ -260,12 +263,55 @@ const GainerProfilePage = () => {
       [field]: value,
     }));
 
-    // Clear error when user starts typing
+    // Clear error when user starts typing or when field becomes valid
     if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: "",
-      }));
+      // Validate the specific field to see if error should be cleared
+      let shouldClearError = false;
+
+      switch (field) {
+        case "fullName":
+          shouldClearError =
+            value.trim().length > 0 && value.trim().length <= 100;
+          break;
+        case "biography":
+          shouldClearError =
+            value.trim().length > 0 && value.trim().length <= 1000;
+          break;
+        case "currentRole":
+          shouldClearError =
+            value.trim().length > 0 && value.trim().length <= 100;
+          break;
+        case "yearsOfExperience": {
+          const numValue = parseInt(value);
+          shouldClearError =
+            !isNaN(numValue) && numValue >= 0 && numValue <= 50;
+          break;
+        }
+        case "educationStatus":
+          shouldClearError = value.length > 0;
+          break;
+        case "profilePictureURL":
+          shouldClearError =
+            !value || (value.length <= 200 && isValidUrl(value));
+          break;
+        case "linkedInURL":
+          shouldClearError =
+            !value || (value.length <= 200 && isValidUrl(value));
+          break;
+        case "gitHubURL":
+          shouldClearError =
+            !value || (value.length <= 200 && isValidUrl(value));
+          break;
+        default:
+          shouldClearError = true;
+      }
+
+      if (shouldClearError) {
+        setErrors((prev) => ({
+          ...prev,
+          [field]: "",
+        }));
+      }
     }
   };
 
@@ -275,12 +321,32 @@ const GainerProfilePage = () => {
       [field]: value,
     }));
 
-    // Clear error when user makes selection
+    // Clear error when user makes selection or when field becomes valid
     if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: "",
-      }));
+      let shouldClearError = false;
+
+      switch (field) {
+        case "areasOfInterest": {
+          shouldClearError =
+            value.length > 0 && value.join(", ").length <= 1000;
+          break;
+        }
+        case "programmingLanguages":
+        case "technologies":
+        case "tools":
+          // These are optional fields, so always clear errors
+          shouldClearError = true;
+          break;
+        default:
+          shouldClearError = true;
+      }
+
+      if (shouldClearError) {
+        setErrors((prev) => ({
+          ...prev,
+          [field]: "",
+        }));
+      }
     }
   };
 
