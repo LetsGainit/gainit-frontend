@@ -17,37 +17,57 @@ export default function AuthCallback() {
     const go = async () => {
       try {
         if (accounts.length > 0) {
-          // Wait for ensure to complete and use its redirect decision
+          // Check if ensure has already handled navigation for new users
           const accountId = accounts[0]?.homeAccountId ?? "unknown";
-          const ensureKey = `userEnsured:${accountId}`;
           const ensureCompletedKey = `ensureCompleted:${accountId}`;
           const redirectDecisionKey = `redirectDecision:${accountId}`;
           
-          // Wait for ensure to complete
+          // If ensure completed and decided to redirect to /choose-role, 
+          // the ensure handler should have already navigated there
+          if (sessionStorage.getItem(ensureCompletedKey)) {
+            const redirectDecision = sessionStorage.getItem(redirectDecisionKey);
+            
+            if (redirectDecision === "/choose-role") {
+              console.info("[AUTH] AuthCallback: ensure already redirected to /choose-role");
+              // Double-check we're not already on /choose-role
+              if (window.location.pathname !== "/choose-role") {
+                navigate("/choose-role", { replace: true });
+              }
+              return;
+            } else if (redirectDecision === "start-page") {
+              console.info("[AUTH] AuthCallback: ensure decided start-page");
+              // User has a role, redirect to original page or home
+              const start = sessionStorage.getItem("msal.redirectStartPage") || "/";
+              sessionStorage.removeItem("msal.redirectStartPage");
+              console.log("[AUTH] User has role, redirecting to:", start);
+              navigate(start, { replace: true });
+              return;
+            }
+          }
+          
+          // If ensure hasn't completed yet, wait a bit and check again
           if (!sessionStorage.getItem(ensureCompletedKey)) {
             console.info("[AUTH] AuthCallback: waiting for ensure to complete...");
-            // Wait a bit for ensure to finish
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, 200));
+            
+            // Check again after waiting
+            if (sessionStorage.getItem(ensureCompletedKey)) {
+              const redirectDecision = sessionStorage.getItem(redirectDecisionKey);
+              if (redirectDecision === "/choose-role") {
+                console.info("[AUTH] AuthCallback: ensure completed, redirecting to /choose-role");
+                navigate("/choose-role", { replace: true });
+                return;
+              } else if (redirectDecision === "start-page") {
+                console.info("[AUTH] AuthCallback: ensure completed, redirecting to start page");
+                const start = sessionStorage.getItem("msal.redirectStartPage") || "/";
+                sessionStorage.removeItem("msal.redirectStartPage");
+                navigate(start, { replace: true });
+                return;
+              }
+            }
           }
           
-          // Get the redirect decision from ensure
-          const redirectDecision = sessionStorage.getItem(redirectDecisionKey);
-          
-          if (redirectDecision === "/choose-role") {
-            console.info("[AUTH] AuthCallback: ensure decided /choose-role");
-            navigate("/choose-role", { replace: true });
-            return;
-          } else if (redirectDecision === "start-page") {
-            console.info("[AUTH] AuthCallback: ensure decided start-page");
-            // User has a role, redirect to original page or home
-            const start = sessionStorage.getItem("msal.redirectStartPage") || "/";
-            sessionStorage.removeItem("msal.redirectStartPage");
-            console.log("[AUTH] User has role, redirecting to:", start);
-            navigate(start, { replace: true });
-            return;
-          }
-          
-          // Fallback: if ensure didn't set a decision, check user info directly
+          // Fallback: if ensure didn't complete or set a decision, check user info directly
           console.warn("[AUTH] AuthCallback: no ensure decision, falling back to direct check");
           try {
             const userInfo = await getUserInfo();
