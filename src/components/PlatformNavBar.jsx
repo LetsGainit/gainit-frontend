@@ -26,6 +26,9 @@ function PlatformNavBar() {
   const { isAuthenticated, userInfo, loading, error, signOut } = useAuth();
   const location = useLocation();
 
+  // Skip auth-related API calls on choose-role route
+  const isChooseRoleRoute = location.pathname === "/choose-role";
+
   // Close mobile menu when route changes
   useEffect(() => {
     setIsMenuOpen(false);
@@ -78,12 +81,12 @@ function PlatformNavBar() {
 
   // Show error toast if there's an authentication error
   useEffect(() => {
-    if (error && isAuthenticated) {
+    if (error && isAuthenticated && !isChooseRoleRoute) {
       setToastMessage(error);
       setToastType("error");
       setShowToast(true);
     }
-  }, [error, isAuthenticated]);
+  }, [error, isAuthenticated, isChooseRoleRoute]);
 
   const handleProfileClick = () => {
     if (!isAuthenticated) {
@@ -163,6 +166,7 @@ function PlatformNavBar() {
 
   // Get display name for user
   const getDisplayName = () => {
+    if (isChooseRoleRoute) return "Gainer";
     if (!isAuthenticated) return "Gainer";
     if (loading) return "Loading...";
     if (userInfo?.name) return userInfo.name;
@@ -227,12 +231,12 @@ function PlatformNavBar() {
                 aria-haspopup="true"
                 onClick={handleProfileClick}
                 onBlur={() => setTimeout(() => setIsProfileOpen(false), 200)}
-                disabled={loading}
+                disabled={loading || isChooseRoleRoute}
               >
                 <CircleUserRound size={20} />
                 <ChevronDown size={16} className="profile-chevron" />
               </button>
-              {isProfileOpen && isAuthenticated && (
+              {isProfileOpen && isAuthenticated && !isChooseRoleRoute && (
                 <div
                   className="dropdown-menu profile-dropdown"
                   role="menu"
@@ -313,7 +317,7 @@ function PlatformNavBar() {
             >
               Learn
             </Link>
-            {isAuthenticated && (
+            {isAuthenticated && !isChooseRoleRoute && (
               <>
                 <div className="mobile-divider"></div>
                 <button
