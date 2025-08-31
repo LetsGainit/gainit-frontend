@@ -23,7 +23,8 @@ export default function AuthCallback() {
             
             // If user has no role, redirect to role selection
             if (!userInfo.role) {
-              console.log("[AUTH] User has no role, redirecting to /choose-role");
+              console.info("[AUTH] AuthCallback: role =", userInfo.role);
+              console.info("[AUTH] AuthCallback: navigating to /choose-role");
               navigate("/choose-role", { replace: true });
               return;
             }
@@ -34,9 +35,9 @@ export default function AuthCallback() {
             console.log("[AUTH] User has role, redirecting to:", start);
             navigate(start, { replace: true });
           } catch (userInfoError) {
-            console.warn("[AUTH] Failed to get user info, redirecting to home:", userInfoError);
-            // Fallback to home if user info fetch fails
-            navigate("/", { replace: true });
+            console.warn("[AUTH] Failed to get user info, redirecting to role selection:", userInfoError);
+            // Fallback to role selection if user info fetch fails
+            navigate("/choose-role", { replace: true });
           }
         } else {
           setError("No account found after login redirect.");

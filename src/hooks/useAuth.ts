@@ -72,10 +72,38 @@ export function useAuth() {
   }, [isAuthenticated, instance]);
 
   const refreshUserData = useCallback(() => {
+    // Skip refresh on sensitive routes
+    const SKIP_FETCH = new Set([
+      "/auth-callback",
+      "/choose-role",
+      "/onboarding/gainer-profile",
+      "/onboarding/mentor-profile",
+      "/onboarding/nonprofit-profile",
+    ]);
+    
+    if (SKIP_FETCH.has(window.location.pathname)) {
+      console.info("[AUTH] useAuth: skipping refresh on", window.location.pathname);
+      return;
+    }
+    
     loadUserInfo();
   }, [loadUserInfo]);
 
   useEffect(() => {
+    // Skip auto-fetch on sensitive routes to avoid concurrent /me/redirect churn
+    const SKIP_FETCH = new Set([
+      "/auth-callback",
+      "/choose-role",
+      "/onboarding/gainer-profile",
+      "/onboarding/mentor-profile",
+      "/onboarding/nonprofit-profile",
+    ]);
+    
+    if (SKIP_FETCH.has(window.location.pathname)) {
+      console.info("[AUTH] useAuth: skipping fetch on", window.location.pathname);
+      return;
+    }
+    
     loadUserInfo();
   }, [loadUserInfo]);
 
