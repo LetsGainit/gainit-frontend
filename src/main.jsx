@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { MsalProvider } from "@azure/msal-react";
 import { initializeMsal, getMsalInstance } from "./auth/auth";
+import { OnboardingProvider } from "./contexts/OnboardingContext";
 import "./css/index.css";
 import App from "./App.jsx";
 
@@ -17,14 +18,16 @@ const initializeApp = async () => {
 
   // Get the MSAL instance after initialization
   const msalInstance = getMsalInstance();
-  
+
   // Render the app after MSAL is initialized
   createRoot(document.getElementById("root")).render(
     <StrictMode>
       <MsalProvider instance={msalInstance}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <OnboardingProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </OnboardingProvider>
       </MsalProvider>
     </StrictMode>
   );

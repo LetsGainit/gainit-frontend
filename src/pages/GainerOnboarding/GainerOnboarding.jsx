@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
+import { useOnboarding } from "../../hooks/useOnboarding";
 import { getAccessToken } from "../../auth/auth";
 import Toast from "../../components/Toast";
 import "./GainerOnboarding.css";
 
 const GainerOnboarding = () => {
   const navigate = useNavigate();
-  const { userInfo, refreshUserData } = useAuth();
+  const { selectedRole, clearRole } = useOnboarding();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -149,15 +149,15 @@ const GainerOnboarding = () => {
   };
 
   useEffect(() => {
-    // Check if user has selected Gainer role
-    if (userInfo?.role !== "gainer") {
+    // Check if user has selected Gainer role from onboarding context
+    if (selectedRole !== "gainer") {
       navigate("/choose-role");
       return;
     }
 
     // Get server user ID
     fetchServerUserId();
-  }, [userInfo, navigate]);
+  }, [selectedRole, navigate]);
 
   const fetchServerUserId = async () => {
     try {
@@ -255,7 +255,7 @@ const GainerOnboarding = () => {
     try {
       new URL(string);
       return true;
-    } catch (_) {
+    } catch {
       return false;
     }
   };
@@ -342,10 +342,8 @@ const GainerOnboarding = () => {
       );
 
       if (response.ok) {
-        const profileData = await response.json();
-
-        // Update user context
-        await refreshUserData();
+        // Clear onboarding role and navigate to home
+        clearRole();
 
         setToastMessage("Profile created successfully! Redirecting to home...");
         setToastType("success");
@@ -396,7 +394,7 @@ const GainerOnboarding = () => {
     setShowToast(false);
   };
 
-  if (!userInfo || userInfo.role !== "gainer") {
+  if (selectedRole !== "gainer") {
     return null;
   }
 

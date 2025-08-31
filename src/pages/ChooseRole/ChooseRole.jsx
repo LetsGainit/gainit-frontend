@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
-import { updateUserRole } from "../../services/usersService";
+import { useOnboarding } from "../../hooks/useOnboarding";
 import Toast from "../../components/Toast";
 import "./ChooseRole.css";
 
@@ -13,7 +12,7 @@ const ChooseRole = () => {
   const [toastType, setToastType] = useState("info");
 
   const navigate = useNavigate();
-  const { userInfo, refreshUserData } = useAuth();
+  const { setRole } = useOnboarding();
 
   const roleOptions = [
     {
@@ -44,18 +43,20 @@ const ChooseRole = () => {
     setSelectedRole(roleId);
   };
 
-  const handleSubmit = async () => {
-    if (!selectedRole || !userInfo) return;
+  const handleSubmit = () => {
+    if (!selectedRole) {
+      setToastMessage("Please select a role to continue.");
+      setToastType("error");
+      setShowToast(true);
+      return;
+    }
 
     setIsSubmitting(true);
     setShowToast(false);
 
     try {
-      // Call the API to update the user's role
-      await updateUserRole(userInfo.userId, selectedRole);
-
-      // Refresh user data to get the updated role
-      await refreshUserData();
+      // Store the role locally in onboarding context
+      setRole(selectedRole);
 
       // Show success message
       setToastMessage(
@@ -69,13 +70,8 @@ const ChooseRole = () => {
         navigate("/onboarding/profile");
       }, 1500);
     } catch (error) {
-      console.error("Failed to update role:", error);
-
-      const errorMessage =
-        error.response?.data?.message ||
-        "Failed to update role. Please try again.";
-
-      setToastMessage(errorMessage);
+      console.error("Failed to set role:", error);
+      setToastMessage("Failed to set role. Please try again.");
       setToastType("error");
       setShowToast(true);
     } finally {
