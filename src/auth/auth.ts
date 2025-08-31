@@ -24,15 +24,52 @@ function attachEventCallbacks(instance: PublicClientApplication) {
       const accountId = payload.account?.homeAccountId ?? "unknown";
       const ensureKey = `userEnsured:${accountId}`;
       if (!sessionStorage.getItem(ensureKey)) {
+        console.info("[ENSURE] triggered on LOGIN_SUCCESS");
         console.debug("[AUTH] Ensuring user in backend…");
-        ensureCurrentUser()
-          .then((user) => {
-            console.info("[AUTH] Ensure success:", { userId: user.userId, isNewUser: user.isNewUser });
+        
+        // Store ensure promise to coordinate with AuthCallback
+        const ensurePromise = ensureCurrentUser()
+          .then(async (user) => {
+            console.info("[ENSURE] response", { isNewUser: user.isNewUser });
+            
+            // For new users, redirect immediately to role selection
+            if (user.isNewUser) {
+              console.info("[NAV] redirecting to /choose-role (new user)");
+              sessionStorage.setItem(`redirectDecision:${accountId}`, "/choose-role");
+              return user;
+            }
+            
+            // For existing users, check if they have a role
+            try {
+              const userInfo = await getUserInfo();
+              if (!userInfo.role) {
+                console.info("[NAV] redirecting to /choose-role (no role)");
+                sessionStorage.setItem(`redirectDecision:${accountId}`, "/choose-role");
+              } else {
+                console.info("[NAV] redirecting to start page/home (has role)");
+                sessionStorage.setItem(`redirectDecision:${accountId}`, "start-page");
+              }
+            } catch (roleCheckError) {
+              console.warn("[ENSURE] role check failed, treating as no role:", roleCheckError.message);
+              sessionStorage.setItem(`redirectDecision:${accountId}`, "/choose-role");
+            }
+            
+            return user;
           })
           .catch((e) => {
-            console.error("[AUTH] Ensure failed:", e);
+            console.warn("[ENSURE] failed, treating as not onboarded:", e.message);
+            // On ensure failure, treat as new user
+            sessionStorage.setItem(`redirectDecision:${accountId}`, "/choose-role");
+            throw e;
           })
-          .finally(() => sessionStorage.setItem(ensureKey, "true"));
+          .finally(() => {
+            sessionStorage.setItem(ensureKey, "true");
+            // Mark ensure as completed
+            sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
+          });
+        
+        // Store the promise for coordination
+        sessionStorage.setItem(`ensurePromise:${accountId}`, JSON.stringify({ status: "pending" }));
       }
     }
   });
