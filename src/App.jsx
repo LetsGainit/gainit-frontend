@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import AuthCallback from "./auth/AuthCallback";
 import ScrollToTop from "./components/ScrollToTop";
 import RoleCheck from "./components/RoleCheck";
+import GainerOnboarding from "./pages/GainerOnboarding/GainerOnboarding";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
             <Route path="/profile/mentor/:id" element={<ProfilePage />} />
             <Route path="/profile/nonprofit/:id" element={<ProfilePage />} />
             <Route path="/choose-role" element={<ChooseRole />} />
+            <Route path="/onboarding/profile" element={<GainerOnboarding />} />
             <Route path="/login" element={<Login />} />
             <Route path="/auth-callback" element={<AuthCallback />} />
           </Routes>

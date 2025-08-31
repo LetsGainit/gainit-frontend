@@ -64,9 +64,9 @@ const ChooseRole = () => {
       setToastType("success");
       setShowToast(true);
 
-      // Navigate to profile setup after a short delay
+      // Navigate to onboarding profile setup after a short delay
       setTimeout(() => {
-        navigate(`/profile/${userInfo.userId}`);
+        navigate("/onboarding/profile");
       }, 1500);
     } catch (error) {
       console.error("Failed to update role:", error);
