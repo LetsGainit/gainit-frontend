@@ -1,18 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useOnboarding } from "../../hooks/useOnboarding";
 import Toast from "../../components/Toast";
 import "./ChooseRole.css";
 
 const ChooseRole = () => {
   const [selectedRole, setSelectedRole] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("info");
 
   const navigate = useNavigate();
-  const { setRole } = useOnboarding();
 
   const roleOptions = [
     {
@@ -51,32 +48,11 @@ const ChooseRole = () => {
       return;
     }
 
-    setIsSubmitting(true);
-    setShowToast(false);
-
-    try {
-      // Store the role locally in onboarding context
-      setRole(selectedRole);
-
-      // Show success message
-      setToastMessage(
-        "Role selected successfully! Redirecting to profile setup..."
-      );
-      setToastType("success");
-      setShowToast(true);
-
-      // Navigate to onboarding profile setup after a short delay
-      setTimeout(() => {
-        navigate("/onboarding/profile");
-      }, 1500);
-    } catch (error) {
-      console.error("Failed to set role:", error);
-      setToastMessage("Failed to set role. Please try again.");
-      setToastType("error");
-      setShowToast(true);
-    } finally {
-      setIsSubmitting(false);
+    // Navigate directly based on selected role
+    if (selectedRole === "gainer") {
+      navigate("/onboarding/gainer-profile");
     }
+    // Future roles will be added here
   };
 
   const handleCloseToast = () => {
@@ -127,13 +103,11 @@ const ChooseRole = () => {
             Select your role to continue and complete your profile setup.
           </p>
           <button
-            className={`submit-button ${
-              !selectedRole || isSubmitting ? "disabled" : ""
-            }`}
+            className={`submit-button ${!selectedRole ? "disabled" : ""}`}
             onClick={handleSubmit}
-            disabled={!selectedRole || isSubmitting}
+            disabled={!selectedRole}
           >
-            {isSubmitting ? "Saving..." : "Continue to Profile Setup"}
+            Continue to Profile Setup
           </button>
         </div>
       </div>
