@@ -154,6 +154,84 @@ const GainerProfilePage = () => {
     fetchServerUserId();
   }, []);
 
+  // Monitor form data changes and clear resolved errors
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      // Check if any existing errors are now resolved
+      const resolvedErrors = {};
+      let hasResolvedErrors = false;
+
+      Object.keys(errors).forEach((errorKey) => {
+        if (errors[errorKey]) {
+          // Check if this error is now resolved
+          let isResolved = false;
+
+          switch (errorKey) {
+            case "fullName":
+              isResolved =
+                formData.fullName.trim().length > 0 &&
+                formData.fullName.trim().length <= 100;
+              break;
+            case "biography":
+              isResolved =
+                formData.biography.trim().length > 0 &&
+                formData.biography.trim().length <= 1000;
+              break;
+            case "currentRole":
+              isResolved =
+                formData.currentRole.trim().length > 0 &&
+                formData.currentRole.trim().length <= 100;
+              break;
+            case "yearsOfExperience": {
+              const numValue = parseInt(formData.yearsOfExperience);
+              isResolved = !isNaN(numValue) && numValue >= 0 && numValue <= 50;
+              break;
+            }
+            case "educationStatus":
+              isResolved = formData.educationStatus.length > 0;
+              break;
+            case "areasOfInterest":
+              isResolved =
+                formData.areasOfInterest.length > 0 &&
+                formData.areasOfInterest.join(", ").length <= 1000;
+              break;
+            case "profilePictureURL":
+              isResolved =
+                !formData.profilePictureURL ||
+                (formData.profilePictureURL.length <= 200 &&
+                  isValidUrl(formData.profilePictureURL));
+              break;
+            case "linkedInURL":
+              isResolved =
+                !formData.linkedInURL ||
+                (formData.linkedInURL.length <= 200 &&
+                  isValidUrl(formData.linkedInURL));
+              break;
+            case "gitHubURL":
+              isResolved =
+                !formData.gitHubURL ||
+                (formData.gitHubURL.length <= 200 &&
+                  isValidUrl(formData.gitHubURL));
+              break;
+            default:
+              isResolved = true;
+          }
+
+          if (isResolved) {
+            hasResolvedErrors = true;
+          } else {
+            resolvedErrors[errorKey] = errors[errorKey];
+          }
+        }
+      });
+
+      // Update errors state if any errors were resolved
+      if (hasResolvedErrors) {
+        setErrors(resolvedErrors);
+      }
+    }
+  }, [formData, errors]);
+
   const fetchServerUserId = async () => {
     try {
       console.log("[GAINER] Fetching server user ID...");
@@ -202,71 +280,6 @@ const GainerProfilePage = () => {
     }
   };
 
-  const validateForm = () => {
-    // Clear previous errors first
-    setErrors({});
-
-    const newErrors = {};
-
-    // Required fields
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = "Full name is required";
-    } else if (formData.fullName.length > 100) {
-      newErrors.fullName = "Full name must be 100 characters or less";
-    }
-
-    if (!formData.biography.trim()) {
-      newErrors.biography = "Biography is required";
-    } else if (formData.biography.length > 1000) {
-      newErrors.biography = "Biography must be 1000 characters or less";
-    }
-
-    if (!formData.currentRole.trim()) {
-      newErrors.currentRole = "Current role is required";
-    } else if (formData.currentRole.length > 100) {
-      newErrors.currentRole = "Current role must be 100 characters or less";
-    }
-
-    if (!formData.yearsOfExperience) {
-      newErrors.yearsOfExperience = "Years of experience is required";
-    } else if (
-      isNaN(formData.yearsOfExperience) ||
-      formData.yearsOfExperience < 0 ||
-      formData.yearsOfExperience > 50
-    ) {
-      newErrors.yearsOfExperience =
-        "Years of experience must be between 0 and 50";
-    }
-
-    if (!formData.educationStatus) {
-      newErrors.educationStatus = "Education status is required";
-    }
-
-    if (formData.areasOfInterest.length === 0) {
-      newErrors.areasOfInterest = "At least one area of interest is required";
-    }
-
-    // URL validation
-    const urlFields = ["profilePictureURL", "linkedInURL", "gitHubURL"];
-    urlFields.forEach((field) => {
-      if (formData[field] && formData[field].length > 200) {
-        newErrors[field] = "URL must be 200 characters or less";
-      } else if (formData[field] && !isValidUrl(formData[field])) {
-        newErrors[field] = "Please enter a valid URL";
-      }
-    });
-
-    // Areas of interest combined length validation
-    const combinedInterestLength = formData.areasOfInterest.join(", ").length;
-    if (combinedInterestLength > 1000) {
-      newErrors.areasOfInterest =
-        "Combined areas of interest must be 1000 characters or less";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const isValidUrl = (string) => {
     try {
       new URL(string);
@@ -274,6 +287,39 @@ const GainerProfilePage = () => {
     } catch {
       return false;
     }
+  };
+
+  // Real-time validation function that checks form validity without setting errors
+  const isFormValid = () => {
+    // Check required fields
+    if (!formData.fullName.trim()) return false;
+    if (!formData.biography.trim()) return false;
+    if (!formData.currentRole.trim()) return false;
+    if (!formData.yearsOfExperience) return false;
+    if (!formData.educationStatus) return false;
+    if (formData.areasOfInterest.length === 0) return false;
+
+    // Check field length limits
+    if (formData.fullName.trim().length > 100) return false;
+    if (formData.biography.trim().length > 1000) return false;
+    if (formData.currentRole.trim().length > 100) return false;
+
+    // Check years of experience range
+    const yearsExp = parseInt(formData.yearsOfExperience);
+    if (isNaN(yearsExp) || yearsExp < 0 || yearsExp > 50) return false;
+
+    // Check URL validity and length
+    const urlFields = ["profilePictureURL", "linkedInURL", "gitHubURL"];
+    for (const field of urlFields) {
+      if (formData[field] && formData[field].length > 200) return false;
+      if (formData[field] && !isValidUrl(formData[field])) return false;
+    }
+
+    // Check areas of interest combined length
+    const combinedInterestLength = formData.areasOfInterest.join(", ").length;
+    if (combinedInterestLength > 1000) return false;
+
+    return true;
   };
 
   const handleInputChange = (field, value) => {
@@ -326,10 +372,11 @@ const GainerProfilePage = () => {
       }
 
       if (shouldClearError) {
-        setErrors((prev) => ({
-          ...prev,
-          [field]: "",
-        }));
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
       }
     }
   };
@@ -361,10 +408,24 @@ const GainerProfilePage = () => {
       }
 
       if (shouldClearError) {
-        setErrors((prev) => ({
-          ...prev,
-          [field]: "",
-        }));
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
+      }
+    }
+
+    // Handle cross-field validation dependencies
+    // If areasOfInterest changed, check if it resolves the combined length error
+    if (field === "areasOfInterest" && errors.areasOfInterest) {
+      const combinedLength = value.join(", ").length;
+      if (combinedLength <= 1000) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.areasOfInterest;
+          return newErrors;
+        });
       }
     }
   };
@@ -372,52 +433,98 @@ const GainerProfilePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    // Only proceed when form is valid (use existing real-time validity logic)
+    if (!isFormValid()) {
+      console.log(
+        "[GAINER_PROFILE] Form validation failed, submission blocked"
+      );
       return;
     }
 
     if (!serverUserId) {
+      console.log("[GAINER_PROFILE] Server user ID not available");
       setToastMessage("User information not loaded. Please try again.");
       setToastType("error");
       setShowToast(true);
       return;
     }
 
+    // Prevent duplicate submissions
+    if (isSubmitting) {
+      console.log(
+        "[GAINER_PROFILE] Submission already in progress, ignoring click"
+      );
+      return;
+    }
+
     setIsSubmitting(true);
+    console.log(
+      "[GAINER_PROFILE] Starting profile submission for user:",
+      serverUserId
+    );
 
     try {
-      console.log("[GAINER] Starting profile submission...");
-      console.log("[GAINER] Server User ID:", serverUserId);
-
+      // Retrieve JWT access token from Azure AD B2C auth layer
       const token = await getAccessToken();
-      console.log("[GAINER] Token acquired successfully");
+      console.log("[GAINER_PROFILE] JWT token acquired successfully");
 
+      // Construct payload according to specifications
       const payload = {
+        // Common required fields
         fullName: formData.fullName.trim(),
         biography: formData.biography.trim(),
+
+        // Always included as empty strings
         facebookPageURL: "",
-        linkedInURL: formData.linkedInURL.trim() || "",
-        gitHubURL: formData.gitHubURL.trim() || "",
         gitHubUsername: "",
-        profilePictureURL: formData.profilePictureURL.trim() || "",
+
+        // Common optional fields (omit if empty)
+        ...(formData.linkedInURL.trim() && {
+          linkedInURL: formData.linkedInURL.trim(),
+        }),
+        ...(formData.gitHubURL.trim() && {
+          gitHubURL: formData.gitHubURL.trim(),
+        }),
+        ...(formData.profilePictureURL.trim() && {
+          profilePictureURL: formData.profilePictureURL.trim(),
+        }),
+
+        // Gainer required fields
         currentRole: formData.currentRole.trim(),
-        yearsOfExperience: parseInt(formData.yearsOfExperience),
+        yearsOfExperience: Number(formData.yearsOfExperience),
         educationStatus: formData.educationStatus,
         areasOfInterest: formData.areasOfInterest,
-        programmingLanguages: formData.programmingLanguages,
-        technologies: formData.technologies,
-        tools: formData.tools,
+
+        // Expertise optional fields (include only if non-empty arrays)
+        ...(formData.programmingLanguages.length > 0 && {
+          programmingLanguages: formData.programmingLanguages,
+        }),
+        ...(formData.technologies.length > 0 && {
+          technologies: formData.technologies,
+        }),
+        ...(formData.tools.length > 0 && { tools: formData.tools }),
       };
 
-      console.log("[GAINER] Payload prepared:", payload);
-
-      const url = API_ENDPOINTS.GAINER_PROFILE(serverUserId);
-      console.log("[GAINER] Submitting to:", url);
-      console.log("[GAINER] Request method: PUT");
-      console.log("[GAINER] Request headers:", {
-        Authorization: `Bearer ${token.substring(0, 20)}...`,
-        "Content-Type": "application/json",
+      console.log("[GAINER_PROFILE] Payload constructed:", {
+        fullName: payload.fullName,
+        biography: payload.biography,
+        currentRole: payload.currentRole,
+        yearsOfExperience: payload.yearsOfExperience,
+        educationStatus: payload.educationStatus,
+        areasOfInterest: payload.areasOfInterest,
+        hasLinkedIn: !!payload.linkedInURL,
+        hasGitHub: !!payload.gitHubURL,
+        hasProfilePicture: !!payload.profilePictureURL,
+        hasProgrammingLanguages: !!payload.programmingLanguages,
+        hasTechnologies: !!payload.technologies,
+        hasTools: !!payload.tools,
+        facebookPageURL: payload.facebookPageURL,
+        gitHubUsername: payload.gitHubUsername,
       });
+
+      // Build request URL using existing endpoint configuration
+      const url = API_ENDPOINTS.GAINER_PROFILE(serverUserId);
+      console.log("[GAINER_PROFILE] Submitting to:", url);
 
       const response = await fetch(url, {
         method: "PUT",
@@ -428,91 +535,143 @@ const GainerProfilePage = () => {
         body: JSON.stringify(payload),
       });
 
-      console.log("[GAINER] Response received:", {
+      console.log("[GAINER_PROFILE] Response received:", {
         status: response.status,
         statusText: response.statusText,
         ok: response.ok,
-        headers: Object.fromEntries(response.headers.entries()),
       });
 
       if (response.ok) {
-        console.log("[GAINER] Profile creation successful!");
+        console.log("[GAINER_PROFILE] Profile creation/update successful");
 
-        // Update user context and navigate to home
+        // Parse response to get updated profile data
+        let profileData;
         try {
-          await refreshUserData();
-          console.log("[GAINER] User data refreshed successfully");
-        } catch (refreshError) {
-          console.warn("[GAINER] Failed to refresh user data:", refreshError);
+          profileData = await response.json();
+          console.log("[GAINER_PROFILE] Profile data received:", {
+            id: profileData.id,
+            fullName: profileData.fullName,
+            hasAreasOfInterest: !!profileData.areasOfInterest?.length,
+          });
+        } catch {
+          console.warn(
+            "[GAINER_PROFILE] Failed to parse response, using form data"
+          );
+          profileData = payload;
         }
 
+        // Update user context and mark user as Gainer
+        try {
+          await refreshUserData();
+          console.log("[GAINER_PROFILE] User data refreshed successfully");
+        } catch (refreshError) {
+          console.warn(
+            "[GAINER_PROFILE] Failed to refresh user data:",
+            refreshError
+          );
+        }
+
+        // Show success feedback and navigate
         setToastMessage("Profile created successfully! Redirecting to home...");
         setToastType("success");
         setShowToast(true);
 
         // Navigate to home after a short delay
         setTimeout(() => {
-          console.log("[GAINER] Navigating to home...");
+          console.log("[GAINER_PROFILE] Navigating to home...");
           navigate("/");
         }, 1500);
       } else {
-        console.log(
-          "[GAINER] Profile creation failed with status:",
-          response.status
-        );
-
+        // Handle different error status codes
         let errorData;
         try {
           errorData = await response.json();
-          console.log("[GAINER] Error response body:", errorData);
-        } catch (parseError) {
-          console.error("[GAINER] Failed to parse error response:", parseError);
+        } catch {
           const errorText = await response.text();
-          console.log("[GAINER] Raw error response:", errorText);
           errorData = { message: `HTTP ${response.status}: ${errorText}` };
         }
 
-        if (response.status === 400 && errorData.errors) {
-          console.log("[GAINER] Backend validation errors:", errorData.errors);
-          // Handle validation errors from backend
-          const backendErrors = {};
-          Object.keys(errorData.errors).forEach((key) => {
-            backendErrors[key] = errorData.errors[key];
-          });
-          setErrors(backendErrors);
+        if (response.status === 400 || response.status === 422) {
+          console.log(
+            "[GAINER_PROFILE] Validation errors received:",
+            errorData.errors
+          );
+
+          // Map backend field errors to inline messages
+          if (errorData.errors) {
+            const backendErrors = {};
+            Object.keys(errorData.errors).forEach((key) => {
+              backendErrors[key] = errorData.errors[key];
+            });
+            setErrors(backendErrors);
+          }
 
           setToastMessage("Please fix the errors below and try again.");
           setToastType("error");
           setShowToast(true);
+        } else if (response.status === 401 || response.status === 403) {
+          console.log(
+            "[GAINER_PROFILE] Authentication/authorization error:",
+            response.status
+          );
+
+          // Attempt silent token refresh
+          try {
+            await refreshUserData();
+            console.log("[GAINER_PROFILE] Token refresh attempted");
+            setToastMessage("Authentication expired. Please try again.");
+            setToastType("error");
+            setShowToast(true);
+          } catch {
+            console.log(
+              "[GAINER_PROFILE] Token refresh failed, redirecting to sign-in"
+            );
+            setToastMessage("Authentication failed. Please sign in again.");
+            setToastType("error");
+            setShowToast(true);
+            // Redirect to sign-in after delay
+            setTimeout(() => {
+              navigate("/signin");
+            }, 2000);
+          }
         } else {
+          // Handle 5xx and other errors
+          console.error(
+            "[GAINER_PROFILE] Server error:",
+            response.status,
+            errorData.message
+          );
           throw new Error(
-            errorData.message || `Failed to create profile: ${response.status}`
+            errorData.message || `Server error: ${response.status}`
           );
         }
       }
     } catch (error) {
-      console.error("[GAINER] Error creating profile:", error);
-      console.error("[GAINER] Error stack:", error.stack);
-      console.error("[GAINER] Error name:", error.name);
-      console.error("[GAINER] Error message:", error.message);
+      console.error("[GAINER_PROFILE] Request failed:", {
+        name: error.name,
+        message: error.message,
+        isNetworkError:
+          error.name === "TypeError" && error.message.includes("fetch"),
+      });
 
-      if (error.message.includes("401")) {
-        console.log("[GAINER] Authentication error detected");
+      // Handle different error types
+      if (error.message.includes("401") || error.message.includes("403")) {
         setToastMessage("Authentication failed. Please sign in again.");
         setToastType("error");
         setShowToast(true);
+        setTimeout(() => {
+          navigate("/signin");
+        }, 2000);
       } else if (
         error.name === "TypeError" &&
         error.message.includes("fetch")
       ) {
-        console.log("[GAINER] Network error detected");
         setToastMessage(
           "Network error. Please check your connection and try again."
         );
         setToastType("error");
         setShowToast(true);
       } else {
-        console.log("[GAINER] Generic error, showing error message");
         setToastMessage(
           error.message || "Failed to create profile. Please try again."
         );
@@ -520,7 +679,9 @@ const GainerProfilePage = () => {
         setShowToast(true);
       }
     } finally {
-      console.log("[GAINER] Form submission completed, re-enabling button");
+      console.log(
+        "[GAINER_PROFILE] Form submission completed, re-enabling button"
+      );
       setIsSubmitting(false);
     }
   };
@@ -973,7 +1134,7 @@ const GainerProfilePage = () => {
           <button
             type="submit"
             onClick={handleSubmit}
-            disabled={isSubmitting || Object.keys(errors).length > 0}
+            disabled={isSubmitting || !isFormValid()}
             className="create-profile-button"
           >
             {isSubmitting ? "Creating Profile..." : "Create Profile"}
