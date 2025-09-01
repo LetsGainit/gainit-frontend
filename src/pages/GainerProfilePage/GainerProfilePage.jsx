@@ -30,7 +30,6 @@ const GainerProfilePage = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("info");
-  const [serverUserId, setServerUserId] = useState(null);
 
   // Education status options
   const educationOptions = [
@@ -149,11 +148,6 @@ const GainerProfilePage = () => {
     ],
   };
 
-  useEffect(() => {
-    // Get server user ID on mount
-    fetchServerUserId();
-  }, []);
-
   // Monitor form data changes and clear resolved errors
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
@@ -231,54 +225,6 @@ const GainerProfilePage = () => {
       }
     }
   }, [formData, errors]);
-
-  const fetchServerUserId = async () => {
-    try {
-      console.log("[GAINER] Fetching server user ID...");
-      const token = await getAccessToken();
-      console.log("[GAINER] Token acquired successfully");
-
-      const url = API_ENDPOINTS.USERS_ME();
-      console.log("[GAINER] Fetching from:", url);
-
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      console.log("[GAINER] Response status:", response.status);
-      console.log(
-        "[GAINER] Response headers:",
-        Object.fromEntries(response.headers.entries())
-      );
-
-      if (response.ok) {
-        const userData = await response.json();
-        console.log("[GAINER] User data received:", {
-          id: userData.id,
-          userId: userData.userId,
-        });
-        setServerUserId(userData.id || userData.userId);
-      } else {
-        const errorText = await response.text();
-        console.error(
-          "[GAINER] Failed to fetch user ID:",
-          response.status,
-          errorText
-        );
-        throw new Error(
-          `Failed to fetch user ID: ${response.status} ${errorText}`
-        );
-      }
-    } catch (error) {
-      console.error("[GAINER] Error fetching server user ID:", error);
-      setToastMessage(`Failed to load user information: ${error.message}`);
-      setToastType("error");
-      setShowToast(true);
-    }
-  };
 
   const isValidUrl = (string) => {
     try {
@@ -441,14 +387,6 @@ const GainerProfilePage = () => {
       return;
     }
 
-    if (!serverUserId) {
-      console.log("[GAINER_PROFILE] Server user ID not available");
-      setToastMessage("User information not loaded. Please try again.");
-      setToastType("error");
-      setShowToast(true);
-      return;
-    }
-
     // Prevent duplicate submissions
     if (isSubmitting) {
       console.log(
@@ -458,15 +396,39 @@ const GainerProfilePage = () => {
     }
 
     setIsSubmitting(true);
-    console.log(
-      "[GAINER_PROFILE] Starting profile submission for user:",
-      serverUserId
-    );
+    console.log("[GAINER_PROFILE] Starting profile submission process");
 
     try {
       // Retrieve JWT access token from Azure AD B2C auth layer
       const token = await getAccessToken();
       console.log("[GAINER_PROFILE] JWT token acquired successfully");
+
+      // Resolve server user ID via GET /api/users/me
+      console.log(
+        "[GAINER_PROFILE] Resolving server user ID via /api/users/me"
+      );
+      const meResponse = await fetch(API_ENDPOINTS.USERS_ME(), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!meResponse.ok) {
+        throw new Error(
+          `Failed to resolve user ID: ${meResponse.status} ${meResponse.statusText}`
+        );
+      }
+
+      const meData = await meResponse.json();
+      const userId = meData.userId;
+
+      // Validate userId is non-empty
+      if (!userId || typeof userId !== "string" || userId.trim() === "") {
+        throw new Error("Invalid user ID received from server");
+      }
+
+      console.log("[GAINER_PROFILE] Resolved server userId:", userId);
 
       // Construct payload according to specifications
       const payload = {
@@ -522,8 +484,8 @@ const GainerProfilePage = () => {
         gitHubUsername: payload.gitHubUsername,
       });
 
-      // Build request URL using existing endpoint configuration
-      const url = API_ENDPOINTS.GAINER_PROFILE(serverUserId);
+      // Build request URL using resolved userId
+      const url = API_ENDPOINTS.GAINER_PROFILE(userId);
       console.log("[GAINER_PROFILE] Submitting to:", url);
 
       const response = await fetch(url, {
