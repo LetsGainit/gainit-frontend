@@ -436,10 +436,6 @@ const GainerProfilePage = () => {
         fullName: formData.fullName.trim(),
         biography: formData.biography.trim(),
 
-        // Always included as empty strings
-        facebookPageURL: "",
-        gitHubUsername: "",
-
         // Common optional fields (omit if empty)
         ...(formData.linkedInURL.trim() && {
           linkedInURL: formData.linkedInURL.trim(),
@@ -480,8 +476,6 @@ const GainerProfilePage = () => {
         hasProgrammingLanguages: !!payload.programmingLanguages,
         hasTechnologies: !!payload.technologies,
         hasTools: !!payload.tools,
-        facebookPageURL: payload.facebookPageURL,
-        gitHubUsername: payload.gitHubUsername,
       });
 
       // Build request URL using resolved userId
