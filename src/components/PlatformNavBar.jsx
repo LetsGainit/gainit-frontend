@@ -189,6 +189,9 @@ function PlatformNavBar() {
           <Link to="/" className="nav-link">
             Home
           </Link>
+          <Link to="/work" className="nav-link">
+            Work Area
+          </Link>
           <Link to="/about" className="nav-link">
             About
           </Link>
@@ -290,6 +293,13 @@ function PlatformNavBar() {
               Home
             </Link>
             <Link
+              to="/work"
+              className="mobile-nav-link"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Work Area
+            </Link>
+            <Link
               to="/about"
               className="mobile-nav-link"
               onClick={() => setIsMenuOpen(false)}
@@ -320,6 +330,26 @@ function PlatformNavBar() {
             {isAuthenticated && !isChooseRoleRoute && (
               <>
                 <div className="mobile-divider"></div>
+                <div className="mobile-user-info">
+                  <div className="mobile-user-details">
+                    <CircleUserRound size={20} />
+                    <div className="mobile-user-text">
+                      <span className="mobile-user-name">{getDisplayName()}</span>
+                      <span className="mobile-user-role">
+                        {getDisplayNameForRole(userInfo?.role)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  className="mobile-nav-link"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    handleUserClick();
+                  }}
+                >
+                  View Profile
+                </button>
                 <button
                   className="mobile-nav-link logout-mobile"
                   onClick={() => {

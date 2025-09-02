@@ -1,0 +1,27 @@
+.work-area-layout {
+  display: flex;
+  min-height: calc(100vh - 64px); /* Account for footer height */
+  background-color: #ffffff;
+}
+
+.work-area-main {
+  flex: 1;
+  margin-left: 250px; /* Account for sidebar width */
+  padding: 0;
+  overflow-x: hidden;
+  min-height: calc(100vh - 64px); /* Ensure content area takes full height minus footer */
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .work-area-layout {
+    flex-direction: column;
+    min-height: calc(100vh - 64px);
+  }
+
+  .work-area-main {
+    margin-left: 0;
+    margin-top: 0;
+    min-height: calc(100vh - 64px);
+  }
+}

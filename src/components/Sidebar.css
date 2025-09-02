@@ -1,0 +1,131 @@
+.sidebar {
+  width: 250px;
+  background-color: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  height: calc(100vh - 64px); /* Account for footer height */
+  position: fixed;
+  left: 0;
+  top: 80px; /* Account for navbar height */
+  z-index: 100;
+  overflow-y: auto;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-nav {
+  padding: 1rem 0;
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  margin: 0;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  color: #4b5563;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  margin: 0.25rem 0.5rem;
+  width: calc(100% - 1rem);
+}
+
+.nav-link:hover {
+  background-color: #f9fafb;
+  color: #6366f1;
+}
+
+.nav-link.active {
+  background-color: #f3f0ff;
+  color: #490476;
+  font-weight: 500;
+}
+
+.nav-link.active .nav-icon {
+  color: #490476;
+}
+
+.nav-icon {
+  color: #6b7280;
+  transition: color 0.2s ease;
+}
+
+.nav-label {
+  flex: 1;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    padding-top: 0;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .sidebar-nav {
+    padding: 0.5rem 0;
+  }
+
+  .nav-list {
+    display: flex;
+    overflow-x: auto;
+    padding: 0 1rem;
+    gap: 0.5rem;
+  }
+
+  .nav-item {
+    flex-shrink: 0;
+  }
+
+  .nav-link {
+    padding: 0.5rem 1rem;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+
+  .nav-link:hover {
+    border-left-color: transparent;
+    border-bottom-color: #e5e7eb;
+  }
+
+  .nav-link.active {
+    border-left-color: transparent;
+    border-bottom-color: #6366f1;
+  }
+
+  .nav-label {
+    display: none;
+  }
+
+  .nav-icon {
+    margin: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .nav-link {
+    padding: 0.5rem 0.75rem;
+  }
+}

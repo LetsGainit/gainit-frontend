@@ -1,0 +1,109 @@
+.work-area-page {
+  min-height: 100vh;
+  background-color: #ffffff;
+  padding: 2rem 1rem;
+}
+
+/* Welcome Header */
+.work-area-header {
+  max-width: 1200px;
+  margin: 0 auto 2rem auto;
+  padding: 0 1rem;
+}
+
+.welcome-title {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+  text-align: left;
+}
+
+.welcome-subtitle {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: #6366f1;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Actions Bar Placeholder */
+.actions-bar-placeholder {
+  max-width: 1200px;
+  margin: 0 auto 2rem auto;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border: 2px dashed #d1d5db;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.actions-bar-placeholder::before {
+  content: "Actions/Filters Bar Placeholder";
+}
+
+/* Main Grid Placeholder */
+.main-grid-placeholder {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border: 2px dashed #d1d5db;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-grid-placeholder::before {
+  content: "Main Grid Container Placeholder (Active/Upcoming/Recent cards)";
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .work-area-page {
+    padding: 1rem 0.5rem;
+  }
+
+  .work-area-header {
+    padding: 0 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .welcome-title {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+
+  .welcome-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .actions-bar-placeholder,
+  .main-grid-placeholder {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    padding: 1rem 0.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .welcome-title {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .actions-bar-placeholder,
+  .main-grid-placeholder {
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
+    padding: 0.75rem 0.25rem;
+  }
+}

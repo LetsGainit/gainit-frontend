@@ -1,0 +1,189 @@
+.my-projects-page {
+  padding: 2rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+/* Page Header */
+.my-projects-header {
+  margin-bottom: 2rem;
+  text-align: left !important;
+  display: block;
+  width: 100%;
+}
+
+.page-title {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 400;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+  text-align: left;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.page-subtitle {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: #6b7280;
+  margin: 0;
+  font-weight: 400;
+  text-align: left !important;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  display: block;
+  width: 100%;
+}
+
+/* Tabs Container */
+.tabs-container {
+  margin-bottom: 2rem;
+}
+
+.tabs-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Tab Button */
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 9999px;
+  background-color: #f3f4f6;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  outline: none;
+}
+
+.tab-button:hover {
+  color: #490476;
+  background-color: #f9fafb;
+}
+
+.tab-button:focus {
+  outline: 2px solid #490476;
+  outline-offset: 2px;
+}
+
+.tab-button.active {
+  background-color: #490476;
+  color: #ffffff;
+}
+
+.tab-button.active:hover {
+  background-color: #490476;
+  color: #ffffff;
+}
+
+.tab-icon {
+  flex-shrink: 0;
+}
+
+.tab-label {
+  white-space: nowrap;
+}
+
+/* Content Region */
+.content-region {
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.content-placeholder {
+  text-align: center;
+  padding: 2rem;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border: 2px dashed #d1d5db;
+  max-width: 500px;
+  width: 100%;
+}
+
+.placeholder-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.5rem 0;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.placeholder-description {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .my-projects-page {
+    padding: 1rem 0.5rem;
+  }
+
+  .my-projects-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .page-title {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .tabs-container {
+    margin-bottom: 1.5rem;
+  }
+
+  .tabs-row {
+    gap: 0.375rem;
+  }
+
+  .tab-button {
+    padding: 0.625rem 1rem;
+    font-size: 0.8125rem;
+  }
+
+  .content-placeholder {
+    padding: 1.5rem 1rem;
+  }
+
+  .placeholder-title {
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .my-projects-page {
+    padding: 0.75rem 0.25rem;
+  }
+
+  .tabs-row {
+    gap: 0.25rem;
+  }
+
+  .tab-button {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.75rem;
+  }
+
+  .tab-icon {
+    width: 14px;
+    height: 14px;
+  }
+}

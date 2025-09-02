@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import AuthCallback from "./auth/AuthCallback";
 import ScrollToTop from "./components/ScrollToTop";
 import RoleCheck from "./components/RoleCheck";
+import WorkArea from "./pages/WorkArea/WorkArea";
 
 import GainerProfilePage from "./pages/GainerProfilePage/GainerProfilePage";
 
@@ -23,6 +24,21 @@ function App() {
       <main className="main-content">
         <Routes>
           {/* Public routes - no authentication required */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/search-projects" element={<SearchProjects />} />
+          <Route path="/home-page" element={<HomePage />} />
+          <Route path="/work" element={<WorkArea />} />
+          <Route path="/project/:id" element={<ProjectPage />} />
+          <Route path="/profile/:id" element={<ProfilePage />} />
+          <Route path="/profile/gainer/:id" element={<ProfilePage />} />
+          <Route path="/profile/mentor/:id" element={<ProfilePage />} />
+          <Route path="/profile/nonprofit/:id" element={<ProfilePage />} />
+          <Route path="/choose-role" element={<ChooseRole />} />
+          <Route
+            path="/onboarding/gainer-profile"
+            element={<GainerProfilePage />}
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/auth-callback" element={<AuthCallback />} />
           <Route path="/choose-role" element={<ChooseRole />} />
