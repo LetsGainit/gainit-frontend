@@ -40,16 +40,33 @@ function attachEventCallbacks(instance: PublicClientApplication) {
                 sessionStorage.setItem(`userInfo:${accountId}`, JSON.stringify(userInfo));
                 sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
                 sessionStorage.setItem(`routingDecision:${accountId}`, "home");
+                
+                // Trigger navigation to home immediately
+                setTimeout(() => {
+                  const start = sessionStorage.getItem("msal.redirectStartPage") || "/";
+                  sessionStorage.removeItem("msal.redirectStartPage");
+                  window.location.href = start;
+                }, 100);
               } catch (profileError) {
                 console.warn("[ENSURE] Failed to fetch profile, treating as new user:", profileError);
                 sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
                 sessionStorage.setItem(`routingDecision:${accountId}`, "choose-role");
+                
+                // Trigger navigation to choose-role immediately
+                setTimeout(() => {
+                  window.location.href = "/choose-role";
+                }, 100);
               }
             } else {
-              // User is new (or isNewUser is true/undefined) - navigate to choose-role
-              console.info("[ENSURE] User is new, routing to choose-role");
+              // User is new (or isNewUser is true/undefined) - navigate to choose-role immediately
+              console.info("[ENSURE] User is new, navigating to choose-role immediately");
               sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
               sessionStorage.setItem(`routingDecision:${accountId}`, "choose-role");
+              
+              // Trigger navigation to choose-role immediately
+              setTimeout(() => {
+                window.location.href = "/choose-role";
+              }, 100);
             }
             return user;
           })
@@ -58,6 +75,11 @@ function attachEventCallbacks(instance: PublicClientApplication) {
             // On ensure failure, treat as new user
             sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
             sessionStorage.setItem(`routingDecision:${accountId}`, "choose-role");
+            
+            // Trigger navigation to choose-role immediately on failure
+            setTimeout(() => {
+              window.location.href = "/choose-role";
+            }, 100);
             throw e;
           })
           .finally(() => {

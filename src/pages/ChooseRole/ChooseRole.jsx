@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
-import { updateUserRole } from "../../services/usersService";
 import Toast from "../../components/Toast";
 import "./ChooseRole.css";
 
@@ -10,10 +8,8 @@ const ChooseRole = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("info");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
-  const { userInfo, refreshUserData } = useAuth();
 
   const roleOptions = [
     {
@@ -44,7 +40,7 @@ const ChooseRole = () => {
     setSelectedRole(roleId);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!selectedRole) {
       setToastMessage("Please select a role to continue.");
       setToastType("error");
@@ -52,35 +48,11 @@ const ChooseRole = () => {
       return;
     }
 
-    if (!userInfo?.userId) {
-      setToastMessage("User information not available. Please try again.");
-      setToastType("error");
-      setShowToast(true);
-      return;
+    // Navigate directly to onboarding based on selected role
+    if (selectedRole === "gainer") {
+      navigate("/onboarding/gainer-profile");
     }
-
-    setIsSubmitting(true);
-
-    try {
-      // Update user role via API
-      await updateUserRole(userInfo.userId, selectedRole);
-      
-      // Refetch user data to get updated isNewUser status
-      await refreshUserData();
-      
-      // Navigate to onboarding based on selected role
-      if (selectedRole === "gainer") {
-        navigate("/onboarding/gainer-profile");
-      }
-      // Future roles will be added here
-    } catch (error) {
-      console.error("Failed to update user role:", error);
-      setToastMessage("Failed to save your role selection. Please try again.");
-      setToastType("error");
-      setShowToast(true);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Future roles will be added here
   };
 
   const handleCloseToast = () => {
@@ -131,11 +103,11 @@ const ChooseRole = () => {
             Select your role to continue and complete your profile setup.
           </p>
           <button
-            className={`submit-button ${!selectedRole || isSubmitting ? "disabled" : ""}`}
+            className={`submit-button ${!selectedRole ? "disabled" : ""}`}
             onClick={handleSubmit}
-            disabled={!selectedRole || isSubmitting}
+            disabled={!selectedRole}
           >
-            {isSubmitting ? "Saving..." : "Continue to Profile Setup"}
+            Continue to Profile Setup
           </button>
         </div>
       </div>
