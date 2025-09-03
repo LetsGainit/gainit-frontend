@@ -34,7 +34,7 @@ function attachEventCallbacks(instance: PublicClientApplication) {
             
             // Routing centralized in RoleCheck; avoid early redirects here
             // Just ensure user exists in backend, let RoleCheck handle navigation decisions
-            console.info("[ENSURE] User ensured in backend, role-based routing handled by RoleCheck");
+            console.info("[ENSURE] User ensured in backend, onboarding-based routing handled by RoleCheck");
             sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
             return user;
           })
@@ -164,6 +164,7 @@ export async function getUserInfo() {
         email: userInfo.emailAddress || account.username,
         name: userInfo.fullName || account.name,
         externalId: userInfo.externalId || account.localAccountId,
+        isNewUser: userInfo.isNewUser, // Include isNewUser field from API response
       };
     } else if (res.status === 401 || res.status === 403) {
       // Token expired or insufficient permissions, try to refresh
@@ -177,6 +178,7 @@ export async function getUserInfo() {
         email: account.username,
         name: account.name,
         externalId: account.localAccountId,
+        isNewUser: true, // Default to new user if API fails
       };
     }
   } catch (e) {
@@ -191,6 +193,7 @@ export async function getUserInfo() {
       email: account.username,
       name: account.name,
       externalId: account.localAccountId,
+      isNewUser: true, // Default to new user if API fails
     };
   }
 }

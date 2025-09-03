@@ -9,6 +9,7 @@ interface UserInfo {
   email: string;
   name: string;
   externalId: string;
+  isNewUser: boolean;
 }
 
 interface ProfileData {

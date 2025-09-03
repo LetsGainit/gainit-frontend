@@ -20,25 +20,25 @@ const RoleCheck = ({ children }) => {
     return children;
   }
 
-  // User is authenticated - apply role-based routing logic
+  // User is authenticated - apply onboarding-based routing logic
   if (location.pathname === "/choose-role") {
-    if (userInfo?.role) {
-      // User has role but is on choose-role page → redirect to home
-      console.log("[RoleCheck] User has role, redirecting to home from /choose-role");
+    if (userInfo?.isNewUser === false) {
+      // User has completed onboarding but is on choose-role page → redirect to home
+      console.log("[RoleCheck] User completed onboarding, redirecting to home from /choose-role");
       return <Navigate to="/" replace />;
     } else {
-      // User has no role and is on choose-role page → stay here
+      // User is new (or isNewUser is true/missing) and is on choose-role page → stay here
       return children;
     }
   }
 
-  // For any protected route: if user has no role, redirect to choose-role
-  if (!userInfo?.role) {
-    console.log("[RoleCheck] User has no role, redirecting to /choose-role");
+  // For any protected route: if user is new (hasn't completed onboarding), redirect to choose-role
+  if (userInfo?.isNewUser === true || userInfo?.isNewUser === undefined) {
+    console.log("[RoleCheck] User hasn't completed onboarding, redirecting to /choose-role");
     return <Navigate to="/choose-role" replace />;
   }
 
-  // User is authenticated and has role → allow access to protected routes
+  // User is authenticated and has completed onboarding → allow access to protected routes
   return children;
 };
 

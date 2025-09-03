@@ -18,10 +18,10 @@ export default function AuthCallback() {
       try {
         if (accounts.length > 0) {
           // Routing centralized in RoleCheck; avoid early redirects here
-          // Just redirect to home and let RoleCheck handle role-based routing
+          // Just redirect to home and let RoleCheck handle onboarding-based routing
           const start = sessionStorage.getItem("msal.redirectStartPage") || "/";
           sessionStorage.removeItem("msal.redirectStartPage");
-          console.info("[AUTH] AuthCallback: redirecting to start page, RoleCheck will handle role-based routing");
+          console.info("[AUTH] AuthCallback: redirecting to start page, RoleCheck will handle onboarding-based routing");
           navigate(start, { replace: true });
         } else {
           setError("No account found after login redirect.");
