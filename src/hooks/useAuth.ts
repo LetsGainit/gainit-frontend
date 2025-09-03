@@ -36,7 +36,20 @@ export function useAuth() {
     setError(null);
 
     try {
-      const info = await getUserInfo();
+      // Check if userInfo was stored during ensure flow
+      const accountId = accounts[0]?.homeAccountId ?? "unknown";
+      const storedUserInfo = sessionStorage.getItem(`userInfo:${accountId}`);
+      
+      let info;
+      if (storedUserInfo) {
+        // Use stored userInfo from ensure flow
+        info = JSON.parse(storedUserInfo);
+        sessionStorage.removeItem(`userInfo:${accountId}`); // Clean up
+      } else {
+        // Fetch userInfo normally
+        info = await getUserInfo();
+      }
+      
       setUserInfo(info);
       
       // Only fetch profile data if user has a role

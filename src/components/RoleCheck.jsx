@@ -4,12 +4,17 @@ import { useAuth } from "../hooks/useAuth";
 import LoadingIllustration from "./LoadingIllustration";
 
 const RoleCheck = ({ children }) => {
-  const { userInfo, loading, isAuthenticated } = useAuth();
+  const { userInfo, loading, isAuthenticated, accounts } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Show loading state while checking auth or user info
-  if (loading || (isAuthenticated && !userInfo)) {
+  // Check if ensure is still in progress
+  const accountId = accounts[0]?.homeAccountId ?? "unknown";
+  const ensureCompletedKey = `ensureCompleted:${accountId}`;
+  const isEnsureInProgress = isAuthenticated && !sessionStorage.getItem(ensureCompletedKey);
+
+  // Show loading state while checking auth, user info, or ensure is in progress
+  if (loading || (isAuthenticated && !userInfo) || isEnsureInProgress) {
     return <LoadingIllustration type="initial" />;
   }
 
@@ -20,7 +25,7 @@ const RoleCheck = ({ children }) => {
     return children;
   }
 
-  // User is authenticated - apply onboarding-based routing logic
+  // User is authenticated - apply ensure-first routing logic
   if (location.pathname === "/choose-role") {
     if (userInfo?.isNewUser === false) {
       // User has completed onboarding but is on choose-role page → redirect to home

@@ -27,21 +27,37 @@ function attachEventCallbacks(instance: PublicClientApplication) {
         console.info("[ENSURE] triggered on LOGIN_SUCCESS");
         console.debug("[AUTH] Ensuring user in backend…");
         
-        // Execute ensure and handle navigation directly
+        // Execute ensure-first flow: always call ensure, then use isNewUser for routing
         ensureCurrentUser()
           .then(async (user) => {
             console.info("[ENSURE] response", { isNewUser: user.isNewUser });
             
-            // Routing centralized in RoleCheck; avoid early redirects here
-            // Just ensure user exists in backend, let RoleCheck handle navigation decisions
-            console.info("[ENSURE] User ensured in backend, onboarding-based routing handled by RoleCheck");
-            sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
+            if (user.isNewUser === false) {
+              // User completed onboarding - fetch full profile and navigate to home
+              console.info("[ENSURE] User completed onboarding, fetching full profile");
+              try {
+                const userInfo = await getUserInfo();
+                sessionStorage.setItem(`userInfo:${accountId}`, JSON.stringify(userInfo));
+                sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
+                sessionStorage.setItem(`routingDecision:${accountId}`, "home");
+              } catch (profileError) {
+                console.warn("[ENSURE] Failed to fetch profile, treating as new user:", profileError);
+                sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
+                sessionStorage.setItem(`routingDecision:${accountId}`, "choose-role");
+              }
+            } else {
+              // User is new (or isNewUser is true/undefined) - navigate to choose-role
+              console.info("[ENSURE] User is new, routing to choose-role");
+              sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
+              sessionStorage.setItem(`routingDecision:${accountId}`, "choose-role");
+            }
             return user;
           })
           .catch((e) => {
             console.warn("[ENSURE] failed:", e.message);
-            // Routing centralized in RoleCheck; avoid early redirects here
+            // On ensure failure, treat as new user
             sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
+            sessionStorage.setItem(`routingDecision:${accountId}`, "choose-role");
             throw e;
           })
           .finally(() => {
@@ -167,50 +183,17 @@ export async function getUserInfo() {
         isNewUser: userInfo.isNewUser, // Include isNewUser field from API response
       };
     } else if (res.status === 404) {
-      // User doesn't exist in backend yet - call ensure to create them
-      console.info("[AUTH] User not found (404), calling ensure endpoint");
-      try {
-        await ensureCurrentUser();
-        console.info("[AUTH] User ensured, refetching /me endpoint");
-        
-        // Refetch /me after ensure
-        const refetchRes = await fetch(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        
-        if (refetchRes.ok) {
-          const userInfo = await refetchRes.json();
-          return {
-            userId: userInfo.userId || account.localAccountId,
-            role: userInfo.role || userInfo.userType,
-            email: userInfo.emailAddress || account.username,
-            name: userInfo.fullName || account.name,
-            externalId: userInfo.externalId || account.localAccountId,
-            isNewUser: userInfo.isNewUser,
-          };
-        } else {
-          // Refetch still failed, treat as new user
-          console.warn("[AUTH] Refetch after ensure failed:", refetchRes.status);
-          return {
-            userId: account.localAccountId,
-            role: undefined,
-            email: account.username,
-            name: account.name,
-            externalId: account.localAccountId,
-            isNewUser: true,
-          };
-        }
-      } catch (ensureError) {
-        console.warn("[AUTH] Ensure failed:", ensureError);
-        return {
-          userId: account.localAccountId,
-          role: undefined,
-          email: account.username,
-          name: account.name,
-          externalId: account.localAccountId,
-          isNewUser: true,
-        };
-      }
+      // User doesn't exist in backend - this shouldn't happen with ensure-first flow
+      // but if it does, treat as new user
+      console.warn("[AUTH] User not found (404) - this shouldn't happen with ensure-first flow");
+      return {
+        userId: account.localAccountId,
+        role: undefined,
+        email: account.username,
+        name: account.name,
+        externalId: account.localAccountId,
+        isNewUser: true,
+      };
     } else if (res.status === 401 || res.status === 403) {
       // Token expired or insufficient permissions, try to refresh
       throw new InteractionRequiredAuthError();
