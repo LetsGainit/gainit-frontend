@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import LoadingIllustration from "./LoadingIllustration";
 
@@ -8,37 +8,37 @@ const RoleCheck = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    // Skip role check if not authenticated or still loading
-    if (!isAuthenticated || loading) return;
-
-    // Skip role check if already on role selection page or auth callback
-    if (
-      location.pathname === "/choose-role" ||
-      location.pathname === "/auth-callback"
-    )
-      return;
-
-    // If user is authenticated but has no role, redirect to role selection
-    if (userInfo && !userInfo.role) {
-      console.log("[RoleCheck] User has no role, redirecting to /choose-role");
-      navigate("/choose-role", { replace: true });
-      return;
-    }
-
-    // If user has a role but is on role selection page, redirect to their profile
-    if (userInfo && userInfo.role && location.pathname === "/choose-role") {
-      console.log("[RoleCheck] User has role, redirecting to profile");
-      navigate(`/profile/${userInfo.userId}`, { replace: true });
-      return;
-    }
-  }, [userInfo, loading, isAuthenticated, navigate, location.pathname]);
-
-  // Show loading state while checking role or if user info is not yet loaded
+  // Show loading state while checking auth or user info
   if (loading || (isAuthenticated && !userInfo)) {
     return <LoadingIllustration type="initial" />;
   }
 
+  // User not authenticated - allow public pages, block protected ones
+  if (!isAuthenticated) {
+    // Allow access to public routes like "/" and "/login"
+    // Block access to protected routes (this will be handled by the route structure)
+    return children;
+  }
+
+  // User is authenticated - apply role-based routing logic
+  if (location.pathname === "/choose-role") {
+    if (userInfo?.role) {
+      // User has role but is on choose-role page → redirect to home
+      console.log("[RoleCheck] User has role, redirecting to home from /choose-role");
+      return <Navigate to="/" replace />;
+    } else {
+      // User has no role and is on choose-role page → stay here
+      return children;
+    }
+  }
+
+  // For any protected route: if user has no role, redirect to choose-role
+  if (!userInfo?.role) {
+    console.log("[RoleCheck] User has no role, redirecting to /choose-role");
+    return <Navigate to="/choose-role" replace />;
+  }
+
+  // User is authenticated and has role → allow access to protected routes
   return children;
 };
 

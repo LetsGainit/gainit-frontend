@@ -73,9 +73,9 @@ export function useAuth() {
 
   const refreshUserData = useCallback(() => {
     // Skip refresh on sensitive routes
+    // Note: Removed /choose-role to allow profile fetch and learn user's role
     const SKIP_FETCH = new Set([
       "/auth-callback",
-      "/choose-role",
       "/onboarding/gainer-profile",
       "/onboarding/mentor-profile",
       "/onboarding/nonprofit-profile",
@@ -91,9 +91,9 @@ export function useAuth() {
 
   useEffect(() => {
     // Skip auto-fetch on sensitive routes to avoid concurrent /me/redirect churn
+    // Note: Removed /choose-role to allow profile fetch and learn user's role
     const SKIP_FETCH = new Set([
       "/auth-callback",
-      "/choose-role",
       "/onboarding/gainer-profile",
       "/onboarding/mentor-profile",
       "/onboarding/nonprofit-profile",
@@ -109,7 +109,15 @@ export function useAuth() {
 
   const signOut = useCallback(async () => {
     try {
-      await instance.logoutRedirect();
+      // Clear local auth state first
+      setUserInfo(null);
+      setProfileData(null);
+      setError(null);
+      
+      // Perform MSAL logout with redirect to home
+      await instance.logoutRedirect({
+        postLogoutRedirectUri: window.location.origin + "/"
+      });
     } catch (err) {
       console.error("Sign out failed:", err);
     }

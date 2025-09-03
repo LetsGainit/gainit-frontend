@@ -32,87 +32,16 @@ function attachEventCallbacks(instance: PublicClientApplication) {
           .then(async (user) => {
             console.info("[ENSURE] response", { isNewUser: user.isNewUser });
             
-            // For new users, redirect immediately to role selection
-            if (user.isNewUser) {
-              console.info("[NAV] redirecting to /choose-role (new user)");
-              sessionStorage.setItem(`redirectDecision:${accountId}`, "/choose-role");
-              sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
-              
-              // Small delay to ensure MSAL state is settled, then direct navigation
-              setTimeout(() => {
-                console.info("[NAV] executing redirect to /choose-role");
-                // Only redirect if we're not already on the target route
-                if (window.location.pathname !== "/choose-role") {
-                  window.location.href = "/choose-role";
-                } else {
-                  console.info("[NAV] already on /choose-role, no redirect needed");
-                }
-              }, 100);
-              return user;
-            }
-            
-            // For existing users, check if they have a role
-            try {
-              const userInfo = await getUserInfo();
-              if (!userInfo.role) {
-                console.info("[NAV] redirecting to /choose-role (no role)");
-                sessionStorage.setItem(`redirectDecision:${accountId}`, "/choose-role");
-                sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
-                
-                // Small delay to ensure MSAL state is settled, then direct navigation
-                setTimeout(() => {
-                  console.info("[NAV] executing redirect to /choose-role (no role)");
-                  // Only redirect if we're not already on the target route
-                  if (window.location.pathname !== "/choose-role") {
-                    window.location.href = "/choose-role";
-                  } else {
-                    console.info("[NAV] already on /choose-role, no redirect needed");
-                  }
-                }, 100);
-                return user;
-              } else {
-                console.info("[NAV] redirecting to start page/home (has role)");
-                sessionStorage.setItem(`redirectDecision:${accountId}`, "start-page");
-                sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
-                
-                // For users with roles, let AuthCallback handle the navigation
-                // This allows proper handling of redirectStartPage
-                return user;
-              }
-            } catch (roleCheckError) {
-              console.warn("[ENSURE] role check failed, treating as no role:", roleCheckError.message);
-              sessionStorage.setItem(`redirectDecision:${accountId}`, "/choose-role");
-              sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
-              
-              // Small delay to ensure MSAL state is settled, then direct navigation
-              setTimeout(() => {
-                console.info("[NAV] executing redirect to /choose-role (role check failed)");
-                // Only redirect if we're not already on the target route
-                if (window.location.pathname !== "/choose-role") {
-                  window.location.href = "/choose-role";
-                } else {
-                  console.info("[NAV] already on /choose-role, no redirect needed");
-                }
-              }, 100);
-              return user;
-            }
+            // Routing centralized in RoleCheck; avoid early redirects here
+            // Just ensure user exists in backend, let RoleCheck handle navigation decisions
+            console.info("[ENSURE] User ensured in backend, role-based routing handled by RoleCheck");
+            sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
+            return user;
           })
           .catch((e) => {
-            console.warn("[ENSURE] failed, treating as not onboarded:", e.message);
-            // On ensure failure, treat as new user
-            sessionStorage.setItem(`redirectDecision:${accountId}`, "/choose-role");
+            console.warn("[ENSURE] failed:", e.message);
+            // Routing centralized in RoleCheck; avoid early redirects here
             sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
-            
-            // Small delay to ensure MSAL state is settled, then direct navigation
-            setTimeout(() => {
-              console.info("[NAV] executing redirect to /choose-role (ensure failed)");
-              // Only redirect if we're not already on the target route
-              if (window.location.pathname !== "/choose-role") {
-                window.location.href = "/choose-role";
-              } else {
-                console.info("[NAV] already on /choose-role, no redirect needed");
-              }
-            }, 100);
             throw e;
           })
           .finally(() => {
