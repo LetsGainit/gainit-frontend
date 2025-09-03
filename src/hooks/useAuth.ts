@@ -49,7 +49,7 @@ export function useAuth() {
           // Don't fail completely if profile fetch fails
         }
       } else {
-        console.log("User has no role assigned, profile data not fetched");
+        console.log("User hasn't completed onboarding, profile data not fetched");
         setProfileData(null);
       }
     } catch (err) {

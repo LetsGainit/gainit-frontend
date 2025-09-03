@@ -166,6 +166,51 @@ export async function getUserInfo() {
         externalId: userInfo.externalId || account.localAccountId,
         isNewUser: userInfo.isNewUser, // Include isNewUser field from API response
       };
+    } else if (res.status === 404) {
+      // User doesn't exist in backend yet - call ensure to create them
+      console.info("[AUTH] User not found (404), calling ensure endpoint");
+      try {
+        await ensureCurrentUser();
+        console.info("[AUTH] User ensured, refetching /me endpoint");
+        
+        // Refetch /me after ensure
+        const refetchRes = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        if (refetchRes.ok) {
+          const userInfo = await refetchRes.json();
+          return {
+            userId: userInfo.userId || account.localAccountId,
+            role: userInfo.role || userInfo.userType,
+            email: userInfo.emailAddress || account.username,
+            name: userInfo.fullName || account.name,
+            externalId: userInfo.externalId || account.localAccountId,
+            isNewUser: userInfo.isNewUser,
+          };
+        } else {
+          // Refetch still failed, treat as new user
+          console.warn("[AUTH] Refetch after ensure failed:", refetchRes.status);
+          return {
+            userId: account.localAccountId,
+            role: undefined,
+            email: account.username,
+            name: account.name,
+            externalId: account.localAccountId,
+            isNewUser: true,
+          };
+        }
+      } catch (ensureError) {
+        console.warn("[AUTH] Ensure failed:", ensureError);
+        return {
+          userId: account.localAccountId,
+          role: undefined,
+          email: account.username,
+          name: account.name,
+          externalId: account.localAccountId,
+          isNewUser: true,
+        };
+      }
     } else if (res.status === 401 || res.status === 403) {
       // Token expired or insufficient permissions, try to refresh
       throw new InteractionRequiredAuthError();
