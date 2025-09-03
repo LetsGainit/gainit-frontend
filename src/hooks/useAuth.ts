@@ -74,12 +74,9 @@ export function useAuth() {
 
   const refreshUserData = useCallback(() => {
     // Skip refresh on sensitive routes
-    // Note: Removed /choose-role to allow profile fetch and learn user's role
+    // Note: Removed /choose-role and /onboarding/* to allow profile fetch and learn user's onboarding status
     const SKIP_FETCH = new Set([
       "/auth-callback",
-      "/onboarding/gainer-profile",
-      "/onboarding/mentor-profile",
-      "/onboarding/nonprofit-profile",
     ]);
     
     if (SKIP_FETCH.has(window.location.pathname)) {
@@ -92,12 +89,9 @@ export function useAuth() {
 
   useEffect(() => {
     // Skip auto-fetch on sensitive routes to avoid concurrent /me/redirect churn
-    // Note: Removed /choose-role to allow profile fetch and learn user's role
+    // Note: Removed /choose-role and /onboarding/* to allow profile fetch and learn user's onboarding status
     const SKIP_FETCH = new Set([
       "/auth-callback",
-      "/onboarding/gainer-profile",
-      "/onboarding/mentor-profile",
-      "/onboarding/nonprofit-profile",
     ]);
     
     if (SKIP_FETCH.has(window.location.pathname)) {

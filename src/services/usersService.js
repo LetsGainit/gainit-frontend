@@ -9,3 +9,13 @@ export const getUserById = async (userId) => {
     throw error;
   }
 };
+
+export const updateUserRole = async (userId, role) => {
+  try {
+    const response = await api.patch(`/users/${userId}/role`, { role });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to update user role:', error);
+    throw error;
+  }
+};

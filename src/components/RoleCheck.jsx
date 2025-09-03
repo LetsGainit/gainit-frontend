@@ -32,7 +32,12 @@ const RoleCheck = ({ children }) => {
     }
   }
 
-  // For any protected route: if user is new (hasn't completed onboarding), redirect to choose-role
+  // Allow access to onboarding routes - never block the onboarding form itself
+  if (location.pathname.startsWith("/onboarding/")) {
+    return children;
+  }
+
+  // For any other protected route: if user is new (hasn't completed onboarding), redirect to choose-role
   if (userInfo?.isNewUser === true || userInfo?.isNewUser === undefined) {
     console.log("[RoleCheck] User hasn't completed onboarding, redirecting to /choose-role");
     return <Navigate to="/choose-role" replace />;
