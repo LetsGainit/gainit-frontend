@@ -94,10 +94,10 @@ export function useAuth() {
     
     if (SKIP_FETCH.has(window.location.pathname)) {
       console.info("[AUTH] useAuth: skipping refresh on", window.location.pathname);
-      return;
+      return Promise.resolve();
     }
     
-    loadUserInfo();
+    return loadUserInfo();
   }, [loadUserInfo]);
 
   useEffect(() => {

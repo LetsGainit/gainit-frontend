@@ -532,11 +532,9 @@ const GainerProfilePage = () => {
         setToastType("success");
         setShowToast(true);
 
-        // Navigate to home after a short delay
-        setTimeout(() => {
-          console.log("[GAINER_PROFILE] Navigating to home...");
-          navigate("/");
-        }, 1500);
+        // Navigate to home immediately after user data is refreshed
+        console.log("[GAINER_PROFILE] Navigating to home...");
+        navigate("/", { replace: true });
       } else {
         // Handle different error status codes
         let errorData;
