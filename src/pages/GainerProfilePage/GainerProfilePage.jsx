@@ -8,7 +8,7 @@ import "./GainerProfilePage.css";
 
 const GainerProfilePage = () => {
   const navigate = useNavigate();
-  const { refreshUserData } = useAuth();
+  const { refreshUserData, markOnboardingComplete } = useAuth();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -516,25 +516,23 @@ const GainerProfilePage = () => {
           profileData = payload;
         }
 
-        // Update user context and mark user as Gainer
-        try {
-          await refreshUserData();
-          console.log("[GAINER_PROFILE] User data refreshed successfully");
-        } catch (refreshError) {
-          console.warn(
-            "[GAINER_PROFILE] Failed to refresh user data:",
-            refreshError
-          );
-        }
+        // Optimistically update user state to mark onboarding complete
+        markOnboardingComplete();
+        console.log("[GAINER_PROFILE] User state optimistically updated");
 
-        // Show success feedback and navigate
+        // Show success feedback and navigate immediately
         setToastMessage("Profile created successfully! Redirecting to home...");
         setToastType("success");
         setShowToast(true);
 
-        // Navigate to home immediately after user data is refreshed
+        // Navigate to home immediately with optimistic state
         console.log("[GAINER_PROFILE] Navigating to home...");
         navigate("/", { replace: true });
+
+        // Trigger background refresh to reconcile with server
+        refreshUserData().catch(refreshError => {
+          console.warn("[GAINER_PROFILE] Background refresh failed:", refreshError);
+        });
       } else {
         // Handle different error status codes
         let errorData;

@@ -85,6 +85,15 @@ export function useAuth() {
     }
   }, [isAuthenticated, instance]);
 
+  const markOnboardingComplete = useCallback(() => {
+    setUserInfo(prev => {
+      if (prev) {
+        return { ...prev, isNewUser: false };
+      }
+      return prev;
+    });
+  }, []);
+
   const refreshUserData = useCallback(() => {
     // Skip refresh on sensitive routes
     // Note: Removed /choose-role and /onboarding/* to allow profile fetch and learn user's onboarding status
@@ -138,6 +147,7 @@ export function useAuth() {
     loading,
     error,
     refreshUserData,
+    markOnboardingComplete,
     signOut,
     accounts,
   };
