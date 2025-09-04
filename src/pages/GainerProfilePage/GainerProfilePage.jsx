@@ -8,7 +8,7 @@ import "./GainerProfilePage.css";
 
 const GainerProfilePage = () => {
   const navigate = useNavigate();
-  const { refreshUserData, markOnboardingComplete } = useAuth();
+  const { refreshUserData, markOnboardingComplete, setJustFinishedOnboarding } = useAuth();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -516,16 +516,16 @@ const GainerProfilePage = () => {
           profileData = payload;
         }
 
-        // Optimistically update user state to mark onboarding complete
-        markOnboardingComplete();
-        console.log("[GAINER_PROFILE] User state optimistically updated");
+        // Set flag to prevent bouncing back to /choose-role
+        setJustFinishedOnboarding();
+        console.log("[GAINER_PROFILE] Set justFinishedOnboarding flag");
 
         // Show success feedback and navigate immediately
         setToastMessage("Profile created successfully! Redirecting to home...");
         setToastType("success");
         setShowToast(true);
 
-        // Navigate to home immediately with optimistic state
+        // Navigate to home immediately
         console.log("[GAINER_PROFILE] Navigating to home...");
         navigate("/", { replace: true });
 

@@ -32,9 +32,11 @@ export default function AuthCallback() {
               console.info("[AUTH] AuthCallback: user completed onboarding, redirecting to home");
               navigate(start, { replace: true });
             } else {
-              // User is new - navigate to choose-role
-              console.info("[AUTH] AuthCallback: user is new, redirecting to choose-role");
-              navigate("/choose-role", { replace: true });
+              // User is new - navigate to choose-role (unless just finished onboarding)
+              if (sessionStorage.getItem("justFinishedOnboarding") !== "true") {
+                console.info("[AUTH] AuthCallback: user is new, redirecting to choose-role");
+                navigate("/choose-role", { replace: true });
+              }
             }
           } else {
             // Ensure hasn't completed yet, wait a bit and check again
@@ -50,13 +52,18 @@ export default function AuthCallback() {
                 console.info("[AUTH] AuthCallback: ensure completed, redirecting to home");
                 navigate(start, { replace: true });
               } else {
-                console.info("[AUTH] AuthCallback: ensure completed, redirecting to choose-role");
-                navigate("/choose-role", { replace: true });
+                // Redirect to choose-role unless just finished onboarding
+                if (sessionStorage.getItem("justFinishedOnboarding") !== "true") {
+                  console.info("[AUTH] AuthCallback: ensure completed, redirecting to choose-role");
+                  navigate("/choose-role", { replace: true });
+                }
               }
             } else {
-              // Fallback if ensure still hasn't completed
-              console.warn("[AUTH] AuthCallback: ensure didn't complete, defaulting to choose-role");
-              navigate("/choose-role", { replace: true });
+              // Fallback if ensure still hasn't completed (unless just finished onboarding)
+              if (sessionStorage.getItem("justFinishedOnboarding") !== "true") {
+                console.warn("[AUTH] AuthCallback: ensure didn't complete, defaulting to choose-role");
+                navigate("/choose-role", { replace: true });
+              }
             }
           }
         } else {

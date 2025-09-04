@@ -52,9 +52,11 @@ function attachEventCallbacks(instance: PublicClientApplication) {
                 sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
                 sessionStorage.setItem(`routingDecision:${accountId}`, "choose-role");
                 
-                // Trigger navigation to choose-role immediately
+                // Trigger navigation to choose-role immediately (unless just finished onboarding)
                 setTimeout(() => {
-                  window.location.href = "/choose-role";
+                  if (sessionStorage.getItem("justFinishedOnboarding") !== "true") {
+                    window.location.href = "/choose-role";
+                  }
                 }, 100);
               }
             } else {
@@ -63,9 +65,11 @@ function attachEventCallbacks(instance: PublicClientApplication) {
               sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
               sessionStorage.setItem(`routingDecision:${accountId}`, "choose-role");
               
-              // Trigger navigation to choose-role immediately
+              // Trigger navigation to choose-role immediately (unless just finished onboarding)
               setTimeout(() => {
-                window.location.href = "/choose-role";
+                if (sessionStorage.getItem("justFinishedOnboarding") !== "true") {
+                  window.location.href = "/choose-role";
+                }
               }, 100);
             }
             return user;
@@ -76,9 +80,11 @@ function attachEventCallbacks(instance: PublicClientApplication) {
             sessionStorage.setItem(`ensureCompleted:${accountId}`, "true");
             sessionStorage.setItem(`routingDecision:${accountId}`, "choose-role");
             
-            // Trigger navigation to choose-role immediately on failure
+            // Trigger navigation to choose-role immediately on failure (unless just finished onboarding)
             setTimeout(() => {
-              window.location.href = "/choose-role";
+              if (sessionStorage.getItem("justFinishedOnboarding") !== "true") {
+                window.location.href = "/choose-role";
+              }
             }, 100);
             throw e;
           })

@@ -4,7 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import LoadingIllustration from "./LoadingIllustration";
 
 const RoleCheck = ({ children }) => {
-  const { userInfo, loading, isAuthenticated, accounts } = useAuth();
+  const { userInfo, loading, isAuthenticated, accounts, getJustFinishedOnboarding } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -43,7 +43,9 @@ const RoleCheck = ({ children }) => {
   }
 
   // For any other protected route: if user is new (hasn't completed onboarding), redirect to choose-role
-  if (userInfo?.isNewUser === true || userInfo?.isNewUser === undefined) {
+  // But skip redirect if user just finished onboarding (to prevent bouncing back)
+  const justFinishedOnboarding = getJustFinishedOnboarding();
+  if ((userInfo?.isNewUser !== false) && !justFinishedOnboarding) {
     console.log("[RoleCheck] User hasn't completed onboarding, redirecting to /choose-role");
     return <Navigate to="/choose-role" replace />;
   }

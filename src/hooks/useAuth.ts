@@ -52,6 +52,11 @@ export function useAuth() {
       
       setUserInfo(info);
       
+      // Clear justFinishedOnboarding flag if user has completed onboarding
+      if (info.isNewUser === false) {
+        clearJustFinishedOnboarding();
+      }
+      
       // Only fetch profile data if user has a role
       if (info.role) {
         try {
@@ -94,6 +99,18 @@ export function useAuth() {
     });
   }, []);
 
+  const setJustFinishedOnboarding = useCallback(() => {
+    sessionStorage.setItem("justFinishedOnboarding", "true");
+  }, []);
+
+  const clearJustFinishedOnboarding = useCallback(() => {
+    sessionStorage.removeItem("justFinishedOnboarding");
+  }, []);
+
+  const getJustFinishedOnboarding = useCallback(() => {
+    return sessionStorage.getItem("justFinishedOnboarding") === "true";
+  }, []);
+
   const refreshUserData = useCallback(() => {
     // Skip refresh on sensitive routes
     // Note: Removed /choose-role and /onboarding/* to allow profile fetch and learn user's onboarding status
@@ -130,6 +147,7 @@ export function useAuth() {
       setUserInfo(null);
       setProfileData(null);
       setError(null);
+      clearJustFinishedOnboarding();
       
       // Perform MSAL logout with redirect to home
       await instance.logoutRedirect({
@@ -138,7 +156,7 @@ export function useAuth() {
     } catch (err) {
       console.error("Sign out failed:", err);
     }
-  }, [instance]);
+  }, [instance, clearJustFinishedOnboarding]);
 
   return {
     isAuthenticated,
@@ -148,6 +166,9 @@ export function useAuth() {
     error,
     refreshUserData,
     markOnboardingComplete,
+    setJustFinishedOnboarding,
+    clearJustFinishedOnboarding,
+    getJustFinishedOnboarding,
     signOut,
     accounts,
   };
