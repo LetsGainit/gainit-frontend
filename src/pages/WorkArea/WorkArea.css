@@ -1,3 +1,19 @@
+/* Work Area Content */
+.work-area-content {
+  min-height: calc(100vh - 80px); /* Account for navbar height */
+  padding-bottom: 120px; /* Account for fixed footer height */
+}
+
+/* Ensure Footer spans full width and appears above sidebar */
+.footer {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 200; /* Higher than sidebar z-index (100) */
+  background-color: #f3f4f6;
+}
+
 .work-area-page {
   min-height: 100vh;
   background-color: #ffffff;

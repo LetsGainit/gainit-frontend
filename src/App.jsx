@@ -12,6 +12,7 @@ import AuthCallback from "./auth/AuthCallback";
 import ScrollToTop from "./components/ScrollToTop";
 import RoleCheck from "./components/RoleCheck";
 import WorkArea from "./pages/WorkArea/WorkArea";
+import ProjectWork from "./pages/WorkArea/ProjectWork";
 
 import GainerProfilePage from "./pages/GainerProfilePage/GainerProfilePage";
 
@@ -29,6 +30,7 @@ function App() {
           <Route path="/search-projects" element={<SearchProjects />} />
           <Route path="/home-page" element={<HomePage />} />
           <Route path="/work" element={<WorkArea />} />
+          <Route path="/work/projects/:projectId" element={<ProjectWork />} />
           <Route path="/project/:id" element={<ProjectPage />} />
           <Route path="/profile/:id" element={<ProfilePage />} />
           <Route path="/profile/gainer/:id" element={<ProfilePage />} />

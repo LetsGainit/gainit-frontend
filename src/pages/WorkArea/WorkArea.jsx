@@ -42,11 +42,13 @@ const WorkArea = () => {
 
   return (
     <>
-      <WorkAreaLayout activeView={activeView} setActiveView={setActiveView}>
-        {renderContent()}
-      </WorkAreaLayout>
+      <div className="work-area-content">
+        <WorkAreaLayout activeView={activeView} setActiveView={setActiveView}>
+          {renderContent()}
+        </WorkAreaLayout>
+      </div>
       
-      {/* Footer at bottom of full page layout */}
+      {/* Footer at bottom of full page layout - outside sidebar layout */}
       <Footer />
     </>
   );
