@@ -12,11 +12,12 @@ import {
   Hourglass,
 } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { fetchUserProfile } from "../../auth/auth";
 import { getDisplayNameForRole, isValidRole } from "../../utils/userUtils";
 import Toast from "../../components/Toast";
+import ProjectCard from "../../components/ProjectCard";
 import "../../css/ProfilePage.css";
 
 function ProfilePage() {
@@ -32,6 +33,8 @@ function ProfilePage() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("error");
+  const [userProjects, setUserProjects] = useState([]);
+  const [projectsLoading, setProjectsLoading] = useState(false);
 
   // Extract role from URL path
   const getRoleFromPath = () => {
@@ -46,6 +49,60 @@ function ProfilePage() {
   };
 
   const userRole = getRoleFromPath();
+
+  // Fetch user projects
+  const fetchUserProjects = useCallback(async (userId) => {
+    if (!userId) return;
+    
+    setProjectsLoading(true);
+    try {
+      const response = await fetch(
+        `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/user/${userId}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user projects: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Map the API response to match the expected ProjectCard structure
+      const mappedProjects = data.map((project) => {
+        // Try multiple possible field names for open roles
+        const openRoles = project.requiredRoles || 
+                         project.openRoles || 
+                         project.roles || 
+                         project.availableRoles || 
+                         project.projectRoles || 
+                         [];
+        
+        return {
+          id: project.projectId,
+          title: project.projectName ?? "Untitled project",
+          description: project.projectDescription ?? "No description",
+          technologies: project.technologies ?? [],
+          difficulty: project.difficultyLevel ?? "Unknown",
+          duration: project.durationText ?? project.duration ?? "N/A",
+          image: project.projectPictureUrl ?? "/default-featured-image.png",
+          openRoles: openRoles,
+          projectStatus: project.projectStatus,
+          role: project.role || project.roleInProject,
+        };
+      });
+      
+      setUserProjects(mappedProjects);
+    } catch (error) {
+      console.error("Failed to fetch user projects:", error);
+      setUserProjects([]);
+    } finally {
+      setProjectsLoading(false);
+    }
+  }, []);
+
+  // Handle project click
+  const handleProjectClick = useCallback((project) => {
+    navigate(`/project/${project.id}`);
+  }, [navigate]);
 
   useEffect(() => {
     async function fetchUser() {
@@ -63,6 +120,9 @@ function ProfilePage() {
         // Fetch profile data from the appropriate endpoint based on role
         const data = await fetchUserProfile(userRole, userId);
         setUser(data);
+        
+        // Fetch user projects
+        await fetchUserProjects(userId);
       } catch (err) {
         console.error("Failed to fetch profile:", err);
 
@@ -396,111 +456,27 @@ function ProfilePage() {
         {/* User Projects Section */}
         <div className="projects-section">
           <div className="projects-container">
-            <h2 className="section-title">Projects</h2>
-            <div className="projects-grid">
-              {projects.length > 0 ? (
-                projects.map((project) => (
-                  <div
-                    key={project.id || project.projectId}
-                    className="project-card"
-                  >
-                    <div className="project-image-container">
-                      <img
-                        src={
-                          project.image ||
-                          project.projectPictureUrl ||
-                          "/default-featured-image.png"
-                        }
-                        alt={project.title || project.projectName}
-                        className="project-image"
-                        onError={(e) => {
-                          e.target.src = "/default-featured-image.png";
-                        }}
-                      />
-                      <span
-                        className={`status-badge ${
-                          project.projectStatus
-                            ? project.projectStatus.toLowerCase()
-                            : ""
-                        }`}
-                      >
-                        {project.projectStatus &&
-                          project.projectStatus.toLowerCase() ===
-                            "completed" && <Check className="status-icon" />}
-                        {project.projectStatus &&
-                          project.projectStatus.toLowerCase() ===
-                            "inprogress" && (
-                            <Hourglass className="status-icon" />
-                          )}
-                        {project.projectStatus || "Unknown"}
-                      </span>
-                    </div>
-                    <div className="project-content">
-                      <div className="project-info">
-                        <h3 className="project-title">
-                          {project.title || project.projectName}
-                        </h3>
-                        <p className="project-description">
-                          {project.description || project.projectDescription}
-                        </p>
-                        <p className="project-role">
-                          Role:{" "}
-                          <span className="role-text">
-                            {project.role || ""}
-                          </span>
-                        </p>
-                        <div className="project-team">
-                          <div className="team-avatars">
-                            {project.team &&
-                              project.team
-                                .slice(0, 3)
-                                .map((member, index) => (
-                                  <img
-                                    key={index}
-                                    src={
-                                      member.image ||
-                                      "/avatar-default-image.png"
-                                    }
-                                    alt={`Team member ${index + 1}`}
-                                    className="team-avatar"
-                                  />
-                                ))}
-                            {project.team && project.team.length > 3 && (
-                              <span className="more-members">
-                                +{project.team.length - 3}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="project-technologies">
-                          {project.technologies &&
-                            project.technologies.map((tech, index) => (
-                              <span key={index} className="tech-badge">
-                                {tech}
-                              </span>
-                            ))}
-                        </div>
-                      </div>
-                      <div className="button-container">
-                        <button
-                          className="view-project-button"
-                          onClick={() =>
-                            navigate(
-                              `/project/${project.id || project.projectId}`
-                            )
-                          }
-                        >
-                          <ArrowRight size={16} />
-                          View Project
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <span>No data</span>
-              )}
-            </div>
+            <h2 className="section-title">Projects ({userProjects.length})</h2>
+            {projectsLoading ? (
+              <div className="loading-container">
+                <div className="spinner">Loading projects...</div>
+              </div>
+            ) : userProjects.length > 0 ? (
+              <div className="projects-grid">
+                {userProjects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    variant="catalog"
+                    onCardClick={handleProjectClick}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="no-projects">
+                <p>No projects found for this user.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

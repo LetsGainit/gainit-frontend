@@ -704,3 +704,23 @@
     font-size: 0.7rem;
   }
 }
+
+/* Loading and No Projects States */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.spinner {
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+.no-projects {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-size: 1rem;
+}
