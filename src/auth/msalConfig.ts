@@ -75,8 +75,9 @@ export const msalConfig: Configuration = {
     }
     `,
 
-    redirectUri: (import.meta as any).env?.VITE_REDIRECT_URI || window.location.origin + "/auth-callback",
-    postLogoutRedirectUri: (import.meta as any).env?.VITE_POST_LOGOUT_REDIRECT_URI || window.location.origin + "/"
+    redirectUri: "https://letsgainit.com/auth-callback",
+    postLogoutRedirectUri: "https://letsgainit.com/",
+
   },
   cache: { 
     cacheLocation: "localStorage", 
