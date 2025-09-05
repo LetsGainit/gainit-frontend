@@ -48,11 +48,16 @@ function ProjectPage() {
   // Fallbacks and field mapping
   const title = project.projectName || "Untitled Project";
   const description = project.projectDescription || "No description available.";
-  // Duration: convert "120.00:00:00" to "120 days"
-  let duration = project.duration || "";
-  if (duration && duration.includes(":")) {
+  // Duration: convert "120.00:00:00" to "120 days" or use durationText
+  let duration = project.durationText || project.duration || "";
+  
+  // Ensure duration is a string before calling string methods
+  if (duration && typeof duration === "string" && duration.includes(":")) {
     const days = duration.split(".")[0];
     duration = `${days} days`;
+  } else if (typeof duration === "number") {
+    // If duration is a number, convert to a readable format
+    duration = `${duration} days`;
   }
   const difficulty = project.difficultyLevel || "Unknown";
   const image = project.projectPictureUrl || "/default-featured-image.png";

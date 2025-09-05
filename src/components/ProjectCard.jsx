@@ -1,11 +1,29 @@
-import { useNavigate } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa";
 
-function ProjectCard({ project }) {
-  const navigate = useNavigate();
+function ProjectCard({ 
+  project, 
+  variant = "catalog", // "catalog" or "work"
+  onCardClick,
+  targetRoute 
+}) {
+  // Normalize data to handle different types and missing fields
+  const normalizedProject = {
+    id: project?.id || project?.projectId || "",
+    title: project?.title || project?.projectName || "Untitled Project",
+    description: project?.description || project?.projectDescription || "No description available",
+    image: project?.image || project?.projectPictureUrl || "/default-featured-image.png",
+    technologies: Array.isArray(project?.technologies) ? project.technologies : [],
+    openRoles: Array.isArray(project?.openRoles) ? project.openRoles : [],
+    duration: project?.durationText || project?.duration || "N/A"
+  };
 
   const handleCardClick = () => {
-    navigate(`/project/${project.id}`);
+    if (onCardClick) {
+      onCardClick(normalizedProject);
+    } else if (targetRoute) {
+      // Fallback to navigation if no custom handler provided
+      window.location.href = targetRoute;
+    }
   };
 
   return (
@@ -16,8 +34,8 @@ function ProjectCard({ project }) {
       {/* Image Container */}
       <div className="project-image-container">
         <img 
-          src={project.image || "/default-featured-image.png"}
-          alt={project.title || "Project Image"}
+          src={normalizedProject.image}
+          alt={normalizedProject.title}
           className="project-image"
         />
       </div>
@@ -26,36 +44,38 @@ function ProjectCard({ project }) {
       <div className="project-content">
         {/* Duration and Positions */}
         <div className="project-meta">
-          <span className="duration">🗓️ {project.durationText || project.duration || "3 Months"}</span>
-          <span className="positions">👥 {project.openRoles?.length || 0} Open Position{(project.openRoles?.length || 0) !== 1 ? 's' : ''}</span>
+          <span className="duration">🗓️ {normalizedProject.duration}</span>
+          <span className="positions">
+            👥 {normalizedProject.openRoles.length} Open Position{normalizedProject.openRoles.length !== 1 ? 's' : ''}
+          </span>
         </div>
 
         {/* Title */}
         <h3 className="project-title">
-          {project.title}
+          {normalizedProject.title}
         </h3>
 
         {/* Description */}
         <p className="project-description">
-          {project.description}
+          {normalizedProject.description}
         </p>
 
         {/* Tech Stack */}
         <div className="tech-stack">
-          {project.technologies?.slice(0, 4).map((tech, index) => (
+          {normalizedProject.technologies.slice(0, 4).map((tech, index) => (
             <span key={index} className="tech-item">
               {tech}
             </span>
           ))}
-          {project.technologies && project.technologies.length > 4 && (
-            <span className="tech-more">+{project.technologies.length - 4} more</span>
+          {normalizedProject.technologies.length > 4 && (
+            <span className="tech-more">+{normalizedProject.technologies.length - 4} more</span>
           )}
         </div>
 
         {/* CTA Link */}
         <div className="project-cta">
           <span className="view-project-link">
-            View Project <FaArrowRight className="arrow-icon" />
+            {variant === "work" ? "Start Working" : "View Project"} <FaArrowRight className="arrow-icon" />
           </span>
         </div>
       </div>

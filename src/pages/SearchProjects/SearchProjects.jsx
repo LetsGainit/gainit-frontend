@@ -1,7 +1,7 @@
 // Updated SearchProjects.jsx with layout and section header centered
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, Filter } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import ProjectCard from "../../components/ProjectCard";
 import LoadingIllustration from "../../components/LoadingIllustration";
 import { getAllActiveProjects } from "../../services/projectsService";
@@ -9,6 +9,7 @@ import "../../css/SearchProjects.css";
 
 function SearchProjects() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(false);
@@ -200,6 +201,11 @@ function SearchProjects() {
 
   const tabs = ["All", "Ongoing", "Pending"];
 
+  const handleProjectClick = useCallback((project) => {
+    // Navigate to project details page
+    navigate(`/project/${project.id}`);
+  }, [navigate]);
+
   return (
     <div className="search-projects-page">
       <div className="page-header">
@@ -263,7 +269,12 @@ function SearchProjects() {
           <>
             <div className="projects-grid">
               {filteredProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
+                <ProjectCard 
+                  key={project.id} 
+                  project={project} 
+                  variant="catalog"
+                  onCardClick={handleProjectClick}
+                />
               ))}
             </div>
             {isSearching && (

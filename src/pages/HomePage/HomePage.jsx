@@ -81,6 +81,11 @@ function HomePage() {
     navigate("/search-projects");
   };
 
+  const handleProjectClick = useCallback((project) => {
+    // Navigate to project details page
+    navigate(`/project/${project.id}`);
+  }, [navigate]);
+
   return (
     <div className="home-page">
       {/* Hero Section */}
@@ -117,7 +122,12 @@ function HomePage() {
             </div>
           ) : (
             projects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard 
+                key={project.id} 
+                project={project} 
+                variant="catalog"
+                onCardClick={handleProjectClick}
+              />
             ))
           )}
         </div>
