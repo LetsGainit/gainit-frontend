@@ -75,8 +75,8 @@ export const msalConfig: Configuration = {
     }
     `,
 
-    redirectUri: "https://gray-moss-04b923a10.2.azurestaticapps.net/auth-callback",
-    postLogoutRedirectUri: "https://gray-moss-04b923a10.2.azurestaticapps.net/"
+    redirectUri: (import.meta as any).env?.VITE_REDIRECT_URI || window.location.origin + "/auth-callback",
+    postLogoutRedirectUri: (import.meta as any).env?.VITE_POST_LOGOUT_REDIRECT_URI || window.location.origin + "/"
   },
   cache: { 
     cacheLocation: "localStorage", 
