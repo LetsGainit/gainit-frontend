@@ -251,6 +251,8 @@ function ProfilePage() {
             <span>Back</span>
           </button>
         </div>
+        
+        <div className="profile-content">
 
         {/* Profile Header Section */}
         <div className="profile-header">
@@ -478,6 +480,8 @@ function ProfilePage() {
               </div>
             )}
           </div>
+        </div>
+        
         </div>
       </div>
       {showToast && (

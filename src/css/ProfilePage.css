@@ -4,6 +4,11 @@
   padding: 2rem 1rem;
 }
 
+.profile-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .back-button-container {
   max-width: 1200px;
   margin: 0 auto 2rem;
@@ -288,8 +293,7 @@
 
 /* Achievements Section */
 .achievements-section {
-  max-width: 1200px;
-  margin: 2rem auto 0;
+  margin: 2rem 0 0;
 }
 
 .achievements-container {
@@ -360,6 +364,7 @@
   flex: 1;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -377,8 +382,7 @@
 
 /* Projects Section */
 .projects-section {
-  max-width: 1200px;
-  margin: 2rem auto 0;
+  margin: 2rem 0 0;
 }
 
 .projects-container {
@@ -509,6 +513,7 @@
   /* Limit description to 3 lines */
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
