@@ -19,16 +19,26 @@ function HomePage() {
       try {
         setLoading(true);
         const data = await getAllActiveProjects();
-        const mappedProjects = data.map((project) => ({
-          id: project.projectId,
-          title: project.projectName ?? "Untitled project",
-          description: project.projectDescription ?? "No description",
-          technologies: project.technologies ?? [],
-          difficulty: project.difficultyLevel ?? "Unknown",
-          duration: project.duration ?? "N/A",
-          image: project.projectPictureUrl ?? "/default-featured-image.png",
-          openPositions: project.requiredRoles?.length ?? 0,
-        }));
+        const mappedProjects = data.map((project) => {
+          // Try multiple possible field names for open roles
+          const openRoles = project.requiredRoles || 
+                           project.openRoles || 
+                           project.roles || 
+                           project.availableRoles || 
+                           project.projectRoles || 
+                           [];
+          
+          return {
+            id: project.projectId,
+            title: project.projectName ?? "Untitled project",
+            description: project.projectDescription ?? "No description",
+            technologies: project.technologies ?? [],
+            difficulty: project.difficultyLevel ?? "Unknown",
+            duration: project.durationText ?? project.duration ?? "N/A",
+            image: project.projectPictureUrl ?? "/default-featured-image.png",
+            openRoles: openRoles,
+          };
+        });
 
         setProjects(mappedProjects.slice(0, 3));
       } catch (error) {

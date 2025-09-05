@@ -104,7 +104,7 @@ function SearchProjects() {
                 description: project.projectDescription ?? "No description",
                 technologies: project.technologies ?? [],
                 difficulty: project.difficultyLevel ?? "Unknown",
-                duration: project.duration ?? "N/A",
+                duration: project.durationText ?? project.duration ?? "N/A",
                 image: project.projectPictureUrl ?? "/default-featured-image.png",
                 openRoles: openRoles,
               };
@@ -141,7 +141,7 @@ function SearchProjects() {
               description: project.projectDescription ?? "No description",
               technologies: project.technologies ?? [],
               difficulty: project.difficultyLevel ?? "Unknown",
-              duration: project.duration ?? "N/A",
+              duration: project.durationText ?? project.duration ?? "N/A",
               image: project.projectPictureUrl ?? "/default-featured-image.png",
               openRoles: openRoles,
             };
