@@ -27,7 +27,7 @@ function ProjectCard({ project }) {
         {/* Duration and Positions */}
         <div className="project-meta">
           <span className="duration">🗓️ {project.duration || "3 Months"}</span>
-          <span className="positions">👥 {project.openPositions || "1"} Position{(project.openPositions || 1) !== 1 ? 's' : ''} Open</span>
+          <span className="positions">👥 {project.openRoles?.length || 0} Open Position{(project.openRoles?.length || 0) !== 1 ? 's' : ''}</span>
         </div>
 
         {/* Title */}

@@ -3,8 +3,6 @@ import {
   Github,
   Linkedin,
   Mail,
-  MessageCircle,
-  MoreVertical,
   ArrowLeft,
   Code2,
   Wrench,
@@ -253,15 +251,6 @@ function ProfilePage() {
               </div>
             </div>
 
-            <div className="profile-actions">
-              <button className="action-button message-button">
-                <MessageCircle size={20} />
-              </button>
-              <button className="action-button follow-button">Follow</button>
-              <button className="action-button menu-button">
-                <MoreVertical size={20} />
-              </button>
-            </div>
           </div>
         </div>
 
