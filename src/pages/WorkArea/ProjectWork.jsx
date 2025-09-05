@@ -5,6 +5,10 @@ import { useAuth } from "../../hooks/useAuth";
 import { getProjectById } from "../../services/projectsService";
 import { getMyTasks, getBoardData } from "../../services/tasksService";
 import { getUserActivity } from "../../services/githubService";
+import WorkAreaLayout from "../../components/layout/WorkAreaLayout";
+import Footer from "../../components/Footer";
+import MyTasks from "./ProjectWork/MyTasks";
+import Forum from "./ProjectWork/Forum";
 import "./ProjectWork.css";
 
 const ProjectWork = () => {
@@ -17,6 +21,7 @@ const ProjectWork = () => {
   const [board, setBoard] = useState([]);
   const [myOpenPRsCount, setMyOpenPRsCount] = useState(0);
   const [activeTab, setActiveTab] = useState("My Tasks");
+  const [activeView, setActiveView] = useState("my-projects");
   
   // Loading states
   const [loading, setLoading] = useState({
@@ -362,120 +367,135 @@ const ProjectWork = () => {
   };
 
   return (
-    <div className="project-work-page">
-      {/* Header */}
-      <div className="project-header">
-        <div className="header-content">
-          <h1 className="project-title">
-            {loading.project ? (
-              <div className="title-skeleton"></div>
-            ) : (
-              project?.projectName || "Loading..."
-            )}
-          </h1>
-        </div>
-      </div>
-
-      {/* KPI Bar */}
-      <div className="kpi-section">
-        <div className="kpi-header">
-          <h2 className="kpi-title">Project Overview</h2>
-          <button 
-            className="refresh-button"
-            onClick={handleRefresh}
-            disabled={refreshing || isLoading}
-            title="Refresh data"
-          >
-            <RefreshCw size={16} className={refreshing ? "spinning" : ""} />
-            {refreshing ? "Refreshing..." : "Refresh"}
-          </button>
-        </div>
-
-        <div className="kpi-grid">
-          {kpis.map((kpi) => {
-            const Icon = kpi.icon;
-            return (
-              <div key={kpi.id} className="kpi-card">
-                <div className="kpi-content">
-                  <div className="kpi-label">{kpi.label}</div>
-                  <div className="kpi-value">
-                    {kpi.loading ? (
-                      <div className="kpi-skeleton"></div>
-                    ) : kpi.value === null ? (
-                      <span className="kpi-empty">—</span>
-                    ) : (
-                      <span className="kpi-number">
-                        {kpi.value}{kpi.suffix}
-                      </span>
-                    )}
-                  </div>
-                  <div className="kpi-icon">
-                    <Icon size={20} />
-                  </div>
-                </div>
-                {kpi.value === null && !kpi.loading && (
-                  <div className="kpi-empty-caption">no data</div>
-                )}
+    <>
+      <div className="work-area-content">
+        <WorkAreaLayout activeView={activeView} setActiveView={setActiveView}>
+          <div className="project-work-page">
+            {/* Header */}
+            <div className="project-header">
+              <div className="header-content">
+                <h1 className="project-title">
+                  {loading.project ? (
+                    <div className="title-skeleton"></div>
+                  ) : (
+                    project?.projectName || "Loading..."
+                  )}
+                </h1>
               </div>
-            );
-          })}
-        </div>
-      </div>
+            </div>
 
-      {/* Tabs Row */}
-      <div className="tabs-container">
-        <div
-          className="tabs-row"
-          role="tablist"
-          aria-label="Project sections"
-        >
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            
-            return (
-              <button
-                key={tab.id}
-                className={`tab-button ${isActive ? "active" : ""}`}
-                role="tab"
-                aria-selected={isActive}
-                aria-controls={`tabpanel-${tab.id}`}
-                onClick={() => handleTabClick(tab.id)}
-                onKeyDown={(e) => handleKeyDown(e, tab.id)}
-                tabIndex={isActive ? 0 : -1}
+            {/* KPI Bar */}
+            <div className="kpi-section">
+              <div className="kpi-header">
+                <h2 className="kpi-title">Project Overview</h2>
+                <button 
+                  className="refresh-button"
+                  onClick={handleRefresh}
+                  disabled={refreshing || isLoading}
+                  title="Refresh data"
+                >
+                  <RefreshCw size={16} className={refreshing ? "spinning" : ""} />
+                  {refreshing ? "Refreshing..." : "Refresh"}
+                </button>
+              </div>
+
+              <div className="kpi-grid">
+                {kpis.map((kpi) => {
+                  const Icon = kpi.icon;
+                  return (
+                    <div key={kpi.id} className="kpi-card">
+                      <div className="kpi-content">
+                        <div className="kpi-label">{kpi.label}</div>
+                        <div className="kpi-value">
+                          {kpi.loading ? (
+                            <div className="kpi-skeleton"></div>
+                          ) : kpi.value === null ? (
+                            <span className="kpi-empty">—</span>
+                          ) : (
+                            <span className="kpi-number">
+                              {kpi.value}{kpi.suffix}
+                            </span>
+                          )}
+                        </div>
+                        <div className="kpi-icon">
+                          <Icon size={20} />
+                        </div>
+                      </div>
+                      {kpi.value === null && !kpi.loading && (
+                        <div className="kpi-empty-caption">no data</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Tabs Row */}
+            <div className="tabs-container">
+              <div
+                className="tabs-row"
+                role="tablist"
+                aria-label="Project sections"
               >
-                <Icon size={16} className="tab-icon" />
-                <span className="tab-label">{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+                {tabs.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  
+                  return (
+                    <button
+                      key={tab.id}
+                      className={`tab-button ${isActive ? "active" : ""}`}
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-controls={`tabpanel-${tab.id}`}
+                      onClick={() => handleTabClick(tab.id)}
+                      onKeyDown={(e) => handleKeyDown(e, tab.id)}
+                      tabIndex={isActive ? 0 : -1}
+                    >
+                      <Icon size={16} className="tab-icon" />
+                      <span className="tab-label">{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-      {/* Content Region */}
-      <div className="content-region">
-        <div className="content-placeholder">
-          <h2 className="placeholder-title">{getContentPlaceholder()}</h2>
-          <p className="placeholder-description">
-            This area will display the {activeTab.toLowerCase()} content when implemented.
-          </p>
-        </div>
-      </div>
+            {/* Content Region */}
+            <div className="content-region">
+              {activeTab === "My Tasks" ? (
+                <MyTasks />
+              ) : activeTab === "Forum" ? (
+                <Forum />
+              ) : (
+                <div className="content-placeholder">
+                  <h2 className="placeholder-title">{getContentPlaceholder()}</h2>
+                  <p className="placeholder-description">
+                    This area will display the {activeTab.toLowerCase()} content when implemented.
+                  </p>
+                </div>
+              )}
+            </div>
 
-      {/* Error State */}
-      {error && (
-        <div className="error-banner">
-          <p>{error}</p>
-          <button 
-            className="retry-button"
-            onClick={handleRefresh}
-            disabled={refreshing}
-          >
-            {refreshing ? "Retrying..." : "Try Again"}
-          </button>
-        </div>
-      )}
-    </div>
+            {/* Error State */}
+            {error && (
+              <div className="error-banner">
+                <p>{error}</p>
+                <button 
+                  className="retry-button"
+                  onClick={handleRefresh}
+                  disabled={refreshing}
+                >
+                  {refreshing ? "Retrying..." : "Try Again"}
+                </button>
+              </div>
+            )}
+          </div>
+        </WorkAreaLayout>
+      </div>
+      
+      {/* Footer at bottom of full page layout - outside sidebar layout */}
+      <Footer />
+    </>
   );
 };
 

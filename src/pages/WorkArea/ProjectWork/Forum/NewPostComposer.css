@@ -1,0 +1,217 @@
+.new-post-composer {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  margin-bottom: 1.5rem;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.composer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.composer-author {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.composer-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #9333ea, #7c3aed);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.composer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.composer-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.composer-role {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.composer-close {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.composer-close:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.composer-close:focus {
+  outline: 2px solid #9333ea;
+  outline-offset: 2px;
+}
+
+.composer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.composer-textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #1f2937;
+  background: white;
+  resize: vertical;
+  min-height: 6rem;
+  max-height: 12rem;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.composer-textarea:focus {
+  outline: none;
+  border-color: #9333ea;
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+}
+
+.composer-textarea::placeholder {
+  color: #9ca3af;
+}
+
+.composer-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.composer-hint {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.composer-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.composer-cancel {
+  padding: 0.75rem 1.5rem;
+  background: white;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.composer-cancel:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+  color: #374151;
+}
+
+.composer-cancel:focus {
+  outline: 2px solid #9333ea;
+  outline-offset: 2px;
+}
+
+.composer-submit {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #9333ea;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.composer-submit:hover:not(:disabled) {
+  background-color: #7c3aed;
+}
+
+.composer-submit:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.composer-submit:focus {
+  outline: 2px solid #9333ea;
+  outline-offset: 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .new-post-composer {
+    padding: 1rem;
+  }
+  
+  .composer-actions {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .composer-hint {
+    text-align: center;
+  }
+  
+  .composer-buttons {
+    justify-content: center;
+  }
+  
+  .composer-cancel,
+  .composer-submit {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .composer-buttons {
+    flex-direction: column;
+  }
+  
+  .composer-cancel,
+  .composer-submit {
+    width: 100%;
+  }
+}

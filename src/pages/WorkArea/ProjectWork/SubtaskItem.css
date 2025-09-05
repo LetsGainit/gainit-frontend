@@ -1,0 +1,177 @@
+.subtask-item {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.subtask-item:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.subtask-item.completed {
+  opacity: 0.7;
+}
+
+.subtask-content {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  gap: 0.75rem;
+}
+
+.subtask-drag-handle {
+  display: flex;
+  align-items: center;
+  color: #9ca3af;
+  cursor: grab;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: color 0.2s ease;
+}
+
+.subtask-drag-handle:hover {
+  color: #6b7280;
+}
+
+.subtask-drag-handle:active {
+  cursor: grabbing;
+}
+
+.subtask-checkbox {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.375rem;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.subtask-checkbox:hover {
+  border-color: #6366f1;
+  background-color: #f8fafc;
+}
+
+.subtask-checkbox:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+.subtask-item.completed .subtask-checkbox {
+  background-color: #22c55e;
+  border-color: #22c55e;
+  color: white;
+}
+
+.subtask-title-container {
+  flex: 1;
+  min-width: 0;
+}
+
+.subtask-title {
+  font-size: 0.875rem;
+  color: #1f2937;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.subtask-item.completed .subtask-title {
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+
+.subtask-edit-input {
+  width: 100%;
+  font-size: 0.875rem;
+  color: #1f2937;
+  background: transparent;
+  border: 1px solid #6366f1;
+  border-radius: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  outline: none;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.subtask-edit-input:focus {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.subtask-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.subtask-item:hover .subtask-actions {
+  opacity: 1;
+}
+
+.subtask-action-button {
+  width: 1.75rem;
+  height: 1.75rem;
+  border: none;
+  background: transparent;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6b7280;
+}
+
+.subtask-action-button:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.subtask-action-button:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+.subtask-action-button.edit:hover {
+  color: #6366f1;
+  background-color: #eef2ff;
+}
+
+.subtask-action-button.delete:hover {
+  color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.subtask-action-button.save:hover {
+  color: #22c55e;
+  background-color: #f0fdf4;
+}
+
+.subtask-action-button.cancel:hover {
+  color: #6b7280;
+  background-color: #f3f4f6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .subtask-content {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  
+  .subtask-drag-handle {
+    display: none;
+  }
+  
+  .subtask-actions {
+    opacity: 1;
+  }
+}
