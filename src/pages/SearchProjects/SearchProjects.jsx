@@ -84,10 +84,33 @@ function SearchProjects() {
         .then((data) => {
           // Ensure we have a valid projects array
           const projectsArray = data.projects || [];
+          
           if (!Array.isArray(projectsArray)) {
             setProjects([]);
           } else {
-            setProjects(projectsArray);
+            // Map the vector search response to match the expected ProjectCard structure
+            const mappedProjects = projectsArray.map((project) => {
+              // Try multiple possible field names for open roles
+              const openRoles = project.requiredRoles || 
+                               project.openRoles || 
+                               project.roles || 
+                               project.availableRoles || 
+                               project.projectRoles || 
+                               [];
+              
+              return {
+                id: project.projectId,
+                title: project.projectName ?? "Untitled project",
+                description: project.projectDescription ?? "No description",
+                technologies: project.technologies ?? [],
+                difficulty: project.difficultyLevel ?? "Unknown",
+                duration: project.duration ?? "N/A",
+                image: project.projectPictureUrl ?? "/default-featured-image.png",
+                openRoles: openRoles,
+              };
+            });
+            
+            setProjects(mappedProjects);
           }
           setLoadingInitial(false);
         })
@@ -102,10 +125,33 @@ function SearchProjects() {
       setError(null);
       getAllActiveProjects()
         .then((data) => {
-          setProjects(data);
+          // Map the API response to match the expected ProjectCard structure
+          const mappedProjects = data.map((project) => {
+            // Try multiple possible field names for open roles
+            const openRoles = project.requiredRoles || 
+                             project.openRoles || 
+                             project.roles || 
+                             project.availableRoles || 
+                             project.projectRoles || 
+                             [];
+            
+            return {
+              id: project.projectId,
+              title: project.projectName ?? "Untitled project",
+              description: project.projectDescription ?? "No description",
+              technologies: project.technologies ?? [],
+              difficulty: project.difficultyLevel ?? "Unknown",
+              duration: project.duration ?? "N/A",
+              image: project.projectPictureUrl ?? "/default-featured-image.png",
+              openRoles: openRoles,
+            };
+          });
+          
+          setProjects(mappedProjects);
           setLoading(false);
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error("Failed to load projects:", error);
           setError("Failed to load projects.");
           setLoading(false);
         });
@@ -133,6 +179,7 @@ function SearchProjects() {
     }
 
     let filtered = projects;
+    
     if (searchTerm) {
       filtered = filtered.filter(
         (project) =>
@@ -147,6 +194,7 @@ function SearchProjects() {
             ))
       );
     }
+    
     setFilteredProjects(filtered);
   }, [projects, searchTerm, activeTab]);
 
