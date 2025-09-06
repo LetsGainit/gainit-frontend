@@ -16,10 +16,35 @@ function ProjectPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await axios.get(
-          `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/${projectId}`
-        );
-        setProject(res.data);
+        // First, try to determine project status by checking if it's a template or active project
+        let projectData;
+        
+        // Try template endpoint first
+        try {
+          const templateRes = await axios.get(
+            `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/template/${projectId}`
+          );
+          projectData = templateRes.data;
+          console.log('[ProjectPage] Using template endpoint for project:', projectId);
+        } catch (templateErr) {
+          // If template fails, try active endpoint
+          try {
+            const activeRes = await axios.get(
+              `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/active/${projectId}`
+            );
+            projectData = activeRes.data;
+            console.log('[ProjectPage] Using active endpoint for project:', projectId);
+          } catch (activeErr) {
+            // If both fail, use default endpoint
+            const defaultRes = await axios.get(
+              `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/${projectId}`
+            );
+            projectData = defaultRes.data;
+            console.log('[ProjectPage] Using default endpoint for project:', projectId);
+          }
+        }
+        
+        setProject(projectData);
       } catch (err) {
         setError(err.message || "Failed to load project.");
       } finally {
