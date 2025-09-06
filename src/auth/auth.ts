@@ -287,3 +287,29 @@ export async function fetchUserProfile(role: string, userId: string) {
   
   return await res.json();
 }
+
+export async function fetchPublicUserProfile(role: string, userId: string) {
+  // Role to endpoint mapping
+  const roleEndpoints = {
+    gainer: `api/users/gainer/${userId}/profile`,
+    mentor: `api/users/mentor/${userId}/profile`,
+    nonprofit: `api/users/nonprofit/${userId}/profile`,
+  };
+  
+  const endpoint = roleEndpoints[role.toLowerCase()];
+  if (!endpoint) {
+    throw new Error(`Unknown user role: ${role}`);
+  }
+  
+  const url = `${API_BASE}${endpoint}`;
+  console.debug("[AUTH] GET public profile:", url);
+  
+  const res = await fetch(url);
+  
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Profile fetch failed: ${res.status} ${body}`);
+  }
+  
+  return await res.json();
+}

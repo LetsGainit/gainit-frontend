@@ -14,7 +14,7 @@ import {
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { fetchUserProfile } from "../../auth/auth";
+import { fetchUserProfile, fetchPublicUserProfile } from "../../auth/auth";
 import { getDisplayNameForRole, isValidRole } from "../../utils/userUtils";
 import Toast from "../../components/Toast";
 import ProjectCard from "../../components/project/ProjectCard";
@@ -110,15 +110,9 @@ function ProfilePage() {
       setError(null);
 
       try {
-        // Check if user is authenticated
-        if (!isAuthenticated) {
-          setError("Authentication required. Please sign in to view profiles.");
-          setLoading(false);
-          return;
-        }
-
         // Fetch profile data from the appropriate endpoint based on role
-        const data = await fetchUserProfile(userRole, userId);
+        // Use public profile function to allow viewing without authentication
+        const data = await fetchPublicUserProfile(userRole, userId);
         setUser(data);
         
         // Fetch user projects
@@ -127,7 +121,7 @@ function ProfilePage() {
         console.error("Failed to fetch profile:", err);
 
         if (err.message.includes("401") || err.message.includes("403")) {
-          setError("Authentication required. Please sign in again.");
+          setError("Profile not accessible. This profile may be private.");
         } else if (err.message.includes("404")) {
           setError("Profile not found.");
         } else {
@@ -146,7 +140,7 @@ function ProfilePage() {
     if (userId) {
       fetchUser();
     }
-  }, [userId, userRole, isAuthenticated]);
+  }, [userId, userRole]);
 
   const handleToastClose = () => {
     setShowToast(false);
