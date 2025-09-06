@@ -95,8 +95,7 @@ function ProjectPage() {
     ...member,
     name: member.fullName,
     role: member.roleInProject,
-    // Optionally, add a profileLink if you have a user profile route:
-    // profileLink: `/user/${member.userId}`
+    profileLink: member.userId ? `/profile/${member.userId}` : null
   }));
   const startDate = project.createdAtUtc ? new Date(project.createdAtUtc).toLocaleDateString() : "N/A";
 
@@ -122,23 +121,37 @@ function ProjectPage() {
             </div>
             <div className="metadata-item">
               <Globe size={20} />
-              <span>{project.scope || "N/A"}</span>
+              <span>Public</span>
             </div>
             <div className="metadata-item">
-              <GitBranch size={20} />
-              <span>{project.methodology || "N/A"}</span>
-            </div>
-            {repositoryLink && (
-              <div className="metadata-item">
+              <Github size={20} />
+              {repositoryLink ? (
                 <a href={repositoryLink} target="_blank" rel="noopener noreferrer" className="repo-link">
-                  <Github size={20} /> Repository
+                  <span style={{ color: 'purple' }}>Repository</span>
                 </a>
-              </div>
-            )}
+              ) : (
+                <span>Repository</span>
+              )}
+            </div>
           </div>
-          <button className="cta-button">
-            Request to Join
-          </button>
+          {(() => {
+            // Determine button based on project status/type
+            if (project.projectType === 'Template') {
+              return (
+                <button className="cta-button" style={{ marginTop: '1rem' }}>
+                  Start Project
+                </button>
+              );
+            } else if (project.projectStatus === 'Pending') {
+              return (
+                <button className="cta-button" style={{ marginTop: '1rem' }}>
+                  Request to Join
+                </button>
+              );
+            }
+            // Don't render button for Active or Completed projects
+            return null;
+          })()}
         </div>
         {/* Right Column - Project Visual */}
         <div className="project-visual">
@@ -242,7 +255,11 @@ function ProjectPage() {
           <div className="team-grid">
             {team.length > 0 ? team.map((member, index) => (
               <div key={index} className="team-member">
-                <div className="member-image">
+                <div 
+                  className="member-image" 
+                  onClick={() => member.profileLink && navigate(member.profileLink)}
+                  style={{ cursor: member.profileLink ? 'pointer' : 'default' }}
+                >
                   <img 
                     src={member.profilePictureUrl || "/avatar-default-image.png"} 
                     alt={member.name || member.fullName || "Team Member"}

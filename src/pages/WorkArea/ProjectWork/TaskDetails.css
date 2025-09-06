@@ -19,22 +19,17 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background-color: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  color: #374151;
+  color: #6366f1;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease;
   font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
   width: fit-content;
 }
 
 .back-button:hover {
-  background-color: #e5e7eb;
-  border-color: #9ca3af;
+  color: #4C1D95;
 }
 
 .task-title-section {
