@@ -15,7 +15,6 @@ import "../css/PlatformNavBar.css";
 
 function PlatformNavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isProjectsOpen, setIsProjectsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -32,7 +31,6 @@ function PlatformNavBar() {
   // Close mobile menu when route changes
   useEffect(() => {
     setIsMenuOpen(false);
-    setIsProjectsOpen(false);
     setIsProfileOpen(false);
   }, [location.pathname]);
 
@@ -195,25 +193,6 @@ function PlatformNavBar() {
           <Link to="/about" className="nav-link">
             About
           </Link>
-          <div className="dropdown">
-            <button
-              className="nav-link dropdown-trigger"
-              onClick={() => setIsProjectsOpen(!isProjectsOpen)}
-              onBlur={() => setTimeout(() => setIsProjectsOpen(false), 200)}
-            >
-              Projects <ChevronDown size={16} />
-            </button>
-            {isProjectsOpen && (
-              <div className="dropdown-menu">
-                <Link to="/search-projects" className="dropdown-item">
-                  Find Projects
-                </Link>
-                <Link to="/my-projects" className="dropdown-item">
-                  My Projects
-                </Link>
-              </div>
-            )}
-          </div>
           <Link to="/Learn" className="nav-link">
             Learn
           </Link>
@@ -305,20 +284,6 @@ function PlatformNavBar() {
               onClick={() => setIsMenuOpen(false)}
             >
               About
-            </Link>
-            <Link
-              to="/search-projects"
-              className="mobile-nav-link"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Find Projects
-            </Link>
-            <Link
-              to="/my-projects"
-              className="mobile-nav-link"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              My Projects
             </Link>
             <Link
               to="/Learn"

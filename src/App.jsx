@@ -15,7 +15,6 @@ import WorkArea from "./pages/WorkArea/WorkArea";
 import ProjectWork from "./pages/WorkArea/ProjectWork";
 import TaskDetails from "./pages/WorkArea/ProjectWork/TaskDetails";
 import AIInsight from "./pages/AIInsight/AIInsight";
-
 import GainerProfilePage from "./pages/GainerProfilePage/GainerProfilePage";
 
 function App() {
