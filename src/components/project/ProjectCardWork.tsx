@@ -37,7 +37,7 @@ const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick 
       onCardClick(normalizedProject);
     } else {
       // Navigate to project work page
-      navigate(`/projectWork/${normalizedProject.id}`);
+      navigate(`/work/projects/${normalizedProject.id}`);
     }
   };
 
