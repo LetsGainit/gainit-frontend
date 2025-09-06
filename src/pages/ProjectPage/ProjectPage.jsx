@@ -16,25 +16,25 @@ function ProjectPage() {
       setLoading(true);
       setError(null);
       try {
-        // First, try to determine project status by checking if it's a template or active project
+        // First, try to determine project status by checking if it's an active or template project
         let projectData;
         
-        // Try template endpoint first
+        // Try active endpoint first
         try {
-          const templateRes = await axios.get(
-            `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/template/${projectId}`
+          const activeRes = await axios.get(
+            `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/${projectId}`
           );
-          projectData = templateRes.data;
-          console.log('[ProjectPage] Using template endpoint for project:', projectId);
-        } catch (templateErr) {
-          // If template fails, try active endpoint
+          projectData = activeRes.data;
+          console.log('[ProjectPage] Using active endpoint for project:', projectId);
+        } catch (activeErr) {
+          // If active fails, try template endpoint
           try {
-            const activeRes = await axios.get(
-              `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/active/${projectId}`
+            const templateRes = await axios.get(
+              `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/template/${projectId}`
             );
-            projectData = activeRes.data;
-            console.log('[ProjectPage] Using active endpoint for project:', projectId);
-          } catch (activeErr) {
+            projectData = templateRes.data;
+            console.log('[ProjectPage] Using template endpoint for project:', projectId);
+          } catch (templateErr) {
             // If both fail, use default endpoint
             const defaultRes = await axios.get(
               `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/${projectId}`
