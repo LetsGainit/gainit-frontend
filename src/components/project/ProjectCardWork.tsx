@@ -33,6 +33,9 @@ const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick 
   };
 
   const handleCardClick = () => {
+    console.log('[ProjectCardWork] Card clicked, navigating to:', `/work/projects/${normalizedProject.id}`);
+    console.log('[ProjectCardWork] Project data:', normalizedProject);
+    
     if (onCardClick) {
       onCardClick(normalizedProject);
     } else {

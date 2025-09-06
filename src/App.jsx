@@ -31,8 +31,6 @@ function App() {
           <Route path="/search-projects" element={<SearchProjects />} />
           <Route path="/home-page" element={<HomePage />} />
           <Route path="/work" element={<WorkArea />} />
-          <Route path="/work/projects/:projectId" element={<ProjectWork />} />
-          <Route path="/work/projects/:projectId/tasks/:taskId" element={<TaskDetails />} />
           <Route path="/ai-insight" element={<AIInsight />} />
           <Route path="/project/:id" element={<ProjectPage />} />
           <Route path="/profile/:id" element={<ProfilePage />} />
@@ -56,6 +54,8 @@ function App() {
                 <Route path="/about" element={<About />} />
                 <Route path="/search-projects" element={<SearchProjects />} />
                 <Route path="/home-page" element={<HomePage />} />
+                <Route path="/work/projects/:projectId" element={<ProjectWork />} />
+                <Route path="/work/projects/:projectId/tasks/:taskId" element={<TaskDetails />} />
                 <Route path="/project/:id" element={<ProjectPage />} />
                 <Route path="/profile/:id" element={<ProfilePage />} />
                 <Route path="/profile/gainer/:id" element={<ProfilePage />} />
