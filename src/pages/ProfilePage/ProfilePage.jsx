@@ -17,7 +17,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { fetchUserProfile } from "../../auth/auth";
 import { getDisplayNameForRole, isValidRole } from "../../utils/userUtils";
 import Toast from "../../components/Toast";
-import ProjectCard from "../../components/ProjectCard";
+import ProjectCard from "../../components/project/ProjectCard";
 import "../../css/ProfilePage.css";
 
 function ProfilePage() {

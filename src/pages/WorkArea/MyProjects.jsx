@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Clock, CheckCircle, Users } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { getUserProjects } from "../../services/projectsService";
-import ProjectCard from "../../components/ProjectCard";
+import ProjectCardWork from "../../components/project/ProjectCardWork";
 import "./MyProjects.css";
 
 const MyProjects = () => {
@@ -261,7 +261,7 @@ const MyProjects = () => {
         {!loading && !error && visibleProjects.length > 0 && (
           <div className="projects-grid">
             {visibleProjects.map((project) => (
-              <ProjectCard 
+              <ProjectCardWork 
                 key={project.projectId} 
                 project={mapProjectToCard(project)} 
               />

@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, Filter } from "lucide-react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import ProjectCard from "../../components/ProjectCard";
+import ProjectCard from "../../components/project/ProjectCard";
 import LoadingIllustration from "../../components/LoadingIllustration";
 import { getPublicActiveProjects, getPublicTemplateProjects } from "../../services/publicProjectsService";
 import "../../css/SearchProjects.css";

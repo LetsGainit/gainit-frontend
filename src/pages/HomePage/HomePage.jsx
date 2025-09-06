@@ -1,4 +1,4 @@
-import ProjectCard from "../../components/ProjectCard";
+import ProjectCard from "../../components/project/ProjectCard";
 import Footer from "../../components/Footer";
 import SearchHero from "../../components/SearchHero";
 import "../../css/HomePage.css";
