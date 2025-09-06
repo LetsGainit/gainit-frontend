@@ -4,8 +4,7 @@ import { Search, Filter } from "lucide-react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import ProjectCard from "../../components/ProjectCard";
 import LoadingIllustration from "../../components/LoadingIllustration";
-import { getAllActiveProjects } from "../../services/projectsService";
-import api from "../../services/api";
+import { getPublicActiveProjects, getPublicTemplateProjects } from "../../services/publicProjectsService";
 import "../../css/SearchProjects.css";
 
 function SearchProjects() {
@@ -34,16 +33,26 @@ function SearchProjects() {
       setActiveProjectsLoading(true);
       setActiveProjectsError(null);
       
-      const data = await getAllActiveProjects();
+      const data = await getPublicActiveProjects();
       
-      // Filter projects that have open positions
-      const projectsWithOpenPositions = data.filter(project => 
-        project.openPositions && project.openPositions > 0
-      );
+      // Filter projects that have open positions > 0
+      const projectsWithOpenPositions = data.filter(project => {
+        const openPos = project.openPositions || 
+                       project.availablePositions || 
+                       (project.maxPositions && project.currentPositions ? project.maxPositions - project.currentPositions : 0) ||
+                       0;
+        return openPos > 0;
+      });
+      
+      // If no projects have open positions, show all projects
+      const projectsToShow = projectsWithOpenPositions.length > 0 ? projectsWithOpenPositions : data;
       
       // Map the API response to match the expected ProjectCard structure
-      const mappedProjects = projectsWithOpenPositions.map((project) => {
-        const openRoles = project.requiredRoles || 
+      const mappedProjects = projectsToShow.map((project) => {
+        // Extract roles from projectTeamMembers or other available fields
+        const openRoles = project.projectTeamMembers ? 
+                         project.projectTeamMembers.map(member => member.roleInProject).filter(role => role) :
+                         project.requiredRoles || 
                          project.openRoles || 
                          project.roles || 
                          project.availableRoles || 
@@ -77,8 +86,7 @@ function SearchProjects() {
       setTemplateProjectsLoading(true);
       setTemplateProjectsError(null);
       
-      const response = await api.get("/projects/templates");
-      const data = response.data;
+      const data = await getPublicTemplateProjects();
       
       // Map the API response to match the expected ProjectCard structure
       const mappedProjects = data.map((project) => {
@@ -127,7 +135,7 @@ function SearchProjects() {
       setSearchTerm(urlQuery);
     }
     
-    // Load both sections on component mount
+    // Load both sections on component mount (public access)
     fetchActiveProjects();
     fetchTemplateProjects();
   }, [searchParams]);
