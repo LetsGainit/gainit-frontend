@@ -1,56 +1,112 @@
-// Updated SearchProjects.jsx with layout and section header centered
+// Updated SearchProjects.jsx with two sections: Active Projects and Template Projects
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, Filter } from "lucide-react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import ProjectCard from "../../components/ProjectCard";
 import LoadingIllustration from "../../components/LoadingIllustration";
 import { getAllActiveProjects } from "../../services/projectsService";
+import api from "../../services/api";
 import "../../css/SearchProjects.css";
 
 function SearchProjects() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingInitial, setLoadingInitial] = useState(false);
-  const [error, setError] = useState(null);
+  
+  // Active Projects State (Projects Open for Joining)
+  const [activeProjects, setActiveProjects] = useState([]);
+  const [activeProjectsLoading, setActiveProjectsLoading] = useState(false);
+  const [activeProjectsError, setActiveProjectsError] = useState(null);
+  
+  // Template Projects State
+  const [templateProjects, setTemplateProjects] = useState([]);
+  const [templateProjectsLoading, setTemplateProjectsLoading] = useState(false);
+  const [templateProjectsError, setTemplateProjectsError] = useState(null);
+  
+  // Search and Filter State
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("All");
-  const [filteredProjects, setFilteredProjects] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const searchInputRef = useRef(null);
 
-  // Vector search API function
-  const searchVectorAPI = async (query, count = 12) => {
+  // API function to get active projects (filtered by openPositions > 0)
+  const fetchActiveProjects = async () => {
     try {
-      setIsSearching(true);
-      setError(null);
-
-      const response = await fetch(
-        `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/search/vector?query=${encodeURIComponent(
-          query
-        )}&count=${count}`
+      setActiveProjectsLoading(true);
+      setActiveProjectsError(null);
+      
+      const data = await getAllActiveProjects();
+      
+      // Filter projects that have open positions
+      const projectsWithOpenPositions = data.filter(project => 
+        project.openPositions && project.openPositions > 0
       );
-
-      if (!response.ok) {
-        throw new Error(`Search failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      // Extract only projects from response, ensure it's an array
-      const projects = data.projects || [];
-      if (!Array.isArray(projects)) {
-        console.warn("API response.projects is not an array:", projects);
-        return { projects: [] };
-      }
-
-      return { projects };
+      
+      // Map the API response to match the expected ProjectCard structure
+      const mappedProjects = projectsWithOpenPositions.map((project) => {
+        const openRoles = project.requiredRoles || 
+                         project.openRoles || 
+                         project.roles || 
+                         project.availableRoles || 
+                         project.projectRoles || 
+                         [];
+        
+        return {
+          id: project.projectId,
+          title: project.projectName ?? "Untitled project",
+          description: project.projectDescription ?? "No description",
+          technologies: project.technologies ?? [],
+          difficulty: project.difficultyLevel ?? "Unknown",
+          duration: project.durationText ?? project.duration ?? "N/A",
+          image: project.projectPictureUrl ?? "/default-featured-image.png",
+          openRoles: openRoles,
+        };
+      });
+      
+      setActiveProjects(mappedProjects);
     } catch (error) {
-      console.error("Vector search error:", error);
-      throw error;
+      console.error("Failed to load active projects:", error);
+      setActiveProjectsError("Failed to load active projects.");
     } finally {
-      setIsSearching(false);
+      setActiveProjectsLoading(false);
+    }
+  };
+
+  // API function to get template projects
+  const fetchTemplateProjects = async () => {
+    try {
+      setTemplateProjectsLoading(true);
+      setTemplateProjectsError(null);
+      
+      const response = await api.get("/projects/templates");
+      const data = response.data;
+      
+      // Map the API response to match the expected ProjectCard structure
+      const mappedProjects = data.map((project) => {
+        const openRoles = project.requiredRoles || 
+                         project.openRoles || 
+                         project.roles || 
+                         project.availableRoles || 
+                         project.projectRoles || 
+                         [];
+        
+        return {
+          id: project.projectId || project.id,
+          title: (project.projectName || project.name) ?? "Untitled project",
+          description: (project.projectDescription || project.description) ?? "No description",
+          technologies: project.technologies ?? [],
+          difficulty: (project.difficultyLevel || project.difficulty) ?? "Unknown",
+          duration: (project.durationText || project.duration) ?? "N/A",
+          image: (project.projectPictureUrl || project.imageUrl) ?? "/default-featured-image.png",
+          openRoles: openRoles,
+        };
+      });
+      
+      setTemplateProjects(mappedProjects);
+    } catch (error) {
+      console.error("Failed to load template projects:", error);
+      setTemplateProjectsError("Failed to load template projects.");
+    } finally {
+      setTemplateProjectsLoading(false);
     }
   };
 
@@ -58,111 +114,27 @@ function SearchProjects() {
     const trimmedQuery = searchTerm.trim();
     if (!trimmedQuery || isSearching) return;
 
-    // Clear previous results and errors to avoid flicker
-    setError(null);
-    setProjects([]);
-
     // Update URL parameters
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set("q", trimmedQuery);
-    newSearchParams.set("count", "12");
     setSearchParams(newSearchParams);
   };
 
-  // Initialize search term from URL params
+  // Initialize search term from URL params and load data
   useEffect(() => {
     const urlQuery = searchParams.get("q");
-    const urlCount = searchParams.get("count") || "12";
-
     if (urlQuery) {
       setSearchTerm(urlQuery);
-      setLoadingInitial(true);
-      setLoading(false);
-      setError(null);
-
-      // Perform vector search if query exists
-      searchVectorAPI(urlQuery, parseInt(urlCount))
-        .then((data) => {
-          // Ensure we have a valid projects array
-          const projectsArray = data.projects || [];
-          
-          if (!Array.isArray(projectsArray)) {
-            setProjects([]);
-          } else {
-            // Map the vector search response to match the expected ProjectCard structure
-            const mappedProjects = projectsArray.map((project) => {
-              // Try multiple possible field names for open roles
-              const openRoles = project.requiredRoles || 
-                               project.openRoles || 
-                               project.roles || 
-                               project.availableRoles || 
-                               project.projectRoles || 
-                               [];
-              
-              return {
-                id: project.projectId,
-                title: project.projectName ?? "Untitled project",
-                description: project.projectDescription ?? "No description",
-                technologies: project.technologies ?? [],
-                difficulty: project.difficultyLevel ?? "Unknown",
-                duration: project.durationText ?? project.duration ?? "N/A",
-                image: project.projectPictureUrl ?? "/default-featured-image.png",
-                openRoles: openRoles,
-              };
-            });
-            
-            setProjects(mappedProjects);
-          }
-          setLoadingInitial(false);
-        })
-        .catch((searchError) => {
-          setError(searchError.message || "Failed to search projects.");
-          setLoadingInitial(false);
-        });
-    } else {
-      // Load all projects if no search query
-      setLoading(true);
-      setLoadingInitial(false);
-      setError(null);
-      getAllActiveProjects()
-        .then((data) => {
-          // Map the API response to match the expected ProjectCard structure
-          const mappedProjects = data.map((project) => {
-            // Try multiple possible field names for open roles
-            const openRoles = project.requiredRoles || 
-                             project.openRoles || 
-                             project.roles || 
-                             project.availableRoles || 
-                             project.projectRoles || 
-                             [];
-            
-            return {
-              id: project.projectId,
-              title: project.projectName ?? "Untitled project",
-              description: project.projectDescription ?? "No description",
-              technologies: project.technologies ?? [],
-              difficulty: project.difficultyLevel ?? "Unknown",
-              duration: project.durationText ?? project.duration ?? "N/A",
-              image: project.projectPictureUrl ?? "/default-featured-image.png",
-              openRoles: openRoles,
-            };
-          });
-          
-          setProjects(mappedProjects);
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error("Failed to load projects:", error);
-          setError("Failed to load projects.");
-          setLoading(false);
-        });
     }
+    
+    // Load both sections on component mount
+    fetchActiveProjects();
+    fetchTemplateProjects();
   }, [searchParams]);
 
-  // Focus search input after scroll reset is complete
+  // Focus search input after component mounts
   useEffect(() => {
-    if (searchInputRef.current && !loadingInitial && !loading) {
-      // Use setTimeout to ensure this runs after scroll reset
+    if (searchInputRef.current) {
       const timer = setTimeout(() => {
         if (searchInputRef.current) {
           searchInputRef.current.focus({ preventScroll: true });
@@ -170,36 +142,41 @@ function SearchProjects() {
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [loadingInitial, loading]);
+  }, []);
 
-  useEffect(() => {
-    // Ensure projects is an array before filtering
-    if (!Array.isArray(projects)) {
-      setFilteredProjects([]);
-      return;
-    }
+  const tabs = ["All", "Templates", "Open for Joining"];
 
-    let filtered = projects;
+  // Filter projects based on search term
+  const filterProjects = (projects) => {
+    if (!searchTerm) return projects;
     
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (project) =>
-          project.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          project.description
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          (project.technologies &&
-            Array.isArray(project.technologies) &&
-            project.technologies.some((tech) =>
-              tech?.toLowerCase().includes(searchTerm.toLowerCase())
-            ))
-      );
-    }
-    
-    setFilteredProjects(filtered);
-  }, [projects, searchTerm, activeTab]);
+    return projects.filter((project) =>
+      project.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (project.technologies &&
+        Array.isArray(project.technologies) &&
+        project.technologies.some((tech) =>
+          tech?.toLowerCase().includes(searchTerm.toLowerCase())
+        ))
+    );
+  };
 
-  const tabs = ["All", "Ongoing", "Pending"];
+  // Determine which sections should be visible based on active tab
+  const shouldShowActiveProjects = activeTab === "All" || activeTab === "Open for Joining";
+  const shouldShowTemplateProjects = activeTab === "All" || activeTab === "Templates";
+
+  // Project limit for "All" tab (2 grid rows = 8 projects max, assuming 4 columns)
+  const PROJECTS_LIMIT = 8;
+  const isAllTab = activeTab === "All";
+
+  // Handle "Find more" button clicks
+  const handleFindMoreActive = () => {
+    setActiveTab("Open for Joining");
+  };
+
+  const handleFindMoreTemplates = () => {
+    setActiveTab("Templates");
+  };
 
   const handleProjectClick = useCallback((project) => {
     // Navigate to project details page
@@ -253,42 +230,89 @@ function SearchProjects() {
         </div>
       </div>
 
-      {/* Error banner - inline rendering */}
-      {error && (
-        <div className="error-banner">
-          <div className="error-message">{error}</div>
+      {/* Active Projects Section */}
+      {shouldShowActiveProjects && (
+        <div className="projects-section">
+          <div className="page-container">
+            <h2 className="section-title">Projects Open for Joining</h2>
+            
+            {activeProjectsLoading ? (
+              <LoadingIllustration type="initial" />
+            ) : Array.isArray(activeProjects) && activeProjects.length > 0 ? (
+              <>
+                <div className="projects-grid">
+                  {filterProjects(activeProjects)
+                    .slice(0, isAllTab ? PROJECTS_LIMIT : undefined)
+                    .map((project) => (
+                      <ProjectCard 
+                        key={project.id} 
+                        project={project} 
+                        variant="catalog"
+                        onCardClick={handleProjectClick}
+                      />
+                    ))}
+                </div>
+                {isAllTab && filterProjects(activeProjects).length > PROJECTS_LIMIT && (
+                  <div className="find-more-container">
+                    <button 
+                      className="find-more-btn"
+                      onClick={handleFindMoreActive}
+                    >
+                      Find more active projects
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="no-results">
+                <p>No active projects available for joining</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      <div className="projects-section centered-layout">
-        {loadingInitial ? (
-          <LoadingIllustration type="initial" />
-        ) : loading ? (
-          <LoadingIllustration type="initial" />
-        ) : Array.isArray(filteredProjects) && filteredProjects.length > 0 ? (
-          <>
-            <div className="projects-grid">
-              {filteredProjects.map((project) => (
-                <ProjectCard 
-                  key={project.id} 
-                  project={project} 
-                  variant="catalog"
-                  onCardClick={handleProjectClick}
-                />
-              ))}
-            </div>
-            {isSearching && (
-              <div className="loading-overlay">
-                <LoadingIllustration type="search" />
+      {/* Template Projects Section */}
+      {shouldShowTemplateProjects && (
+        <div className="projects-section">
+          <div className="page-container">
+            <h2 className="section-title">Template Projects</h2>
+            
+            {templateProjectsLoading ? (
+              <LoadingIllustration type="initial" />
+            ) : Array.isArray(templateProjects) && templateProjects.length > 0 ? (
+              <>
+                <div className="projects-grid">
+                  {filterProjects(templateProjects)
+                    .slice(0, isAllTab ? PROJECTS_LIMIT : undefined)
+                    .map((project) => (
+                      <ProjectCard 
+                        key={project.id} 
+                        project={project} 
+                        variant="catalog"
+                        onCardClick={handleProjectClick}
+                      />
+                    ))}
+                </div>
+                {isAllTab && filterProjects(templateProjects).length > PROJECTS_LIMIT && (
+                  <div className="find-more-container">
+                    <button 
+                      className="find-more-btn"
+                      onClick={handleFindMoreTemplates}
+                    >
+                      Find more template projects
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="no-results">
+                <p>No template projects available</p>
               </div>
             )}
-          </>
-        ) : (
-          <div className="no-results">
-            <p>No results</p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
       <footer className="footer">
         <div className="footer-content">
           © {new Date().getFullYear()} GainIt. All rights reserved.
