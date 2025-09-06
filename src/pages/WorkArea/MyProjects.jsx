@@ -17,7 +17,7 @@ const MyProjects = () => {
   const statusMapping = {
     "Active": "InProgress",
     "Complited": "Completed", 
-    "Pending": "Pending"
+    "Requested": "Pending"
   };
 
   // Generate correlation ID
@@ -161,7 +161,7 @@ const MyProjects = () => {
         return "No active projects yet.";
       case "Complited":
         return "No completed projects yet.";
-      case "Pending":
+      case "Requested":
         return "No pending projects yet.";
       default:
         return "No projects found.";
