@@ -1,18 +1,12 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, FolderOpen, BookOpen, Briefcase } from "lucide-react";
+import { Home, Search, FolderOpen, Brain } from "lucide-react";
 import "./Sidebar.css";
 
 const Sidebar = ({ activeView, setActiveView }) => {
   const location = useLocation();
 
   const navItems = [
-    {
-      id: "dashboard",
-      path: "/work",
-      label: "Dashboard",
-      icon: Briefcase,
-    },
     {
       id: "my-projects",
       path: "/work",
@@ -26,15 +20,15 @@ const Sidebar = ({ activeView, setActiveView }) => {
       icon: Search,
     },
     {
-      id: "analytics",
-      path: "/analytics",
-      label: "Analytics",
-      icon: BookOpen,
+      id: "ai-insight",
+      path: "/ai-insight",
+      label: "AI Insight",
+      icon: Brain,
     },
   ];
 
   const handleNavClick = (item) => {
-    if (item.id === "my-projects" || item.id === "dashboard") {
+    if (item.id === "my-projects") {
       // Handle internal Work Area navigation
       setActiveView(item.id);
     } else {
@@ -44,7 +38,7 @@ const Sidebar = ({ activeView, setActiveView }) => {
   };
 
   const isActive = (item) => {
-    if (item.id === "my-projects" || item.id === "dashboard") {
+    if (item.id === "my-projects") {
       return activeView === item.id;
     }
     if (item.path === "/") {
@@ -63,7 +57,7 @@ const Sidebar = ({ activeView, setActiveView }) => {
             
             return (
               <li key={item.id} className="nav-item">
-                {item.id === "my-projects" || item.id === "dashboard" ? (
+                {item.id === "my-projects" ? (
                   <button
                     className={`nav-link ${active ? "active" : ""}`}
                     onClick={() => handleNavClick(item)}

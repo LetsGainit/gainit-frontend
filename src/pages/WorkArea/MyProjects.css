@@ -201,9 +201,31 @@
 .error-content p {
   font-size: 0.875rem;
   color: #7f1d1d;
-  margin: 0;
+  margin: 0 0 1rem 0;
   line-height: 1.5;
   font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.retry-button {
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.retry-button:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.retry-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
 }
 
 /* Empty State */

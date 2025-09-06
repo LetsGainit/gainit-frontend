@@ -29,41 +29,40 @@ const MyProjects = () => {
     });
   };
 
-  // Temporary mock data for testing the flow
-  const tempMockProjects = [
-    {
-      projectId: "temp-1",
-      projectName: "Eco-Friendly Mobile App",
-      projectDescription: "A mobile application that helps users track their carbon footprint and provides eco-friendly lifestyle recommendations. Features include daily activity tracking, carbon offset calculations, and community challenges.",
-      projectPictureUrl: "/default-featured-image.png",
-      duration: "90.00:00:00",
-      status: "InProgress",
-      technologies: ["React Native", "Node.js", "MongoDB", "AWS", "Firebase"],
-      projectTeamMembers: [
-        { userId: "1", fullName: "John Doe", roleInProject: "Frontend Developer" },
-        { userId: "2", fullName: "Jane Smith", roleInProject: "Backend Developer" },
-        { userId: "3", fullName: "Mike Johnson", roleInProject: "UI/UX Designer" }
-      ],
-      repositoryLink: "https://github.com/example/eco-app"
+  // Helper function to calculate days left
+  const calculateDaysLeft = (createdAtUtc, duration) => {
+    if (!createdAtUtc || !duration) return null;
+    
+    try {
+      const startDate = new Date(createdAtUtc);
+      const durationInDays = parseInt(duration.split('.')[0]) || 0;
+      const endDate = new Date(startDate.getTime() + (durationInDays * 24 * 60 * 60 * 1000));
+      const today = new Date();
+      const daysLeft = Math.ceil((endDate - today) / (24 * 60 * 60 * 1000));
+      
+      return Math.max(0, daysLeft);
+    } catch (error) {
+      console.error('Error calculating days left:', error);
+      return null;
     }
-  ];
+  };
 
   // Fetch user projects
   const fetchUserProjects = useCallback(async () => {
+    if (!userInfo?.userId) {
+      console.log('[MY-PROJECTS] No user ID available, skipping fetch');
+      return;
+    }
+
     const correlationId = generateCorrelationId();
-    console.log(`[MY-PROJECTS] Fetching projects with correlation ID: ${correlationId}`);
+    console.log(`[MY-PROJECTS] Fetching projects for user ${userInfo.userId} with correlation ID: ${correlationId}`);
 
     try {
       setLoading(true);
       setError(null);
 
-      // TEMPORARY: Use mock data for testing the flow
-      // TODO: Remove this and uncomment the real API call below
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
-      const projects = tempMockProjects;
-      
-      // Real API call (commented out for testing)
-      // const projects = await getUserProjects(userInfo.userId, correlationId);
+      // Real API call
+      const projects = await getUserProjects(userInfo.userId, correlationId);
 
       console.log(`[MY-PROJECTS] Successfully fetched ${projects.length} projects`);
       setAllProjects(projects || []);
@@ -82,12 +81,12 @@ const MyProjects = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userInfo?.userId]);
 
   // Filter projects based on active tab
   const visibleProjects = allProjects.filter(project => {
     const backendStatus = statusMapping[activeTab];
-    return project.status === backendStatus;
+    return project.projectStatus === backendStatus;
   });
 
   // Load projects on mount
@@ -126,22 +125,31 @@ const MyProjects = () => {
 
   // Map project data to ProjectCard format
   const mapProjectToCard = (project) => {
-    // Handle duration format (convert "120.00:00:00" to "120 days" or similar)
-    let duration = project.duration || "3 Months";
-    if (duration && duration.includes(":")) {
-      const days = duration.split(".")[0];
-      duration = `${days} days`;
+    // Calculate days left from createdAtUtc + duration
+    const daysLeft = calculateDaysLeft(project.createdAtUtc, project.duration);
+    let durationText = "3 Months"; // Default fallback
+    
+    if (daysLeft !== null) {
+      durationText = `${daysLeft} days left`;
+    } else if (project.duration && project.duration.includes(":")) {
+      const days = project.duration.split(".")[0];
+      durationText = `${days} days`;
     }
+
+    // Combine programming languages and technologies
+    const allTechnologies = [
+      ...(project.programmingLanguages || []),
+      ...(project.technologies || [])
+    ];
 
     return {
       id: project.projectId,
       title: project.projectName || "Untitled Project",
       description: project.projectDescription || "No description available",
-      image: project.projectPictureUrl || project.projectImage || "/default-featured-image.png",
-      duration: duration,
-      openPositions: project.projectTeamMembers?.length || 0,
-      technologies: project.technologies || [],
-      repositoryLink: project.repositoryLink,
+      image: project.projectPictureUrl || "/default-featured-image.png",
+      duration: durationText,
+      openPositions: project.openRoles?.length || 0,
+      technologies: allTechnologies,
       status: activeTab
     };
   };
@@ -228,6 +236,13 @@ const MyProjects = () => {
             <div className="error-content">
               <h3>Unable to load projects</h3>
               <p>{error}</p>
+              <button 
+                className="retry-button"
+                onClick={fetchUserProjects}
+                disabled={loading}
+              >
+                {loading ? "Retrying..." : "Try Again"}
+              </button>
             </div>
           </div>
         )}

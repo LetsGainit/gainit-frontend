@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
-import { getMyTasks } from "../../../services/tasksService";
+import { getProjectTasks } from "../../../services/tasksService";
 import { ClipboardList, Loader, AlertCircle, CheckCircle2, Plus } from "lucide-react";
 import TaskCard from "./TaskCard";
 import AddTaskModal from "./AddTaskModal";
@@ -39,109 +39,25 @@ const MyTasks: React.FC = () => {
   };
 
   // Fetch tasks
-  const fetchTasks = useCallback(() => {
-    console.log(`[MY-TASKS] Fetching tasks for project ${projectId}`);
+  const fetchTasks = useCallback(async () => {
+    if (!projectId) return;
 
+    console.log(`[MY-TASKS] Fetching tasks for project ${projectId}`);
     setLoading(true);
     setError(null);
 
-    // Simulate a short delay
-    setTimeout(() => {
-      const mockTasks: Task[] = [
-        {
-          taskId: "task-1",
-          title: "Implement user authentication system",
-          description: "Set up secure user authentication with login, registration, password reset, and JWT token management. Include proper validation, error handling, and security measures.",
-          status: "InProgress",
-          priority: "Critical",
-          type: "Development",
-          dueAtUtc: "2024-02-10T23:59:59Z",
-          createdAtUtc: "2024-01-17T09:15:00Z",
-          projectId: projectId || "temp-1"
-        },
-        {
-          taskId: "task-2",
-          title: "Create responsive UI components",
-          description: "Design and implement reusable UI components for the mobile app including buttons, forms, navigation, and layout components with proper responsive behavior.",
-          status: "Todo",
-          priority: "High",
-          type: "Frontend",
-          dueAtUtc: "2024-02-15T23:59:59Z",
-          createdAtUtc: "2024-01-18T14:30:00Z",
-          projectId: projectId || "temp-1"
-        },
-        {
-          taskId: "task-3",
-          title: "Setup database integration",
-          description: "Configure database connection, create data models, and implement CRUD operations for user data and carbon footprint tracking.",
-          status: "Blocked",
-          priority: "High",
-          type: "Backend",
-          createdAtUtc: "2024-01-19T10:15:00Z",
-          projectId: projectId || "temp-1"
-        },
-        {
-          taskId: "task-4",
-          title: "Write unit tests",
-          description: "Create comprehensive unit tests for all core functionality including authentication, data processing, and API endpoints.",
-          status: "Todo",
-          priority: "Medium",
-          type: "Testing",
-          dueAtUtc: "2024-02-20T23:59:59Z",
-          createdAtUtc: "2024-01-20T16:45:00Z",
-          projectId: projectId || "temp-1"
-        },
-        {
-          taskId: "task-5",
-          title: "Design app wireframes",
-          description: "Create detailed wireframes and user flow diagrams for all main screens and user interactions in the mobile application.",
-          status: "Done",
-          priority: "Medium",
-          type: "Design",
-          dueAtUtc: "2024-01-25T23:59:59Z",
-          createdAtUtc: "2024-01-15T09:00:00Z",
-          projectId: projectId || "temp-1"
-        },
-        {
-          taskId: "task-6",
-          title: "API documentation",
-          description: "Create comprehensive API documentation with examples and integration guides for all endpoints.",
-          status: "Done",
-          priority: "Low",
-          type: "Documentation",
-          dueAtUtc: "2024-01-30T23:59:59Z",
-          createdAtUtc: "2024-01-16T11:20:00Z",
-          projectId: projectId || "temp-1"
-        },
-        {
-          taskId: "task-7",
-          title: "Performance optimization",
-          description: "Optimize app performance including image loading, code splitting, and memory management.",
-          status: "InProgress",
-          priority: "Medium",
-          type: "Development",
-          dueAtUtc: "2024-02-25T23:59:59Z",
-          createdAtUtc: "2024-01-21T13:10:00Z",
-          projectId: projectId || "temp-1"
-        }
-      ];
-
-      // Filter tasks for current project (include all statuses for grid display)
-      const filteredTasks = mockTasks.filter(task => 
-        task.projectId === projectId || task.projectId === "temp-1"
-      );
+    try {
+      const correlationId = generateCorrelationId();
+      const tasksData = await getProjectTasks(correlationId, projectId);
       
-      console.log(`[MY-TASKS] ProjectId: ${projectId}, All tasks: ${mockTasks.length}, Filtered tasks: ${filteredTasks.length}`);
-
-      // Sort by creation date (newest first)
-      const sortedTasks = filteredTasks.sort((a, b) => 
-        new Date(b.createdAtUtc).getTime() - new Date(a.createdAtUtc).getTime()
-      );
-
-      console.log(`[MY-TASKS] Successfully fetched ${sortedTasks.length} tasks for project ${projectId}`);
-      setTasks(sortedTasks);
+      console.log(`[MY-TASKS] Successfully fetched ${tasksData.length} tasks for project ${projectId}`);
+      setTasks(tasksData);
+    } catch (err) {
+      console.error(`[MY-TASKS] Error fetching tasks:`, err);
+      setError(err instanceof Error ? err.message : 'Failed to load tasks');
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   }, [projectId]);
 
   // Load tasks on mount

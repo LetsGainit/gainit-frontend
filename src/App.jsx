@@ -14,6 +14,7 @@ import RoleCheck from "./components/RoleCheck";
 import WorkArea from "./pages/WorkArea/WorkArea";
 import ProjectWork from "./pages/WorkArea/ProjectWork";
 import TaskDetails from "./pages/WorkArea/ProjectWork/TaskDetails";
+import AIInsight from "./pages/AIInsight/AIInsight";
 
 import GainerProfilePage from "./pages/GainerProfilePage/GainerProfilePage";
 
@@ -33,6 +34,7 @@ function App() {
           <Route path="/work" element={<WorkArea />} />
           <Route path="/work/projects/:projectId" element={<ProjectWork />} />
           <Route path="/work/projects/:projectId/tasks/:taskId" element={<TaskDetails />} />
+          <Route path="/ai-insight" element={<AIInsight />} />
           <Route path="/project/:id" element={<ProjectPage />} />
           <Route path="/profile/:id" element={<ProfilePage />} />
           <Route path="/profile/gainer/:id" element={<ProfilePage />} />

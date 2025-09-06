@@ -1,18 +1,19 @@
 import React, { useState } from "react";
-import { X, Send } from "lucide-react";
+import { X, Send, Loader } from "lucide-react";
 import "./NewPostComposer.css";
 
 interface NewPostComposerProps {
   onSubmit: (content: string) => void;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
-const NewPostComposer: React.FC<NewPostComposerProps> = ({ onSubmit, onCancel }) => {
+const NewPostComposer: React.FC<NewPostComposerProps> = ({ onSubmit, onCancel, isLoading = false }) => {
   const [content, setContent] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (content.trim()) {
+    if (content.trim() && !isLoading) {
       onSubmit(content.trim());
       setContent("");
     }
@@ -56,6 +57,7 @@ const NewPostComposer: React.FC<NewPostComposerProps> = ({ onSubmit, onCancel })
           className="composer-textarea"
           rows={3}
           autoFocus
+          disabled={isLoading}
         />
         
         <div className="composer-actions">
@@ -68,17 +70,22 @@ const NewPostComposer: React.FC<NewPostComposerProps> = ({ onSubmit, onCancel })
               type="button"
               onClick={onCancel}
               className="composer-cancel"
+              disabled={isLoading}
             >
               Cancel
             </button>
             
             <button
               type="submit"
-              disabled={!content.trim()}
+              disabled={!content.trim() || isLoading}
               className="composer-submit"
             >
-              <Send size={16} />
-              Post
+              {isLoading ? (
+                <Loader size={16} className="animate-spin" />
+              ) : (
+                <Send size={16} />
+              )}
+              {isLoading ? 'Posting...' : 'Post'}
             </button>
           </div>
         </div>

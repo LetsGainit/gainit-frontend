@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { 
   MessageSquare, 
@@ -9,127 +9,68 @@ import {
   Reply, 
   Share2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Loader,
+  AlertCircle
 } from "lucide-react";
 import PostCard from "./Forum/PostCard";
 import NewPostComposer from "./Forum/NewPostComposer";
+import { 
+  getProjectPosts, 
+  createPost, 
+  updatePost, 
+  deletePost, 
+  createReply, 
+  togglePostLike, 
+  toggleReplyLike,
+  Post,
+  Reply as ForumReply,
+  CreatePostDto,
+  UpdatePostDto,
+  CreateReplyDto
+} from "../../../services/forum.api";
 import "./Forum.css";
 
-export type ForumReply = {
-  replyId: string;
-  postId: string;
-  authorId: string;
-  authorName: string;
-  authorRole: string;
-  content: string;
-  createdAtUtc: string;
-  updatedAtUtc?: string;
-  likeCount: number;
-  isLikedByCurrentUser: boolean;
-};
-
-export type ForumPost = {
-  postId: string;
-  projectId: string;
-  authorId: string;
-  authorName: string;
-  authorRole: string;
-  content: string;
-  createdAtUtc: string;
-  updatedAtUtc?: string;
-  likeCount: number;
-  replyCount: number;
-  isLikedByCurrentUser: boolean;
-  replies?: ForumReply[];
-};
+// Use imported types directly, no need for re-export
 
 const Forum: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   
   // Local state
-  const [posts, setPosts] = useState<ForumPost[]>([
-    {
-      postId: "post-1",
-      projectId: projectId || "temp-1",
-      authorId: "user-1",
-      authorName: "John Doe",
-      authorRole: "Frontend Developer",
-      content: "Hey team! I've been working on the authentication flow and wanted to get everyone's thoughts on the UX. Should we go with a two-step verification or keep it simple with just email/password?",
-      createdAtUtc: "2024-01-20T10:30:00Z",
-      likeCount: 5,
-      replyCount: 3,
-      isLikedByCurrentUser: false,
-      replies: [
-        {
-          replyId: "reply-1",
-          postId: "post-1",
-          authorId: "user-2",
-          authorName: "Jane Smith",
-          authorRole: "Backend Developer",
-          content: "I think two-step would be great for security, especially since we're handling user data. We could implement it as optional initially.",
-          createdAtUtc: "2024-01-20T11:15:00Z",
-          likeCount: 2,
-          isLikedByCurrentUser: true
-        },
-        {
-          replyId: "reply-2",
-          postId: "post-1",
-          authorId: "user-3",
-          authorName: "Mike Johnson",
-          authorRole: "UI/UX Designer",
-          content: "Agreed with Jane. We could also add social login options to reduce friction for users who prefer that.",
-          createdAtUtc: "2024-01-20T12:00:00Z",
-          likeCount: 1,
-          isLikedByCurrentUser: false
-        }
-      ]
-    },
-    {
-      postId: "post-2",
-      projectId: projectId || "temp-1",
-      authorId: "user-2",
-      authorName: "Jane Smith",
-      authorRole: "Backend Developer",
-      content: "Quick update: The API endpoints for user management are ready for testing. Please check the documentation in the project wiki and let me know if you encounter any issues.",
-      createdAtUtc: "2024-01-19T14:20:00Z",
-      likeCount: 3,
-      replyCount: 1,
-      isLikedByCurrentUser: true,
-      replies: [
-        {
-          replyId: "reply-3",
-          postId: "post-2",
-          authorId: "user-1",
-          authorName: "John Doe",
-          authorRole: "Frontend Developer",
-          content: "Thanks Jane! I'll test them out this afternoon.",
-          createdAtUtc: "2024-01-19T15:30:00Z",
-          likeCount: 0,
-          isLikedByCurrentUser: false
-        }
-      ]
-    },
-    {
-      postId: "post-3",
-      projectId: projectId || "temp-1",
-      authorId: "user-3",
-      authorName: "Mike Johnson",
-      authorRole: "UI/UX Designer",
-      content: "I've uploaded the latest wireframes for the dashboard. The new layout should improve navigation and make better use of screen space. Feedback welcome!",
-      createdAtUtc: "2024-01-18T09:45:00Z",
-      likeCount: 7,
-      replyCount: 0,
-      isLikedByCurrentUser: false,
-      replies: []
-    }
-  ]);
-
+  const [posts, setPosts] = useState<Post[]>([]);
   const [sortBy, setSortBy] = useState<"newest" | "top" | "replies">("newest");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showNewPost, setShowNewPost] = useState(false);
+  const [isCreatingPost, setIsCreatingPost] = useState(false);
+
+  // Fetch posts
+  const fetchPosts = useCallback(async () => {
+    if (!projectId) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      console.log(`[FORUM] Fetching posts for project ${projectId}`);
+      const postsData = await getProjectPosts(projectId);
+      setPosts(postsData);
+      console.log(`[FORUM] Successfully fetched ${postsData.length} posts for project ${projectId}`);
+    } catch (err) {
+      console.error(`[FORUM] Error fetching posts:`, err);
+      setError(err instanceof Error ? err.message : 'Failed to load posts');
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId]);
+
+  // Load posts on mount
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
 
   // Filter and sort posts
   const filteredAndSortedPosts = useMemo(() => {
@@ -167,88 +108,93 @@ const Forum: React.FC = () => {
   const paginatedPosts = filteredAndSortedPosts.slice(startIndex, startIndex + pageSize);
 
   // Handlers
-  const handleCreatePost = (content: string) => {
-    const newPost: ForumPost = {
-      postId: crypto.randomUUID(),
-      projectId: projectId || "temp-1",
-      authorId: "current-user",
-      authorName: "You",
-      authorRole: "Developer",
-      content,
-      createdAtUtc: new Date().toISOString(),
-      likeCount: 0,
-      replyCount: 0,
-      isLikedByCurrentUser: false,
-      replies: []
-    };
+  const handleCreatePost = async (content: string) => {
+    if (!projectId || isCreatingPost) return;
 
-    setPosts(prev => [newPost, ...prev]);
-    setShowNewPost(false);
+    setIsCreatingPost(true);
+    try {
+      const dto: CreatePostDto = {
+        projectId,
+        content
+      };
+
+      console.log(`[FORUM] Creating post for project ${projectId}`);
+      const newPost = await createPost(dto);
+      setPosts(prev => [newPost, ...prev]);
+      setShowNewPost(false);
+      console.log(`[FORUM] Successfully created post:`, newPost);
+    } catch (err) {
+      console.error(`[FORUM] Error creating post:`, err);
+      setError(err instanceof Error ? err.message : 'Failed to create post');
+    } finally {
+      setIsCreatingPost(false);
+    }
   };
 
-  const handleToggleLike = (postId: string) => {
-    setPosts(prev => prev.map(post => {
-      if (post.postId === postId) {
-        const isLiked = post.isLikedByCurrentUser;
-        return {
-          ...post,
-          isLikedByCurrentUser: !isLiked,
-          likeCount: isLiked ? post.likeCount - 1 : post.likeCount + 1
-        };
-      }
-      return post;
-    }));
+  const handleToggleLike = async (postId: string) => {
+    try {
+      console.log(`[FORUM] Toggling like for post ${postId}`);
+      const updatedPost = await togglePostLike(postId);
+      setPosts(prev => prev.map(post => 
+        post.postId === postId ? updatedPost : post
+      ));
+      console.log(`[FORUM] Successfully toggled like for post:`, updatedPost);
+    } catch (err) {
+      console.error(`[FORUM] Error toggling like for post:`, err);
+      setError(err instanceof Error ? err.message : 'Failed to toggle like');
+    }
   };
 
   const handleToggleReplies = (postId: string) => {
     // This will be handled by PostCard component
   };
 
-  const handleCreateReply = (postId: string, content: string) => {
-    const newReply: ForumReply = {
-      replyId: crypto.randomUUID(),
-      postId,
-      authorId: "current-user",
-      authorName: "You",
-      authorRole: "Developer",
-      content,
-      createdAtUtc: new Date().toISOString(),
-      likeCount: 0,
-      isLikedByCurrentUser: false
-    };
+  const handleCreateReply = async (postId: string, content: string) => {
+    try {
+      const dto: CreateReplyDto = {
+        postId,
+        content
+      };
 
-    setPosts(prev => prev.map(post => {
-      if (post.postId === postId) {
-        return {
-          ...post,
-          replies: [...(post.replies || []), newReply],
-          replyCount: post.replyCount + 1
-        };
-      }
-      return post;
-    }));
+      console.log(`[FORUM] Creating reply for post ${postId}`);
+      const newReply = await createReply(dto);
+      setPosts(prev => prev.map(post => {
+        if (post.postId === postId) {
+          return {
+            ...post,
+            replies: [...(post.replies || []), newReply],
+            replyCount: post.replyCount + 1
+          };
+        }
+        return post;
+      }));
+      console.log(`[FORUM] Successfully created reply:`, newReply);
+    } catch (err) {
+      console.error(`[FORUM] Error creating reply:`, err);
+      setError(err instanceof Error ? err.message : 'Failed to create reply');
+    }
   };
 
-  const handleLikeReply = (postId: string, replyId: string) => {
-    setPosts(prev => prev.map(post => {
-      if (post.postId === postId) {
-        return {
-          ...post,
-          replies: post.replies?.map(reply => {
-            if (reply.replyId === replyId) {
-              const isLiked = reply.isLikedByCurrentUser;
-              return {
-                ...reply,
-                isLikedByCurrentUser: !isLiked,
-                likeCount: isLiked ? reply.likeCount - 1 : reply.likeCount + 1
-              };
-            }
-            return reply;
-          })
-        };
-      }
-      return post;
-    }));
+  const handleLikeReply = async (postId: string, replyId: string) => {
+    try {
+      console.log(`[FORUM] Toggling like for reply ${replyId}`);
+      const updatedReply = await toggleReplyLike(replyId);
+      setPosts(prev => prev.map(post => {
+        if (post.postId === postId) {
+          return {
+            ...post,
+            replies: post.replies?.map(reply => 
+              reply.replyId === replyId ? updatedReply : reply
+            )
+          };
+        }
+        return post;
+      }));
+      console.log(`[FORUM] Successfully toggled like for reply:`, updatedReply);
+    } catch (err) {
+      console.error(`[FORUM] Error toggling like for reply:`, err);
+      setError(err instanceof Error ? err.message : 'Failed to toggle like');
+    }
   };
 
   const handleSortChange = (newSort: "newest" | "top" | "replies") => {
@@ -297,12 +243,29 @@ const Forum: React.FC = () => {
     </div>
   );
 
+  // Error state
+  const renderError = () => (
+    <div className="forum-error">
+      <div className="error-card">
+        <AlertCircle size={48} className="error-icon" />
+        <h3>Unable to load posts</h3>
+        <p>{error}</p>
+        <button 
+          className="retry-button"
+          onClick={fetchPosts}
+        >
+          Try Again
+        </button>
+      </div>
+    </div>
+  );
+
   // Empty state
   const renderEmpty = () => (
     <div className="forum-empty">
       <div className="empty-card">
         <MessageSquare size={48} className="empty-icon" />
-        <h3>No posts yet</h3>
+        <h3>No posts yet — start the conversation!</h3>
         <p>Be the first to start a discussion in this project's forum.</p>
         <button 
           className="empty-action-button"
@@ -361,6 +324,7 @@ const Forum: React.FC = () => {
         <NewPostComposer
           onSubmit={handleCreatePost}
           onCancel={() => setShowNewPost(false)}
+          isLoading={isCreatingPost}
         />
       )}
 
@@ -368,6 +332,8 @@ const Forum: React.FC = () => {
       <div className="forum-content">
         {loading ? (
           renderSkeleton()
+        ) : error ? (
+          renderError()
         ) : paginatedPosts.length === 0 ? (
           renderEmpty()
         ) : (

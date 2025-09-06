@@ -26,3 +26,17 @@ export async function getBoardData(correlationId, params = {}) {
     });
     return response.data;
 }
+
+export async function getProjectTasks(correlationId, projectId, params = {}) {
+    const response = await api.get(`/tasks/project/${projectId}`, {
+        headers: {
+            'X-Correlation-ID': correlationId
+        },
+        params: {
+            includeCompleted: true,
+            sortBy: 'CreatedAtUtc',
+            ...params
+        }
+    });
+    return response.data;
+}

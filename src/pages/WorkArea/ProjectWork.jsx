@@ -1,35 +1,46 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { RefreshCw, Calendar, CheckCircle, BarChart3, GitPullRequest, ClipboardCheck, MessageSquare, Code, BarChart } from "lucide-react";
+import { RefreshCw, Calendar, CheckCircle, BarChart3, GitPullRequest, ClipboardCheck, MessageSquare, Code, AlertCircle } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { getProjectById } from "../../services/projectsService";
 import { getMyTasks, getBoardData } from "../../services/tasksService";
-import { getUserActivity } from "../../services/githubService";
+import { getProjectGitHubStats, getOpenPRsCount } from "../../services/github-stats.api";
 import WorkAreaLayout from "../../components/layout/WorkAreaLayout";
 import Footer from "../../components/Footer";
 import MyTasks from "./ProjectWork/MyTasks";
 import Forum from "./ProjectWork/Forum";
+import CodeTab from "../Project/CodeTab";
+import MilestonesTab from "../Project/MilestonesTab";
 import "./ProjectWork.css";
 
 const ProjectWork = () => {
   const { projectId } = useParams();
-  const { userInfo } = useAuth();
+  const { userInfo, isAuthenticated, loading: authLoading } = useAuth();
+  
+  // Debug logging
+  console.log('[ProjectWork] Component mounted with:', {
+    projectId,
+    userInfo,
+    isAuthenticated,
+    authLoading
+  });
   
   // State management
   const [project, setProject] = useState(null);
   const [myTasks, setMyTasks] = useState([]);
   const [board, setBoard] = useState([]);
-  const [myOpenPRsCount, setMyOpenPRsCount] = useState(0);
+  const [githubStats, setGithubStats] = useState(null);
   const [activeTab, setActiveTab] = useState("My Tasks");
   const [activeView, setActiveView] = useState("my-projects");
   
-  // Loading states
-  const [loading, setLoading] = useState({
-    project: false,
-    tasks: false,
-    board: false,
-    prs: false
+  // Individual KPI states
+  const [kpiStates, setKpiStates] = useState({
+    progress: { loading: false, error: null, data: null },
+    daysLeft: { loading: false, error: null, data: null },
+    myOpenTasks: { loading: false, error: null, data: null },
+    openPRs: { loading: false, error: null, data: null }
   });
+  
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
@@ -42,74 +53,43 @@ const ProjectWork = () => {
     });
   };
 
-  // Temporary mock data for testing
-  const tempMockData = {
-    project: {
-      projectId: "temp-1",
-      projectName: "Eco-Friendly Mobile App",
-      projectDescription: "A mobile application that helps users track their carbon footprint and provides eco-friendly lifestyle recommendations.",
-      projectPictureUrl: "/default-featured-image.png",
-      duration: "90.00:00:00",
-      createdAtUtc: "2024-01-01T00:00:00Z",
-      status: "InProgress",
-      technologies: ["React Native", "Node.js", "MongoDB", "AWS", "Firebase"],
-      projectTeamMembers: [
-        { userId: "1", fullName: "John Doe", roleInProject: "Frontend Developer" },
-        { userId: "2", fullName: "Jane Smith", roleInProject: "Backend Developer" },
-        { userId: "3", fullName: "Mike Johnson", roleInProject: "UI/UX Designer" }
-      ],
-      repositoryLink: "https://github.com/example/eco-app"
-    },
-    tasks: [
-      { taskId: "1", projectId: "temp-1", status: "InProgress", title: "Setup project structure" },
-      { taskId: "2", projectId: "temp-1", status: "Done", title: "Create wireframes" },
-      { taskId: "3", projectId: "temp-1", status: "InProgress", title: "Implement user authentication" },
-      { taskId: "4", projectId: "temp-1", status: "Done", title: "Design database schema" }
-    ],
-    board: [
-      { taskId: "1", projectId: "temp-1", status: "InProgress", title: "Setup project structure" },
-      { taskId: "2", projectId: "temp-1", status: "Done", title: "Create wireframes" },
-      { taskId: "3", projectId: "temp-1", status: "InProgress", title: "Implement user authentication" },
-      { taskId: "4", projectId: "temp-1", status: "Done", title: "Design database schema" },
-      { taskId: "5", projectId: "temp-1", status: "InProgress", title: "Build API endpoints" },
-      { taskId: "6", projectId: "temp-1", status: "Done", title: "Setup CI/CD pipeline" }
-    ],
-    githubActivity: [
-      { type: "pull_request", state: "open", title: "Add user authentication feature" },
-      { type: "pull_request", state: "closed", title: "Fix database connection issue" }
-    ]
+  // Helper function to update KPI state
+  const updateKpiState = (kpiName, updates) => {
+    setKpiStates(prev => ({
+      ...prev,
+      [kpiName]: { ...prev[kpiName], ...updates }
+    }));
   };
 
   // Fetch project details
   const fetchProject = useCallback(async () => {
-    if (!projectId) return;
+    if (!projectId) {
+      console.log('[PROJECT-WORK] No projectId provided');
+      return;
+    }
 
     const correlationId = generateCorrelationId();
     console.log(`[PROJECT-WORK] Fetching project ${projectId} with correlation ID: ${correlationId}`);
 
     try {
-      setLoading(prev => ({ ...prev, project: true }));
+      updateKpiState('daysLeft', { loading: true, error: null });
       setError(null);
 
-      // TEMPORARY: Use mock data for testing
-      // TODO: Remove this and uncomment the real API call below
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
-      const projectData = projectId === "temp-1" ? tempMockData.project : null;
-      
-      // Real API call (commented out for testing)
-      // const projectData = await getProjectById(projectId, correlationId);
+      const projectData = await getProjectById(projectId, correlationId);
 
       if (projectData) {
-        console.log(`[PROJECT-WORK] Successfully fetched project: ${projectData.projectName}`);
+        console.log(`[PROJECT-WORK] Successfully fetched project:`, projectData);
         setProject(projectData);
+        updateKpiState('daysLeft', { loading: false, data: projectData });
       } else {
+        console.error("[PROJECT-WORK] Project data is null/undefined");
         setError("Project not found");
+        updateKpiState('daysLeft', { loading: false, error: "Project not found" });
       }
     } catch (err) {
       console.error("[PROJECT-WORK] Failed to fetch project:", err);
-      setError("Failed to load project details");
-    } finally {
-      setLoading(prev => ({ ...prev, project: false }));
+      setError(`Failed to load project details: ${err.message || 'Unknown error'}`);
+      updateKpiState('daysLeft', { loading: false, error: err.message || "Failed to load project" });
     }
   }, [projectId]);
 
@@ -121,24 +101,18 @@ const ProjectWork = () => {
     console.log(`[PROJECT-WORK] Fetching my tasks with correlation ID: ${correlationId}`);
 
     try {
-      setLoading(prev => ({ ...prev, tasks: true }));
+      updateKpiState('myOpenTasks', { loading: true, error: null });
 
-      // TEMPORARY: Use mock data for testing
-      // TODO: Remove this and uncomment the real API call below
-      await new Promise(resolve => setTimeout(resolve, 300)); // Simulate API delay
-      const tasksData = projectId === "temp-1" ? tempMockData.tasks : [];
-      
-      // Real API call (commented out for testing)
-      // const tasksData = await getMyTasks(correlationId);
+      const tasksData = await getMyTasks(correlationId);
 
       console.log(`[PROJECT-WORK] Successfully fetched ${tasksData.length} tasks`);
       setMyTasks(tasksData || []);
+      updateKpiState('myOpenTasks', { loading: false, data: tasksData || [] });
     } catch (err) {
       console.error("[PROJECT-WORK] Failed to fetch my tasks:", err);
-    } finally {
-      setLoading(prev => ({ ...prev, tasks: false }));
+      updateKpiState('myOpenTasks', { loading: false, error: err.message || "Failed to load tasks" });
     }
-  }, [userInfo?.userId, projectId]);
+  }, [userInfo?.userId]);
 
   // Fetch board data
   const fetchBoard = useCallback(async () => {
@@ -148,57 +122,39 @@ const ProjectWork = () => {
     console.log(`[PROJECT-WORK] Fetching board data with correlation ID: ${correlationId}`);
 
     try {
-      setLoading(prev => ({ ...prev, board: true }));
+      updateKpiState('progress', { loading: true, error: null });
 
-      // TEMPORARY: Use mock data for testing
-      // TODO: Remove this and uncomment the real API call below
-      await new Promise(resolve => setTimeout(resolve, 400)); // Simulate API delay
-      const boardData = projectId === "temp-1" ? tempMockData.board : [];
-      
-      // Real API call (commented out for testing)
-      // const boardData = await getBoardData(correlationId);
+      const boardData = await getBoardData(correlationId);
 
       console.log(`[PROJECT-WORK] Successfully fetched ${boardData.length} board items`);
       setBoard(boardData || []);
+      updateKpiState('progress', { loading: false, data: boardData || [] });
     } catch (err) {
       console.error("[PROJECT-WORK] Failed to fetch board data:", err);
-    } finally {
-      setLoading(prev => ({ ...prev, board: false }));
+      updateKpiState('progress', { loading: false, error: err.message || "Failed to load board data" });
     }
   }, [projectId]);
 
-  // Fetch GitHub activity
-  const fetchGitHubActivity = useCallback(async () => {
-    if (!projectId || !userInfo?.userId) return;
+  // Fetch GitHub stats
+  const fetchGitHubStats = useCallback(async () => {
+    if (!projectId) return;
 
     const correlationId = generateCorrelationId();
-    console.log(`[PROJECT-WORK] Fetching GitHub activity for project ${projectId} with correlation ID: ${correlationId}`);
+    console.log(`[PROJECT-WORK] Fetching GitHub stats for project ${projectId} with correlation ID: ${correlationId}`);
 
     try {
-      setLoading(prev => ({ ...prev, prs: true }));
+      updateKpiState('openPRs', { loading: true, error: null });
 
-      // TEMPORARY: Use mock data for testing
-      // TODO: Remove this and uncomment the real API call below
-      await new Promise(resolve => setTimeout(resolve, 600)); // Simulate API delay
-      const activityData = projectId === "temp-1" ? tempMockData.githubActivity : [];
+      const statsData = await getProjectGitHubStats(projectId);
       
-      // Real API call (commented out for testing)
-      // const activityData = await getUserActivity(projectId, userInfo.userId, correlationId);
-
-      // Count open PRs from the activity data
-      const openPRs = activityData?.filter(item => 
-        item.type === 'pull_request' && item.state === 'open'
-      ) || [];
-      
-      console.log(`[PROJECT-WORK] Found ${openPRs.length} open PRs`);
-      setMyOpenPRsCount(openPRs.length);
+      console.log(`[PROJECT-WORK] Successfully fetched GitHub stats:`, statsData);
+      setGithubStats(statsData);
+      updateKpiState('openPRs', { loading: false, data: statsData });
     } catch (err) {
-      console.error("[PROJECT-WORK] Failed to fetch GitHub activity:", err);
-      setMyOpenPRsCount(0);
-    } finally {
-      setLoading(prev => ({ ...prev, prs: false }));
+      console.error("[PROJECT-WORK] Failed to fetch GitHub stats:", err);
+      updateKpiState('openPRs', { loading: false, error: err.message || "Failed to load GitHub stats" });
     }
-  }, [projectId, userInfo?.userId]);
+  }, [projectId]);
 
   // Fetch all data
   const fetchAllData = useCallback(async (isRefresh = false) => {
@@ -212,7 +168,7 @@ const ProjectWork = () => {
         fetchProject(),
         fetchMyTasks(),
         fetchBoard(),
-        fetchGitHubActivity()
+        fetchGitHubStats()
       ]);
     } catch (err) {
       console.error("[PROJECT-WORK] Failed to fetch data:", err);
@@ -221,14 +177,59 @@ const ProjectWork = () => {
         setRefreshing(false);
       }
     }
-  }, [fetchProject, fetchMyTasks, fetchBoard, fetchGitHubActivity]);
+  }, [fetchProject, fetchMyTasks, fetchBoard, fetchGitHubStats]);
 
   // Load data on mount
   useEffect(() => {
     if (projectId && userInfo?.userId) {
+      console.log('[ProjectWork] Fetching data for project:', projectId);
       fetchAllData();
+    } else {
+      console.log('[ProjectWork] Not fetching data - missing projectId or userInfo:', { projectId, userInfo });
     }
   }, [projectId, userInfo?.userId, fetchAllData]);
+
+  // Show loading state while auth is loading
+  if (authLoading) {
+    return (
+      <div className="work-area-content">
+        <div className="project-work-page">
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p>Loading project...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="work-area-content">
+        <div className="project-work-page">
+          <div className="error-container">
+            <h2>Authentication Required</h2>
+            <p>Please sign in to view this project.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if no projectId
+  if (!projectId) {
+    return (
+      <div className="work-area-content">
+        <div className="project-work-page">
+          <div className="error-container">
+            <h2>Project Not Found</h2>
+            <p>No project ID provided.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Refresh handler
   const handleRefresh = () => {
@@ -237,16 +238,29 @@ const ProjectWork = () => {
 
   // KPI Calculations
   const calculateProgress = () => {
-    // Filter board items to this project
-    // TODO: Backend should include projectId in board items response for proper filtering
-    const projectTasks = board.filter(task => task.projectId === projectId);
+    if (kpiStates.progress.loading || kpiStates.progress.error) {
+      return null;
+    }
+
+    const boardData = kpiStates.progress.data || board;
+    
+    // Filter board items to this project if projectId is available
+    const projectTasks = boardData.filter(task => 
+      !task.projectId || task.projectId === projectId
+    );
     
     if (projectTasks.length === 0) {
       // Fallback to my tasks if board doesn't include projectId
-      // TODO: This undercounts (only my tasks) until backend exposes project-scoped board filter
-      const myProjectTasks = myTasks.filter(task => task.projectId === projectId);
-      const completedMyTasks = myProjectTasks.filter(task => task.status === 'Done');
-      return myProjectTasks.length > 0 ? Math.round((completedMyTasks.length / myProjectTasks.length) * 100) : 0;
+      const myProjectTasks = myTasks.filter(task => 
+        (!task.projectId || task.projectId === projectId) && 
+        task.status !== 'Done'
+      );
+      const completedMyTasks = myTasks.filter(task => 
+        (!task.projectId || task.projectId === projectId) && 
+        task.status === 'Done'
+      );
+      const totalMyTasks = myProjectTasks.length + completedMyTasks.length;
+      return totalMyTasks > 0 ? Math.round((completedMyTasks.length / totalMyTasks) * 100) : 0;
     }
 
     const totalTasks = projectTasks.length;
@@ -255,25 +269,45 @@ const ProjectWork = () => {
   };
 
   const calculateDaysLeft = () => {
-    if (!project?.createdAtUtc || !project?.duration) {
-      // TODO: Add milestone-based deadline calculation when available
+    if (kpiStates.daysLeft.loading || kpiStates.daysLeft.error) {
       return null;
     }
 
-    const startDate = new Date(project.createdAtUtc);
-    const durationInDays = parseInt(project.duration.split('.')[0]) || 0;
+    const projectData = kpiStates.daysLeft.data || project;
+    
+    if (!projectData?.createdAtUtc || !projectData?.duration) {
+      return null;
+    }
+
+    const startDate = new Date(projectData.createdAtUtc);
+    const durationInDays = parseInt(projectData.duration.split('.')[0]) || 0;
     const endDate = new Date(startDate.getTime() + (durationInDays * 24 * 60 * 60 * 1000));
     const today = new Date();
     const daysLeft = Math.ceil((endDate - today) / (24 * 60 * 60 * 1000));
     
-    return Math.max(0, daysLeft);
+    return daysLeft; // Can be negative (overdue)
   };
 
   const calculateMyOpenTasks = () => {
-    const myProjectTasks = myTasks.filter(task => 
-      task.projectId === projectId && task.status !== 'Done'
+    if (kpiStates.myOpenTasks.loading || kpiStates.myOpenTasks.error) {
+      return null;
+    }
+
+    const tasksData = kpiStates.myOpenTasks.data || myTasks;
+    const myProjectTasks = tasksData.filter(task => 
+      (!task.projectId || task.projectId === projectId) && 
+      task.status !== 'Done'
     );
     return myProjectTasks.length;
+  };
+
+  const calculateOpenPRs = () => {
+    if (kpiStates.openPRs.loading || kpiStates.openPRs.error) {
+      return null;
+    }
+
+    const statsData = kpiStates.openPRs.data || githubStats;
+    return getOpenPRsCount(statsData);
   };
 
   // KPI Data
@@ -284,7 +318,8 @@ const ProjectWork = () => {
       value: calculateProgress(),
       suffix: '%',
       icon: BarChart3,
-      loading: loading.board || loading.tasks
+      state: kpiStates.progress,
+      emptyMessage: 'No tasks yet'
     },
     {
       id: 'daysLeft',
@@ -292,7 +327,9 @@ const ProjectWork = () => {
       value: calculateDaysLeft(),
       suffix: '',
       icon: Calendar,
-      loading: loading.project
+      state: kpiStates.daysLeft,
+      emptyMessage: 'No target date',
+      isOverdue: calculateDaysLeft() !== null && calculateDaysLeft() < 0
     },
     {
       id: 'myTasks',
@@ -300,19 +337,21 @@ const ProjectWork = () => {
       value: calculateMyOpenTasks(),
       suffix: '',
       icon: CheckCircle,
-      loading: loading.tasks
+      state: kpiStates.myOpenTasks,
+      emptyMessage: '0'
     },
     {
       id: 'myPRs',
       label: 'Open PRs',
-      value: myOpenPRsCount,
+      value: calculateOpenPRs(),
       suffix: '',
       icon: GitPullRequest,
-      loading: loading.prs
+      state: kpiStates.openPRs,
+      emptyMessage: '0'
     }
   ];
 
-  const isLoading = Object.values(loading).some(Boolean);
+  const isLoading = Object.values(kpiStates).some(state => state.loading);
 
   // Tab configuration
   const tabs = [
@@ -332,9 +371,9 @@ const ProjectWork = () => {
       icon: Code,
     },
     {
-      id: "Analytics",
-      label: "Analytics",
-      icon: BarChart,
+      id: "Milestones",
+      label: "Milestones",
+      icon: CheckCircle,
     },
   ];
 
@@ -359,12 +398,23 @@ const ProjectWork = () => {
         return "Forum (placeholder)";
       case "Code":
         return "Code (placeholder)";
-      case "Analytics":
-        return "Analytics (placeholder)";
+      case "Milestones":
+        return "Milestones (placeholder)";
       default:
         return "Content (placeholder)";
     }
   };
+
+  // Debug render
+  console.log('[ProjectWork] Rendering with state:', {
+    projectId,
+    userInfo,
+    isAuthenticated,
+    authLoading,
+    project,
+    error,
+    kpiStates
+  });
 
   return (
     <>
@@ -375,10 +425,10 @@ const ProjectWork = () => {
             <div className="project-header">
               <div className="header-content">
                 <h1 className="project-title">
-                  {loading.project ? (
+                  {kpiStates.daysLeft.loading ? (
                     <div className="title-skeleton"></div>
                   ) : (
-                    project?.projectName || "Loading..."
+                    project?.projectName || `Project ${projectId || 'Unknown'}`
                   )}
                 </h1>
               </div>
@@ -402,18 +452,24 @@ const ProjectWork = () => {
               <div className="kpi-grid">
                 {kpis.map((kpi) => {
                   const Icon = kpi.icon;
+                  const { loading, error, data } = kpi.state;
+                  
                   return (
                     <div key={kpi.id} className="kpi-card">
                       <div className="kpi-content">
                         <div className="kpi-label">{kpi.label}</div>
                         <div className="kpi-value">
-                          {kpi.loading ? (
+                          {loading ? (
                             <div className="kpi-skeleton"></div>
+                          ) : error ? (
+                            <div className="kpi-error" title={error}>
+                              <AlertCircle size={16} />
+                            </div>
                           ) : kpi.value === null ? (
                             <span className="kpi-empty">—</span>
                           ) : (
-                            <span className="kpi-number">
-                              {kpi.value}{kpi.suffix}
+                            <span className={`kpi-number ${kpi.isOverdue ? 'kpi-overdue' : ''}`}>
+                              {kpi.isOverdue ? `Overdue by ${Math.abs(kpi.value)}d` : `${kpi.value}${kpi.suffix}`}
                             </span>
                           )}
                         </div>
@@ -421,8 +477,23 @@ const ProjectWork = () => {
                           <Icon size={20} />
                         </div>
                       </div>
-                      {kpi.value === null && !kpi.loading && (
-                        <div className="kpi-empty-caption">no data</div>
+                      {kpi.value === null && !loading && !error && (
+                        <div className="kpi-empty-caption">{kpi.emptyMessage}</div>
+                      )}
+                      {error && (
+                        <div className="kpi-error-caption">
+                          <button 
+                            className="kpi-retry-button"
+                            onClick={() => {
+                              if (kpi.id === 'progress') fetchBoard();
+                              else if (kpi.id === 'daysLeft') fetchProject();
+                              else if (kpi.id === 'myTasks') fetchMyTasks();
+                              else if (kpi.id === 'myPRs') fetchGitHubStats();
+                            }}
+                          >
+                            Retry
+                          </button>
+                        </div>
                       )}
                     </div>
                   );
@@ -466,6 +537,10 @@ const ProjectWork = () => {
                 <MyTasks />
               ) : activeTab === "Forum" ? (
                 <Forum />
+              ) : activeTab === "Code" ? (
+                <CodeTab projectId={projectId} />
+              ) : activeTab === "Milestones" ? (
+                <MilestonesTab projectId={projectId} />
               ) : (
                 <div className="content-placeholder">
                   <h2 className="placeholder-title">{getContentPlaceholder()}</h2>

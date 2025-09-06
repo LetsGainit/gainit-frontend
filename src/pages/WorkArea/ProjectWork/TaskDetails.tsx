@@ -1,62 +1,57 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Clock, Plus, Edit2, Trash2, GripVertical, Check, X } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Plus, Edit2, Trash2, GripVertical, Check, X, Loader, AlertCircle } from "lucide-react";
 import { useAuth } from "../../../hooks/useAuth";
 import WorkAreaLayout from "../../../components/layout/WorkAreaLayout";
 import Footer from "../../../components/Footer";
 import SubtaskItem from "./SubtaskItem.tsx";
+import { getTask, createSubtask, updateSubtask, toggleSubtask, deleteSubtask, Task, Subtask, CreateSubtaskDto, UpdateSubtaskDto } from "../../../services/tasks.api";
 import "./TaskDetails.css";
 
-interface Task {
-  taskId: string;
-  title: string;
-  description: string;
-  status: "Todo" | "InProgress" | "Blocked" | "Done";
-  priority: "Low" | "Medium" | "High" | "Critical";
-  type: string;
-  dueAtUtc?: string;
-  createdAtUtc: string;
-  projectId: string;
-}
-
-interface Subtask {
-  subtaskId: string;
-  title: string;
-  isDone: boolean;
-  orderIndex: number;
-}
+// Task and Subtask interfaces are now imported from tasks.api.ts
 
 const TaskDetails: React.FC = () => {
   const { projectId, taskId } = useParams<{ projectId: string; taskId: string }>();
   const { userInfo } = useAuth();
   const navigate = useNavigate();
   
-  // Mock task data
-  const [task, setTask] = useState<Task>({
-    taskId: taskId || "task-1",
-    title: "Implement user authentication",
-    description: "Create login/registration, password reset, JWT, and role-based access.",
-    status: "InProgress",
-    priority: "High",
-    type: "Feature",
-    dueAtUtc: "2025-03-18T00:00:00Z",
-    createdAtUtc: "2025-02-20T00:00:00Z",
-    projectId: projectId || "temp-1"
-  });
-
-  // Mock subtasks data
-  const [subtasks, setSubtasks] = useState<Subtask[]>([
-    { subtaskId: "s1", title: "Design auth flows", isDone: true, orderIndex: 1 },
-    { subtaskId: "s2", title: "Build login/register endpoints", isDone: false, orderIndex: 2 },
-    { subtaskId: "s3", title: "JWT issue/verify middleware", isDone: false, orderIndex: 3 },
-  ]);
-
+  // State management
+  const [task, setTask] = useState<Task | null>(null);
+  const [subtasks, setSubtasks] = useState<Subtask[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const [activeView, setActiveView] = useState("my-projects");
+  const [isAddingSubtask, setIsAddingSubtask] = useState(false);
 
   // Derived counters
-  const completedSubtaskCount = subtasks.filter(subtask => subtask.isDone).length;
-  const subtaskCount = subtasks.length;
+  const completedSubtaskCount = task?.completedSubtaskCount || subtasks.filter(subtask => subtask.isDone).length;
+  const subtaskCount = task?.subtaskCount || subtasks.length;
+
+  // Fetch task data
+  useEffect(() => {
+    const fetchTaskData = async () => {
+      if (!taskId) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        console.log(`[TASK-DETAILS] Fetching task ${taskId}`);
+        const taskData = await getTask(taskId);
+        setTask(taskData);
+        setSubtasks(taskData.subtasks || []);
+        console.log(`[TASK-DETAILS] Successfully loaded task:`, taskData);
+      } catch (err) {
+        console.error(`[TASK-DETAILS] Error fetching task:`, err);
+        setError(err instanceof Error ? err.message : 'Failed to load task');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTaskData();
+  }, [taskId]);
 
   // Handle back navigation
   const handleBack = () => {
@@ -65,50 +60,90 @@ const TaskDetails: React.FC = () => {
 
   // Handle status change
   const handleStatusChange = (newStatus: "Todo" | "InProgress" | "Blocked" | "Done") => {
-    setTask(prev => ({ ...prev, status: newStatus }));
+    if (task) {
+      setTask(prev => prev ? { ...prev, status: newStatus } : null);
+    }
   };
 
   // Add new subtask
-  const handleAddSubtask = () => {
-    if (!newSubtaskTitle.trim()) return;
+  const handleAddSubtask = async () => {
+    if (!newSubtaskTitle.trim() || !taskId || isAddingSubtask) return;
 
-    const newSubtask: Subtask = {
-      subtaskId: `s${Date.now()}`,
-      title: newSubtaskTitle.trim(),
-      isDone: false,
-      orderIndex: Math.max(...subtasks.map(s => s.orderIndex), 0) + 1
-    };
+    setIsAddingSubtask(true);
+    try {
+      const dto: CreateSubtaskDto = {
+        title: newSubtaskTitle.trim(),
+        description: undefined,
+        orderIndex: Math.max(...subtasks.map(s => s.orderIndex), 0) + 1
+      };
 
-    setSubtasks(prev => [...prev, newSubtask]);
-    setNewSubtaskTitle("");
+      console.log(`[TASK-DETAILS] Creating subtask for task ${taskId}`);
+      const newSubtask = await createSubtask(taskId, dto);
+      setSubtasks(prev => [...prev, newSubtask]);
+      setNewSubtaskTitle("");
+      console.log(`[TASK-DETAILS] Successfully created subtask:`, newSubtask);
+    } catch (err) {
+      console.error(`[TASK-DETAILS] Error creating subtask:`, err);
+      setError(err instanceof Error ? err.message : 'Failed to create subtask');
+    } finally {
+      setIsAddingSubtask(false);
+    }
   };
 
   // Toggle subtask completion
-  const handleToggleSubtask = (subtaskId: string) => {
-    setSubtasks(prev => 
-      prev.map(subtask => 
-        subtask.subtaskId === subtaskId 
-          ? { ...subtask, isDone: !subtask.isDone }
-          : subtask
-      )
-    );
+  const handleToggleSubtask = async (subtaskId: string) => {
+    if (!taskId) return;
+
+    try {
+      console.log(`[TASK-DETAILS] Toggling subtask ${subtaskId}`);
+      const updatedSubtask = await toggleSubtask(taskId, subtaskId);
+      setSubtasks(prev => 
+        prev.map(subtask => 
+          subtask.subtaskId === subtaskId ? updatedSubtask : subtask
+        )
+      );
+      console.log(`[TASK-DETAILS] Successfully toggled subtask:`, updatedSubtask);
+    } catch (err) {
+      console.error(`[TASK-DETAILS] Error toggling subtask:`, err);
+      setError(err instanceof Error ? err.message : 'Failed to toggle subtask');
+    }
   };
 
   // Edit subtask title
-  const handleEditSubtask = (subtaskId: string, newTitle: string) => {
-    setSubtasks(prev => 
-      prev.map(subtask => 
-        subtask.subtaskId === subtaskId 
-          ? { ...subtask, title: newTitle }
-          : subtask
-      )
-    );
+  const handleEditSubtask = async (subtaskId: string, newTitle: string) => {
+    if (!taskId || !newTitle.trim()) return;
+
+    try {
+      const dto: UpdateSubtaskDto = {
+        title: newTitle.trim()
+      };
+
+      console.log(`[TASK-DETAILS] Updating subtask ${subtaskId}`);
+      const updatedSubtask = await updateSubtask(taskId, subtaskId, dto);
+      setSubtasks(prev => 
+        prev.map(subtask => 
+          subtask.subtaskId === subtaskId ? updatedSubtask : subtask
+        )
+      );
+      console.log(`[TASK-DETAILS] Successfully updated subtask:`, updatedSubtask);
+    } catch (err) {
+      console.error(`[TASK-DETAILS] Error updating subtask:`, err);
+      setError(err instanceof Error ? err.message : 'Failed to update subtask');
+    }
   };
 
   // Delete subtask
-  const handleDeleteSubtask = (subtaskId: string) => {
-    if (window.confirm("Are you sure you want to delete this subtask?")) {
+  const handleDeleteSubtask = async (subtaskId: string) => {
+    if (!taskId || !window.confirm("Are you sure you want to delete this subtask?")) return;
+
+    try {
+      console.log(`[TASK-DETAILS] Deleting subtask ${subtaskId}`);
+      await deleteSubtask(taskId, subtaskId);
       setSubtasks(prev => prev.filter(subtask => subtask.subtaskId !== subtaskId));
+      console.log(`[TASK-DETAILS] Successfully deleted subtask ${subtaskId}`);
+    } catch (err) {
+      console.error(`[TASK-DETAILS] Error deleting subtask:`, err);
+      setError(err instanceof Error ? err.message : 'Failed to delete subtask');
     }
   };
 
@@ -170,6 +205,67 @@ const TaskDetails: React.FC = () => {
     }
     return a.isDone ? 1 : -1;
   });
+
+  // Loading skeleton
+  const renderSkeleton = () => (
+    <div className="task-details-skeleton">
+      <div className="skeleton-header">
+        <div className="skeleton-back-button"></div>
+        <div className="skeleton-title"></div>
+      </div>
+      <div className="skeleton-meta"></div>
+      <div className="skeleton-description"></div>
+      <div className="skeleton-subtasks">
+        <div className="skeleton-subtask"></div>
+        <div className="skeleton-subtask"></div>
+        <div className="skeleton-subtask"></div>
+      </div>
+    </div>
+  );
+
+  // Error state
+  const renderError = () => (
+    <div className="task-details-error">
+      <div className="error-card">
+        <AlertCircle className="error-icon" size={48} />
+        <h3>Unable to load task</h3>
+        <p>{error}</p>
+        <button className="retry-button" onClick={() => window.location.reload()}>
+          Try Again
+        </button>
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <>
+        <div className="work-area-content">
+          <WorkAreaLayout activeView={activeView} setActiveView={setActiveView}>
+            <div className="task-details-page">
+              {renderSkeleton()}
+            </div>
+          </WorkAreaLayout>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (error || !task) {
+    return (
+      <>
+        <div className="work-area-content">
+          <WorkAreaLayout activeView={activeView} setActiveView={setActiveView}>
+            <div className="task-details-page">
+              {renderError()}
+            </div>
+          </WorkAreaLayout>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -240,14 +336,19 @@ const TaskDetails: React.FC = () => {
                   onKeyDown={(e) => e.key === 'Enter' && handleAddSubtask()}
                   placeholder="Add a subtask..."
                   className="subtask-input"
+                  disabled={isAddingSubtask}
                 />
                 <button 
                   onClick={handleAddSubtask}
-                  disabled={!newSubtaskTitle.trim()}
+                  disabled={!newSubtaskTitle.trim() || isAddingSubtask}
                   className="add-subtask-button"
                 >
-                  <Plus size={16} />
-                  Add
+                  {isAddingSubtask ? (
+                    <Loader size={16} className="animate-spin" />
+                  ) : (
+                    <Plus size={16} />
+                  )}
+                  {isAddingSubtask ? 'Adding...' : 'Add'}
                 </button>
               </div>
 
@@ -264,7 +365,7 @@ const TaskDetails: React.FC = () => {
                 ))}
                 {subtasks.length === 0 && (
                   <div className="empty-subtasks">
-                    <p>No subtasks yet. Add one above to get started!</p>
+                    <p>No subtasks yet — add your first one!</p>
                   </div>
                 )}
               </div>
