@@ -2,6 +2,9 @@ import { Clock, Globe, GitBranch, User, Users, Mail, ArrowLeft, ExternalLink, Gi
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import api from "../../services/api";
+import RequestToJoinModal from "../../components/RequestToJoinModal";
+import Toast from "../../components/Toast";
 import "../../css/ProjectPage.css";
 
 function ProjectPage() {
@@ -10,6 +13,10 @@ function ProjectPage() {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [projectSource, setProjectSource] = useState(null); // 'Active' or 'Template'
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [joinRequestPending, setJoinRequestPending] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     async function fetchProject() {
@@ -25,7 +32,7 @@ function ProjectPage() {
             `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/${projectId}`
           );
           projectData = activeRes.data;
-          console.log('[ProjectPage] Using active endpoint for project:', projectId);
+          setProjectSource('Active');
         } catch (activeErr) {
           // If active fails, try template endpoint
           try {
@@ -33,14 +40,14 @@ function ProjectPage() {
               `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/template/${projectId}`
             );
             projectData = templateRes.data;
-            console.log('[ProjectPage] Using template endpoint for project:', projectId);
+            setProjectSource('Template');
           } catch (templateErr) {
-            // If both fail, use default endpoint
+            // If both fail, use default endpoint (treat as Active)
             const defaultRes = await axios.get(
               `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/${projectId}`
             );
             projectData = defaultRes.data;
-            console.log('[ProjectPage] Using default endpoint for project:', projectId);
+            setProjectSource('Active');
           }
         }
         
@@ -53,6 +60,36 @@ function ProjectPage() {
     }
     fetchProject();
   }, [projectId]);
+
+  const handleRequestToJoin = () => {
+    setIsRequestModalOpen(true);
+  };
+
+  const handleJoinRequestSubmit = async (data) => {
+    try {
+      await api.post(`/projects/${projectId}/createrequest`, {
+        requestedRole: data.requestedRole,
+        message: data.message
+      });
+      
+      setJoinRequestPending(true);
+      setIsRequestModalOpen(false);
+      setToast({
+        message: "Join request sent successfully!",
+        type: "success"
+      });
+    } catch (error) {
+      console.error('Failed to send join request:', error);
+      setToast({
+        message: error.response?.data?.message || "Failed to send join request. Please try again.",
+        type: "error"
+      });
+    }
+  };
+
+  const handleToastClose = () => {
+    setToast(null);
+  };
 
   if (loading) {
     return (
@@ -88,7 +125,7 @@ function ProjectPage() {
   const image = project.projectPictureUrl || "/default-featured-image.png";
   const repositoryLink = project.repositoryLink;
   const goals = project.goals || [];
-  const openRoles = project.openRoles || [];
+  const openRoles = project.requiredRoles || project.openRoles || [];
   const technologies = project.technologies || [];
   const programmingLanguages = project.programmingLanguages || [];
   const team = (project.projectTeamMembers || []).map(member => ({
@@ -97,7 +134,7 @@ function ProjectPage() {
     role: member.roleInProject,
     profileLink: member.userId ? `/profile/${member.userId}` : null
   }));
-  const startDate = project.createdAtUtc ? new Date(project.createdAtUtc).toLocaleDateString() : "N/A";
+  const startDate = project.createdAtUtc ? new Date(project.createdAtUtc).toLocaleDateString() : "-";
 
   return (
     <div className="project-page">
@@ -139,21 +176,32 @@ function ProjectPage() {
             </div>
           </div>
           {(() => {
-            // Determine button based on project status/type
-            if (project.projectType === 'Template') {
+            // Determine button based on project source (which endpoint succeeded)
+            if (projectSource === 'Template') {
               return (
                 <button className="cta-button" style={{ marginTop: '1rem' }}>
-                  Start Project
+                  Create New Project
                 </button>
               );
-            } else if (project.projectStatus === 'Pending') {
+            } else if (projectSource === 'Active') {
+              if (joinRequestPending) {
+                return (
+                  <button className="cta-button" style={{ marginTop: '1rem', opacity: 0.7 }} disabled>
+                    Request Pending
+                  </button>
+                );
+              }
               return (
-                <button className="cta-button" style={{ marginTop: '1rem' }}>
+                <button 
+                  className="cta-button" 
+                  style={{ marginTop: '1rem' }}
+                  onClick={handleRequestToJoin}
+                >
                   Request to Join
                 </button>
               );
             }
-            // Don't render button for Active or Completed projects
+            // Don't render button if source is unknown
             return null;
           })()}
         </div>
@@ -288,6 +336,24 @@ function ProjectPage() {
           </div>
         </div>
       </div>
+
+      {/* Request to Join Modal */}
+      <RequestToJoinModal
+        isOpen={isRequestModalOpen}
+        onClose={() => setIsRequestModalOpen(false)}
+        onSubmit={handleJoinRequestSubmit}
+        availableRoles={openRoles}
+        projectTitle={title}
+      />
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={handleToastClose}
+        />
+      )}
     </div>
   );
 }
