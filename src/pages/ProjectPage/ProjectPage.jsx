@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import api from "../../services/api";
 import RequestToJoinModal from "../../components/RequestToJoinModal";
+import CreateProjectModal from "../../components/CreateProjectModal";
 import Toast from "../../components/Toast";
 import "../../css/ProjectPage.css";
 
@@ -16,6 +17,7 @@ function ProjectPage() {
   const [projectSource, setProjectSource] = useState(null); // 'Active' or 'Template'
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [joinRequestPending, setJoinRequestPending] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
@@ -82,6 +84,39 @@ function ProjectPage() {
       console.error('Failed to send join request:', error);
       setToast({
         message: error.response?.data?.message || "Failed to send join request. Please try again.",
+        type: "error"
+      });
+    }
+  };
+
+  const handleCreateProject = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const handleCreateProjectSubmit = async () => {
+    try {
+      const response = await api.post('/start-from-template', {
+        templateProjectId: projectId
+      });
+      
+      setIsCreateModalOpen(false);
+      setToast({
+        message: "Project created successfully.",
+        type: "success"
+      });
+      
+      // Navigate to the new project page
+      const newProjectId = response.data.newProjectId || response.data.projectId || response.data.id;
+      if (newProjectId) {
+        navigate(`/projects/${newProjectId}`);
+      } else {
+        // Fallback: navigate to projects list if no ID returned
+        navigate('/projects');
+      }
+    } catch (error) {
+      console.error('Failed to create project from template:', error);
+      setToast({
+        message: "Couldn't create the project. Please try again.",
         type: "error"
       });
     }
@@ -179,7 +214,11 @@ function ProjectPage() {
             // Determine button based on project source (which endpoint succeeded)
             if (projectSource === 'Template') {
               return (
-                <button className="cta-button" style={{ marginTop: '1rem' }}>
+                <button 
+                  className="cta-button" 
+                  style={{ marginTop: '1rem' }}
+                  onClick={handleCreateProject}
+                >
                   Create New Project
                 </button>
               );
@@ -343,6 +382,14 @@ function ProjectPage() {
         onClose={() => setIsRequestModalOpen(false)}
         onSubmit={handleJoinRequestSubmit}
         availableRoles={openRoles}
+        projectTitle={title}
+      />
+
+      {/* Create Project Modal */}
+      <CreateProjectModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreateProjectSubmit}
         projectTitle={title}
       />
 
