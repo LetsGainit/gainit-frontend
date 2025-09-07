@@ -23,6 +23,11 @@ export async function getProjectById(projectId, correlationId) {
     return response.data;
 }
 
+export async function getCurrentUser() {
+    const response = await api.get("/api/users/me");
+    return response.data;
+}
+
 export async function getMatchedProjects(userId, count = 5) {
     console.log(`[Home] Calling /api/match/profile with userId=${userId}, count=${count}`);
     const response = await api.get(`/api/match/profile?userId=${userId}&count=${count}`);

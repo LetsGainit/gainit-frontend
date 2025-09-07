@@ -2,7 +2,7 @@ import ProjectCard from "../../components/project/ProjectCard";
 import Footer from "../../components/Footer";
 import SearchHero from "../../components/SearchHero";
 import "../../css/HomePage.css";
-import { getAllActiveProjects, getMatchedProjects } from "../../services/projectsService";
+import { getAllActiveProjects, getMatchedProjects, getCurrentUser } from "../../services/projectsService";
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
@@ -12,6 +12,7 @@ import { useAuth } from "../../hooks/useAuth";
 function HomePage() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [gainitUser, setGainitUser] = useState(null);
   const navigate = useNavigate();
   const { instance, accounts } = useMsal();
   const { userInfo } = useAuth();
@@ -26,8 +27,22 @@ function HomePage() {
         
         let data;
         if (isAuthenticated) {
-          console.log(`[Home] Fetching matched projects for user: ${userInfo.userId}`);
-          data = await getMatchedProjects(userInfo.userId, 5);
+          try {
+            // Use cached GainIt user if available, otherwise fetch it
+            let currentUser = gainitUser;
+            if (!currentUser) {
+              console.log("[Home] Fetching GainIt user info via /api/users/me");
+              currentUser = await getCurrentUser();
+              setGainitUser(currentUser);
+            }
+            
+            console.log(`[Home] Using GainIt userId from /me: ${currentUser.id}`);
+            console.log(`[Home] Calling /api/match/profile with userId=${currentUser.id}, count=5`);
+            data = await getMatchedProjects(currentUser.id, 5);
+          } catch (meError) {
+            console.warn("[Home] Failed to fetch GainIt user info, falling back to active projects:", meError);
+            data = await getAllActiveProjects();
+          }
         } else {
           console.log("[Home] Fallback to active projects (guest)");
           data = await getAllActiveProjects();
