@@ -23,7 +23,7 @@
 }
 
 /* Section titles */
-.section-title {
+.search-projects-page .section-title {
   font-size: 1.75rem;
   font-weight: 600;
   color: #1f2937;
@@ -32,8 +32,6 @@
   text-align: left;
   border-bottom: 1px solid #e5e7eb;
   padding: 0 0 1rem 2rem;
-  width: 100vw;
-  margin-left: calc(-50vw + 50%);
   display: block;
   box-sizing: border-box;
 }
@@ -44,7 +42,7 @@
     padding-inline: 1rem;
   }
   
-  .section-title {
+  .search-projects-page .section-title {
     padding: 0 0 1rem 1rem;
   }
 }
@@ -54,7 +52,7 @@
     padding-inline: 0.5rem;
   }
   
-  .section-title {
+  .search-projects-page .section-title {
     padding: 0 0 1rem 0.5rem;
   }
 }

@@ -131,7 +131,7 @@ function ProjectPage() {
               <Github size={20} />
               {repositoryLink ? (
                 <a href={repositoryLink} target="_blank" rel="noopener noreferrer" className="repo-link">
-                  <span style={{ color: 'purple' }}>Repository</span>
+                  <span style={{ color: '#3b4177' }}>Repository</span>
                 </a>
               ) : (
                 <span>Repository</span>
@@ -240,8 +240,8 @@ function ProjectPage() {
                 <span className="detail-value">{startDate}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Methodology</span>
-                <span className="detail-value">{project.methodology || "N/A"}</span>
+                <span className="detail-label">Publicity</span>
+                <span className="detail-value">{project.scope || "Public"}</span>
               </div>
               <div className="detail-row">
                 <span className="detail-label">Duration</span>

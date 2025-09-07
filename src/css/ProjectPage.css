@@ -103,8 +103,13 @@
 
 .overview-container {
   display: grid;
+  /* Single column on mobile */
   grid-template-columns: 1fr;
   gap: 2rem;
+}
+/* Prevent grid children from overflowing and forcing a wrap */
+.overview-container > * {
+  min-width: 0;
 }
 
 .section-title {
@@ -373,7 +378,17 @@
   }
 
   .overview-container {
-    grid-template-columns: 2fr 1fr;
+    /* Two equal columns on desktop */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  /* Make both overview cards fill equal height */
+  .goals-section,
+  .roles-section {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
   .goals-section {
