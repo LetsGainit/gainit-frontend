@@ -23,7 +23,7 @@ export async function getProjectById(projectId, correlationId) {
     return response.data;
 }
 
-export async function getMatchedProjects() {
-    const response = await api.get("/match/profile");
+export async function getMatchedProjects(userId, count = 5) {
+    const response = await api.get(`/match/profile?userId=${userId}&count=${count}`);
     return response.data;
 }

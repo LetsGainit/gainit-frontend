@@ -7,27 +7,29 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { apiScopes } from "../../auth/msalConfig";
+import { useAuth } from "../../hooks/useAuth";
 
 function HomePage() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { instance, accounts } = useMsal();
+  const { userInfo } = useAuth();
 
   useEffect(() => {
     async function fetchProjects() {
       try {
         setLoading(true);
         
-        // Check if user is authenticated
-        const isAuthenticated = accounts.length > 0;
+        // Check if user is authenticated and has userInfo
+        const isAuthenticated = accounts.length > 0 && userInfo?.userId;
         
         let data;
         if (isAuthenticated) {
-          console.log("[Home] Fetching matched projects for logged-in user");
-          data = await getMatchedProjects();
+          console.log(`[Home] Fetching matched projects for user: ${userInfo.userId}`);
+          data = await getMatchedProjects(userInfo.userId, 5);
         } else {
-          console.log("[Home] Fetching active projects (guest)");
+          console.log("[Home] Fallback to active projects (guest)");
           data = await getAllActiveProjects();
         }
         
@@ -65,7 +67,7 @@ function HomePage() {
     }
 
     fetchProjects();
-  }, [accounts.length]);
+  }, [accounts.length, userInfo?.userId]);
 
   const handleSearch = useCallback(async (query) => {
     const q = query.trim();
