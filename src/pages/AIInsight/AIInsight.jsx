@@ -16,10 +16,12 @@ import {
   Trophy,
   Activity
 } from 'lucide-react';
-import axios from 'axios';
+import { useAuth } from '../../hooks/useAuth';
+import api from '../../services/api';
 import './AIInsight.css';
 
 const AIInsight = () => {
+  const { user } = useAuth();
   const [summary, setSummary] = useState(null);
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -27,11 +29,17 @@ const AIInsight = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!user?.userId) {
+        setError('User not authenticated');
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         const [summaryRes, dashboardRes] = await Promise.all([
-          axios.get('/api/me/summary'),
-          axios.get('/api/me/dashboard')
+          api.get('/me/summary'),
+          api.get(`/${user.userId}/dashboard`)
         ]);
         
         setSummary(summaryRes.data);
@@ -45,7 +53,7 @@ const AIInsight = () => {
     };
 
     fetchData();
-  }, []);
+  }, [user?.userId]);
 
   const getIcon = (iconName) => {
     const iconMap = {
