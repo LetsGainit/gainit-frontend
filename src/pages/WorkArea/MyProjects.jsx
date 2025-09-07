@@ -134,6 +134,9 @@ const MyProjects = () => {
     } else if (project.duration && typeof project.duration === 'string' && project.duration.includes(":")) {
       const days = project.duration.split(".")[0];
       durationText = `${days} days`;
+    } else if (project.duration && typeof project.duration === 'string' && project.duration.includes(".")) {
+      const days = project.duration.split(".")[0];
+      durationText = `${days} days`;
     }
 
     // Combine programming languages and technologies

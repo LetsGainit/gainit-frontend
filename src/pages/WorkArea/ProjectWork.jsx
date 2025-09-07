@@ -280,7 +280,7 @@ const ProjectWork = () => {
     }
 
     const startDate = new Date(projectData.createdAtUtc);
-    const durationInDays = parseInt(projectData.duration.split('.')[0]) || 0;
+    const durationInDays = typeof projectData.duration === 'string' ? parseInt(projectData.duration.split('.')[0]) || 0 : 0;
     const endDate = new Date(startDate.getTime() + (durationInDays * 24 * 60 * 60 * 1000));
     const today = new Date();
     const daysLeft = Math.ceil((endDate - today) / (24 * 60 * 60 * 1000));
