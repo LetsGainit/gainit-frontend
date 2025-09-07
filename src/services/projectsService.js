@@ -22,3 +22,8 @@ export async function getProjectById(projectId, correlationId) {
     });
     return response.data;
 }
+
+export async function getMatchedProjects() {
+    const response = await api.get("/match/profile");
+    return response.data;
+}

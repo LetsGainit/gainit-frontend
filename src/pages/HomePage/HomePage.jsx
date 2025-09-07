@@ -2,7 +2,7 @@ import ProjectCard from "../../components/project/ProjectCard";
 import Footer from "../../components/Footer";
 import SearchHero from "../../components/SearchHero";
 import "../../css/HomePage.css";
-import { getAllActiveProjects } from "../../services/projectsService";
+import { getAllActiveProjects, getMatchedProjects } from "../../services/projectsService";
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
@@ -18,7 +18,19 @@ function HomePage() {
     async function fetchProjects() {
       try {
         setLoading(true);
-        const data = await getAllActiveProjects();
+        
+        // Check if user is authenticated
+        const isAuthenticated = accounts.length > 0;
+        
+        let data;
+        if (isAuthenticated) {
+          console.log("[Home] Fetching matched projects for logged-in user");
+          data = await getMatchedProjects();
+        } else {
+          console.log("[Home] Fetching active projects (guest)");
+          data = await getAllActiveProjects();
+        }
+        
         const mappedProjects = data.map((project) => {
           // Try multiple possible field names for open roles
           const openRoles = project.requiredRoles || 
@@ -42,7 +54,7 @@ function HomePage() {
 
         setProjects(mappedProjects.slice(0, 3));
       } catch (error) {
-        console.error("Error loading active projects", error);
+        console.error("Error loading projects", error);
         // If it's an auth error, we might need to handle it differently
         if (error.response?.status === 401) {
           console.log("Authentication required for projects");
@@ -53,7 +65,7 @@ function HomePage() {
     }
 
     fetchProjects();
-  }, []);
+  }, [accounts.length]);
 
   const handleSearch = useCallback(async (query) => {
     const q = query.trim();
