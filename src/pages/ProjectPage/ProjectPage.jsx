@@ -1,4 +1,4 @@
-import { Clock, Globe, GitBranch, User, Users, Mail, ArrowLeft, ExternalLink, Github } from "lucide-react";
+import { Clock, Globe, GitBranch, User, Users, Mail, ArrowLeft, ExternalLink, Github, Gauge } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -122,6 +122,10 @@ function ProjectPage() {
             <div className="metadata-item">
               <Globe size={20} />
               <span>Public</span>
+            </div>
+            <div className="metadata-item">
+              <Gauge size={20} />
+              <span>{difficulty}</span>
             </div>
             <div className="metadata-item">
               <Github size={20} />
