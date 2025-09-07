@@ -65,6 +65,7 @@ const MyProjects = () => {
       const projects = await getUserProjects(userInfo.userId, correlationId);
 
       console.log(`[MY-PROJECTS] Successfully fetched ${projects.length} projects`);
+      console.log('[MY-PROJECTS] Raw projects data:', projects);
       setAllProjects(projects || []);
     } catch (err) {
       console.error("[MY-PROJECTS] Failed to fetch projects:", err);
@@ -86,8 +87,14 @@ const MyProjects = () => {
   // Filter projects based on active tab
   const visibleProjects = allProjects.filter(project => {
     const backendStatus = statusMapping[activeTab];
+    console.log(`[MY-PROJECTS] Filtering for tab "${activeTab}" (backend status: "${backendStatus}")`);
+    console.log(`[MY-PROJECTS] Project "${project.projectName}" has status: "${project.projectStatus}"`);
     return project.projectStatus === backendStatus;
   });
+
+  // Debug: Log all unique status values
+  const uniqueStatuses = [...new Set(allProjects.map(p => p.projectStatus))];
+  console.log('[MY-PROJECTS] Unique project statuses found:', uniqueStatuses);
 
   // Load projects on mount
   useEffect(() => {
