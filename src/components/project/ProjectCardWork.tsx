@@ -15,6 +15,7 @@ interface ProjectCardWorkProps {
     projectPictureUrl?: string;
     technologies?: string[];
     status?: string;
+    projectStatus?: string;
   };
   onCardClick?: (project: any) => void;
 }
@@ -29,12 +30,19 @@ const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick 
     description: project?.description || project?.projectDescription || "No description available",
     image: project?.image || project?.projectPictureUrl || "/default-featured-image.png",
     technologies: Array.isArray(project?.technologies) ? project.technologies : [],
-    status: project?.status || "Active"
+    status: project?.status || "Active",
+    projectStatus: project?.projectStatus || project?.status || "Active"
   };
 
   const handleCardClick = () => {
-    console.log('[ProjectCardWork] Card clicked, navigating to:', `/work/projects/${normalizedProject.id}`);
+    console.log('[ProjectCardWork] Card clicked, project status:', normalizedProject.projectStatus);
     console.log('[ProjectCardWork] Project data:', normalizedProject);
+    
+    // Block navigation if project is pending
+    if (normalizedProject.projectStatus === 'Pending') {
+      console.log('[ProjectCardWork] Project is pending, blocking navigation');
+      return;
+    }
     
     if (onCardClick) {
       onCardClick(normalizedProject);

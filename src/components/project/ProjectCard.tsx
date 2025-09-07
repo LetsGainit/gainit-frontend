@@ -17,6 +17,8 @@ interface ProjectCardProps {
     openRoles?: string[];
     duration?: string;
     durationText?: string;
+    status?: string;
+    projectStatus?: string;
   };
   onCardClick?: (project: any) => void;
 }
@@ -32,10 +34,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onCardClick }) => {
     image: project?.image || project?.projectPictureUrl || "/default-featured-image.png",
     technologies: Array.isArray(project?.technologies) ? project.technologies : [],
     openRoles: Array.isArray(project?.openRoles) ? project.openRoles : [],
-    duration: project?.durationText || project?.duration || "N/A"
+    duration: project?.durationText || project?.duration || "N/A",
+    projectStatus: project?.projectStatus || project?.status || "Active"
   };
 
   const handleCardClick = () => {
+    // Block navigation if project is pending
+    if (normalizedProject.projectStatus === 'Pending') {
+      console.log('[ProjectCard] Project is pending, blocking navigation');
+      return;
+    }
+    
     if (onCardClick) {
       onCardClick(normalizedProject);
     } else {

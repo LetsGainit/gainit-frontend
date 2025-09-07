@@ -153,7 +153,8 @@ const MyProjects = () => {
       duration: durationText,
       openPositions: project.openRoles?.length || 0,
       technologies: allTechnologies,
-      status: activeTab
+      status: activeTab,
+      projectStatus: project.projectStatus
     };
   };
 
