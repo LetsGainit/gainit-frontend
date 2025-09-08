@@ -60,11 +60,8 @@ function SearchResult() {
     const normalized = String(rawStatus).toLowerCase();
     const isActive = normalized === "pending" || normalized === "inprogress" || normalized === "in_progress";
 
-    if (isActive) {
-      navigate(`/project/${projectId}`);
-    } else {
-      navigate(`/templates/${projectId}`);
-    }
+    // Replace current history entry so URL doesn't include /search-result
+    navigate(`/project/${projectId}`, { replace: true });
   }, [navigate]);
 
   // Auto-run search on initial load if there is a query param
