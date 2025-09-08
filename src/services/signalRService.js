@@ -137,6 +137,17 @@ class SignalRService {
             this.handleEvent('replyLiked', data);
         });
 
+        // Test message handlers
+        this.connection.on('testMessage', (data) => {
+            console.log('🔔 SignalR Test Message Received:', data);
+            this.handleEvent('testMessage', data);
+        });
+
+        this.connection.on('broadcastMessage', (data) => {
+            console.log('🔔 SignalR Broadcast Message Received:', data);
+            this.handleEvent('broadcastMessage', data);
+        });
+
         // Connection state events
         this.connection.onclose((error) => {
             this.isConnected = false;
@@ -207,6 +218,18 @@ class SignalRService {
         }
     }
 
+    // Refresh connection with new token (useful for token expiration)
+    async refreshConnection() {
+        console.log('🔄 SignalR: Refreshing connection with new token...');
+        if (this.connection) {
+            await this.connection.stop();
+            this.connection = null;
+        }
+        this.isConnected = false;
+        this.reconnectAttempts = 0;
+        return await this.startConnection();
+    }
+
     // Get token from your auth provider (Azure B2C with MSAL)
     getTokenFromAuthProvider() {
         // Try to get token from localStorage first (fallback)
@@ -265,6 +288,22 @@ class SignalRService {
             
             if (token) {
                 console.log('🔑 SignalR: Got token from getAccessToken()');
+                console.log('🔑 SignalR: Token preview:', token.substring(0, 50) + '...');
+                
+                // Decode and log token info for debugging
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    console.log('🔑 SignalR: Token payload:', {
+                        aud: payload.aud,
+                        iss: payload.iss,
+                        exp: new Date(payload.exp * 1000).toISOString(),
+                        iat: new Date(payload.iat * 1000).toISOString(),
+                        scp: payload.scp || payload.scope
+                    });
+                } catch (e) {
+                    console.warn('🔑 SignalR: Could not decode token payload:', e);
+                }
+                
                 return token;
             } else {
                 console.warn('🔑 SignalR: getAccessToken() returned no token');
