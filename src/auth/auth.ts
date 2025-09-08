@@ -8,6 +8,7 @@ import {
 } from "@azure/msal-browser";
 import { msalConfig, apiScopes, API_BASE } from "./msalConfig";
 
+
 let msal: PublicClientApplication;
 let eventsAttached = false;
 

@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Bell, CircleUserRound, ChevronDown } from "lucide-react";
+import { CircleUserRound, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { apiScopes } from "../auth/msalConfig";
@@ -11,6 +11,7 @@ import {
   getDisplayNameForRole,
 } from "../utils/userUtils";
 import Toast from "./Toast";
+import NotificationBell from "./NotificationBell";
 import "../css/PlatformNavBar.css";
 
 function PlatformNavBar() {
@@ -200,9 +201,7 @@ function PlatformNavBar() {
 
         {/* Right Section - User Actions */}
         <div className="platform-controls">
-          <button className="icon-button" aria-label="Notifications">
-            <Bell size={20} />
-          </button>
+          <NotificationBell />
           <div className="vertical-separator"></div>
           <div className="user-profile">
             <div className={`dropdown ${isProfileOpen ? "open" : ""}`}>
