@@ -194,7 +194,7 @@ const JoinRequestsModal: React.FC<JoinRequestsModalProps> = ({
 
         {/* Content */}
         <div className="join-requests-modal-content">
-          {(loading || externalLoading) ? (
+          {loading ? (
             <div className="loading-state">
               <div className="loading-spinner"></div>
               <p>Loading join requests...</p>

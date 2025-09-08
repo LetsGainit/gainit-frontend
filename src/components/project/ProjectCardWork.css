@@ -188,10 +188,10 @@
   box-shadow: none;
 }
 
-.btn-secondary {
-  background: #490476;
-  color: white;
-  border: 1px solid #490476;
+.project-card-work .btn-secondary {
+  background: #490476 !important;
+  color: white !important;
+  border: 1px solid #490476 !important;
   border-radius: 6px;
   padding: 0.375rem 0.75rem;
   font-size: 0.75rem;
@@ -205,9 +205,9 @@
   gap: 0.25rem;
 }
 
-.btn-secondary:hover {
-  background: #3a0360;
-  border-color: #3a0360;
+.project-card-work .btn-secondary:hover {
+  background: #3a0360 !important;
+  border-color: #3a0360 !important;
   transform: translateY(-1px);
   box-shadow: 0 1px 2px -1px rgba(73, 4, 118, 0.3);
 }

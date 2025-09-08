@@ -25,7 +25,6 @@ const MyProjects = () => {
   const [savingRepo, setSavingRepo] = useState(false);
   const [showJoinRequestsModal, setShowJoinRequestsModal] = useState(false);
   const [selectedProjectForRequests, setSelectedProjectForRequests] = useState(null);
-  const [joinRequestsLoading, setJoinRequestsLoading] = useState(false);
   
   const { userInfo } = useAuth();
   const navigate = useNavigate();
@@ -163,7 +162,6 @@ const MyProjects = () => {
   const handleViewJoinRequests = (projectId) => {
     const project = allProjects.find(p => p.projectId === projectId);
     if (project) {
-      setJoinRequestsLoading(true);
       setSelectedProjectForRequests({
         id: projectId,
         name: project.projectName || 'Unknown Project'
@@ -175,7 +173,6 @@ const MyProjects = () => {
   const handleCloseJoinRequestsModal = () => {
     setShowJoinRequestsModal(false);
     setSelectedProjectForRequests(null);
-    setJoinRequestsLoading(false);
   };
 
   const handleJoinRequestDecision = (projectId, joinRequestId, isApproved) => {
@@ -395,7 +392,6 @@ const MyProjects = () => {
                 onConnectRepo={(pid) => setShowRepoModalFor(pid)}
                 onViewJoinRequests={handleViewJoinRequests}
                 hasRepository={Boolean(project.repositoryUrl || project.repositoryLink || project.RepositoryLink)}
-                loadingJoinRequests={joinRequestsLoading && selectedProjectForRequests?.id === project.projectId}
                 isProjectAdmin={project.isAdmin}
               />
             ))}
@@ -448,7 +444,6 @@ const MyProjects = () => {
           projectName={selectedProjectForRequests.name}
           onDecision={handleJoinRequestDecision}
           onError={handleJoinRequestError}
-          loading={joinRequestsLoading}
         />
       )}
     </div>

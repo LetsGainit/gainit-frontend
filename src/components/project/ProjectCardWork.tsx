@@ -26,11 +26,10 @@ interface ProjectCardWorkProps {
   onConnectRepo?: (projectId: string) => void;
   onViewJoinRequests?: (projectId: string) => void;
   hasRepository?: boolean;
-  loadingJoinRequests?: boolean;
   isProjectAdmin?: boolean;
 }
 
-const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick, startingId, onStartProject, onConnectRepo, onViewJoinRequests, hasRepository, loadingJoinRequests = false, isProjectAdmin = true }) => {
+const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick, startingId, onStartProject, onConnectRepo, onViewJoinRequests, hasRepository, isProjectAdmin = true }) => {
   const navigate = useNavigate();
 
   // Normalize data to handle different types and missing fields
@@ -142,16 +141,9 @@ const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick,
                     e.stopPropagation();
                     onViewJoinRequests(normalizedProject.id);
                   }}
-                  disabled={loadingJoinRequests}
+                  disabled={false}
                 >
-                  {loadingJoinRequests ? (
-                    <>
-                      <div className="button-spinner"></div>
-                      Loading...
-                    </>
-                  ) : (
-                    'View Requests'
-                  )}
+                  View Requests
                 </button>
               )}
               {onConnectRepo && !hasRepository && isProjectAdmin ? (
