@@ -1,6 +1,7 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import SearchBarContainer from "../../components/SearchBarContainer";
+import LoadingIllustration from "../../components/LoadingIllustration";
 import ProjectCard from "../../components/project/ProjectCard";
 import publicApi from "../../services/publicApi";
 
@@ -86,7 +87,10 @@ function SearchResult() {
       />
       <div className="projects-section">
         <div className="page-container">
-          {error && (
+          {isLoading && (
+            <LoadingIllustration type="search" />
+          )}
+          {!isLoading && error && (
             <div className="no-results" style={{ color: "#b3261e", marginBottom: "12px" }}>
               {error}
             </div>

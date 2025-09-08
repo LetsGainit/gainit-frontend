@@ -39,17 +39,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onCardClick }) => {
   };
 
   const handleCardClick = () => {
-    // Block navigation if project is pending
-    if (normalizedProject.projectStatus === 'Pending') {
-      console.log('[ProjectCard] Project is pending, blocking navigation');
-      return;
-    }
-    
     if (onCardClick) {
       onCardClick(normalizedProject);
     } else {
       // Navigate to project page
-      navigate(`/project-page/${normalizedProject.id}`);
+      navigate(`/project/${normalizedProject.id}`);
     }
   };
 
