@@ -97,12 +97,15 @@ function ProjectPage() {
 
   const handleCreateProjectSubmit = async ({ selectedRole }) => {
     try {
-      const response = await api.post('/projects/start-from-template', undefined, {
-        params: {
-          templateId: projectId,
-          requestedRole: selectedRole || undefined,
+      const response = await api.post(
+        '/projects/start-from-template',
+        { selectedRole },
+        {
+          params: {
+            templateId: projectId,
+          }
         }
-      });
+      );
       
       setIsCreateModalOpen(false);
       setToast({
