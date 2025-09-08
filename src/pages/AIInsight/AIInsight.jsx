@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
+import { getUserProjects } from '../../services/projectsService';
 import './AIInsight.css';
 
 const AIInsight = () => {
@@ -97,15 +98,28 @@ const AIInsight = () => {
   }, [userInfo?.userId, authLoading, isAuthenticated, synced]);
 
   const handleSync = async () => {
-    if (!projectId) {
-      setSyncError('Missing project id');
-      return;
-    }
     setSyncError(null);
     setSyncing(true);
     try {
-      console.debug('[AIInsight] Sync start', { projectId });
-      await api.post(`/projects/${projectId}/sync`);
+      // Resolve project id: route param or fetch first user project
+      let effectiveProjectId = projectId;
+      if (!effectiveProjectId) {
+        const correlationId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          const r = Math.random() * 16 | 0;
+          const v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+        console.debug('[AIInsight] Fetching user projects to resolve projectId');
+        const projects = await getUserProjects(correlationId);
+        if (Array.isArray(projects) && projects.length > 0) {
+          effectiveProjectId = projects[0].id || projects[0].projectId;
+        } else {
+          throw new Error('No projects found for user');
+        }
+      }
+
+      console.debug('[AIInsight] Sync start', { projectId: effectiveProjectId });
+      await api.post(`/projects/${effectiveProjectId}/sync`);
       console.debug('[AIInsight] Sync completed');
       setSynced(true);
     } catch (e) {
@@ -114,7 +128,7 @@ const AIInsight = () => {
         status: e?.response?.status,
         data: e?.response?.data
       });
-      setSyncError('Failed to sync project. Please try again.');
+      setSyncError(e?.message || 'Failed to sync project. Please try again.');
     } finally {
       setSyncing(false);
     }

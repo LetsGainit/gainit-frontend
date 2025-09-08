@@ -242,7 +242,7 @@ const ProjectWork = () => {
       return null;
     }
 
-    const boardData = kpiStates.progress.data || board;
+    const boardData = kpiStates.progress.data || board || [];
     
     // Filter board items to this project if projectId is available
     const projectTasks = boardData.filter(task => 
@@ -251,11 +251,12 @@ const ProjectWork = () => {
     
     if (projectTasks.length === 0) {
       // Fallback to my tasks if board doesn't include projectId
-      const myProjectTasks = myTasks.filter(task => 
+      const myTasksArray = myTasks || [];
+      const myProjectTasks = myTasksArray.filter(task => 
         (!task.projectId || task.projectId === projectId) && 
         task.status !== 'Done'
       );
-      const completedMyTasks = myTasks.filter(task => 
+      const completedMyTasks = myTasksArray.filter(task => 
         (!task.projectId || task.projectId === projectId) && 
         task.status === 'Done'
       );
@@ -293,7 +294,7 @@ const ProjectWork = () => {
       return null;
     }
 
-    const tasksData = kpiStates.myOpenTasks.data || myTasks;
+    const tasksData = kpiStates.myOpenTasks.data || myTasks || [];
     const myProjectTasks = tasksData.filter(task => 
       (!task.projectId || task.projectId === projectId) && 
       task.status !== 'Done'
