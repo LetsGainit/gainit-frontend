@@ -14,7 +14,13 @@ class SignalRService {
         try {
             console.log('🔗 SignalR: Starting connection...');
             
-            // Get your JWT token (adjust based on how you store it)
+            // Guard against double-starts
+            if (this.connection?.state === signalR.HubConnectionState.Connected) {
+                console.log('🔗 SignalR: Already connected, returning true');
+                return true;
+            }
+            
+            // Get your JWT token
             const token = await this.getTokenFromAuthProviderAsync();
             console.log('🔗 SignalR: Token acquired:', token ? 'Yes' : 'No');
 
@@ -23,62 +29,49 @@ class SignalRService {
                 return false;
             }
 
-            // ✅ CORRECT Azure SignalR Service endpoints
-            const possibleEndpoints = [
-                'https://gainit-signalr.service.signalr.net/client/?hub=notifications',
-                // Fallback to app endpoint if needed
-                'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/hubs/notifications'
-            ];
+            // ✅ FIXED: Use ONLY the backend endpoint (Azure SignalR Service Default mode)
+            const endpoint = 'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/hubs/notifications';
+            console.log('🔗 SignalR: Using backend endpoint:', endpoint);
             
-            // Try each endpoint until one works
-            for (let i = 0; i < possibleEndpoints.length; i++) {
-                const endpoint = possibleEndpoints[i];
-                console.log(`🔗 SignalR: Trying endpoint ${i + 1}/${possibleEndpoints.length}:`, endpoint);
+            try {
+                // ✅ FIXED: Correct connection configuration for Azure SignalR Service Default mode
+                this.connection = new signalR.HubConnectionBuilder()
+                    .withUrl(endpoint, {
+                        accessTokenFactory: async () => {
+                            // This will be called whenever the connection needs a token
+                            console.log('🔑 SignalR: Getting token from auth provider...');
+                            return await this.getTokenFromAuthProviderAsync();
+                        }
+                        // ✅ REMOVED: transport and skipNegotiation options (not needed for Default mode)
+                    })
+                    .withAutomaticReconnect([0, 2000, 10000, 30000]) // Auto-reconnect with backoff
+                    .configureLogging(signalR.LogLevel.Information)
+                    .build();
+
+                // Set up event handlers
+                this.setupEventHandlers();
+
+                // Add debug settings for better troubleshooting
+                this.connection.serverTimeoutInMilliseconds = 30000; // default 30s is fine; set explicitly for clarity
+                this.connection.keepAliveIntervalInMilliseconds = 15000;
+
+                // Start connection
+                console.log('🔗 SignalR: Attempting to start connection...');
+                await this.connection.start();
+                this.isConnected = true;
+                this.reconnectAttempts = 0;
+
+                console.log('�� SignalR: Connected successfully!');
+                return true;
                 
-                try {
-                    // ✅ CORRECT connection configuration for Azure SignalR Service
-                    this.connection = new signalR.HubConnectionBuilder()
-                        .withUrl(endpoint, {
-                            accessTokenFactory: async () => {
-                                // This will be called whenever the connection needs a token
-                                // It will automatically handle token refresh
-                                return await this.getTokenFromAuthProviderAsync();
-                            },
-                            // ✅ CORRECT - Let SignalR handle transport negotiation
-                            // Remove transport and skipNegotiation for Azure SignalR Service
-                        })
-                        .withAutomaticReconnect([0, 2000, 10000, 30000]) // Auto-reconnect with backoff
-                        .configureLogging(signalR.LogLevel.Information)
-                        .build();
-
-                    // Set up event handlers
-                    this.setupEventHandlers();
-
-                    // Start connection
-                    console.log('🔗 SignalR: Attempting to start connection...');
-                    await this.connection.start();
-                    this.isConnected = true;
-                    this.reconnectAttempts = 0;
-
-                    console.log(`🔗 SignalR: Connected successfully to ${endpoint}!`);
-                    return true;
-                    
-                } catch (endpointError) {
-                    console.warn(`🔗 SignalR: Failed to connect to ${endpoint}:`, endpointError.message);
-                    if (this.connection) {
-                        await this.connection.stop();
-                        this.connection = null;
-                    }
-                    
-                    // If this is the last endpoint, throw the error
-                    if (i === possibleEndpoints.length - 1) {
-                        throw endpointError;
-                    }
-                }
+            } catch (connectionError) {
+                console.error('�� SignalR: Failed to connect:', connectionError);
+                this.handleConnectionError(connectionError);
+                return false;
             }
 
         } catch (error) {
-            console.error('🔗 SignalR: All endpoints failed:', error);
+            console.error('🔗 SignalR: Connection failed:', error);
             this.handleConnectionError(error);
             return false;
         }
@@ -287,7 +280,7 @@ class SignalRService {
             const token = await getAccessToken();
             
             if (token) {
-                console.log('🔑 SignalR: Got token from getAccessToken()');
+                console.log('�� SignalR: Got token from getAccessToken()');
                 console.log('🔑 SignalR: Token preview:', token.substring(0, 50) + '...');
                 
                 // Decode and log token info for debugging
@@ -301,15 +294,15 @@ class SignalRService {
                         scp: payload.scp || payload.scope
                     });
                 } catch (e) {
-                    console.warn('🔑 SignalR: Could not decode token payload:', e);
+                    console.warn('�� SignalR: Could not decode token payload:', e);
                 }
                 
                 return token;
             } else {
-                console.warn('🔑 SignalR: getAccessToken() returned no token');
+                console.warn('�� SignalR: getAccessToken() returned no token');
             }
         } catch (error) {
-            console.warn('🔑 SignalR: Failed to get token from getAccessToken():', error);
+            console.warn('�� SignalR: Failed to get token from getAccessToken():', error);
         }
         
         // Fallback: Try to get token from localStorage/sessionStorage
