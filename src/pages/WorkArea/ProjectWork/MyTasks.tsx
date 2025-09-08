@@ -48,7 +48,7 @@ const MyTasks: React.FC = () => {
 
     try {
       const correlationId = generateCorrelationId();
-      const tasksData = await getProjectTasks(correlationId, projectId);
+      const tasksData = await getProjectTasks(projectId!, { includeCompleted: false, sortBy: "CreatedAtUtc" }, correlationId);
       
       console.log(`[MY-TASKS] Successfully fetched ${tasksData.length} tasks for project ${projectId}`);
       setTasks(tasksData);

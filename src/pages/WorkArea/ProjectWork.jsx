@@ -95,15 +95,15 @@ const ProjectWork = () => {
 
   // Fetch my tasks
   const fetchMyTasks = useCallback(async () => {
-    if (!userInfo?.userId) return;
+    if (!projectId || !userInfo?.userId) return;
 
     const correlationId = generateCorrelationId();
-    console.log(`[PROJECT-WORK] Fetching my tasks with correlation ID: ${correlationId}`);
+    console.log(`[PROJECT-WORK] Fetching my tasks for project ${projectId} with correlation ID: ${correlationId}`);
 
     try {
       updateKpiState('myOpenTasks', { loading: true, error: null });
 
-      const tasksData = await getMyTasks(correlationId);
+      const tasksData = await getMyTasks(projectId, { includeCompleted: false, sortBy: 'CreatedAtUtc' }, correlationId);
 
       console.log(`[PROJECT-WORK] Successfully fetched ${tasksData.length} tasks`);
       setMyTasks(tasksData || []);
@@ -112,19 +112,19 @@ const ProjectWork = () => {
       console.error("[PROJECT-WORK] Failed to fetch my tasks:", err);
       updateKpiState('myOpenTasks', { loading: false, error: err.message || "Failed to load tasks" });
     }
-  }, [userInfo?.userId]);
+  }, [projectId, userInfo?.userId]);
 
   // Fetch board data
   const fetchBoard = useCallback(async () => {
     if (!projectId) return;
 
     const correlationId = generateCorrelationId();
-    console.log(`[PROJECT-WORK] Fetching board data with correlation ID: ${correlationId}`);
+    console.log(`[PROJECT-WORK] Fetching board data for project ${projectId} with correlation ID: ${correlationId}`);
 
     try {
       updateKpiState('progress', { loading: true, error: null });
 
-      const boardData = await getBoardData(correlationId);
+      const boardData = await getBoardData(projectId, { includeCompleted: true }, correlationId);
 
       console.log(`[PROJECT-WORK] Successfully fetched ${boardData.length} board items`);
       setBoard(boardData || []);

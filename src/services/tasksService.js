@@ -1,10 +1,9 @@
 import api from "./api";
 
-export async function getMyTasks(correlationId, params = {}) {
-    const response = await api.get('/tasks/my-tasks', {
-        headers: {
-            'X-Correlation-ID': correlationId
-        },
+// Get current user's tasks for a specific project
+export async function getMyTasks(projectId, params = {}, correlationId) {
+    const response = await api.get(`/projects/${projectId}/tasks/my-tasks`, {
+        headers: correlationId ? { 'X-Correlation-ID': correlationId } : undefined,
         params: {
             includeCompleted: false,
             sortBy: 'CreatedAtUtc',
@@ -14,11 +13,10 @@ export async function getMyTasks(correlationId, params = {}) {
     return response.data;
 }
 
-export async function getBoardData(correlationId, params = {}) {
-    const response = await api.get('/tasks/board', {
-        headers: {
-            'X-Correlation-ID': correlationId
-        },
+// Get board data for a specific project
+export async function getBoardData(projectId, params = {}, correlationId) {
+    const response = await api.get(`/projects/${projectId}/tasks/board`, {
+        headers: correlationId ? { 'X-Correlation-ID': correlationId } : undefined,
         params: {
             includeCompleted: true,
             ...params
@@ -27,16 +25,7 @@ export async function getBoardData(correlationId, params = {}) {
     return response.data;
 }
 
-export async function getProjectTasks(correlationId, projectId, params = {}) {
-    const response = await api.get(`/tasks/project/${projectId}`, {
-        headers: {
-            'X-Correlation-ID': correlationId
-        },
-        params: {
-            includeCompleted: true,
-            sortBy: 'CreatedAtUtc',
-            ...params
-        }
-    });
-    return response.data;
+// Backwards-compatible alias to getMyTasks for a project
+export async function getProjectTasks(projectId, params = {}, correlationId) {
+    return getMyTasks(projectId, params, correlationId);
 }
