@@ -5,8 +5,9 @@ import './CreateProjectModal.css';
 interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: () => Promise<void>;
+  onSubmit: (data: { selectedRole: string }) => Promise<void>;
   projectTitle: string;
+  availableRoles?: string[];
   loading?: boolean;
 }
 
@@ -15,14 +16,19 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   onClose,
   onSubmit,
   projectTitle,
+  availableRoles = [],
   loading = false
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<string>('');
+  const [errors, setErrors] = useState<{ selectedRole?: string }>({});
 
   // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
       setIsSubmitting(false);
+      setSelectedRole('');
+      setErrors({});
     }
   }, [isOpen]);
 
@@ -32,11 +38,16 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     if (isSubmitting) {
       return;
     }
+    // Validate role selection if roles are provided
+    if (availableRoles.length > 0 && !selectedRole) {
+      setErrors({ selectedRole: 'Please select a role' });
+      return;
+    }
     
     setIsSubmitting(true);
     
     try {
-      await onSubmit();
+      await onSubmit({ selectedRole });
     } catch (error) {
       // Error handling is done in parent component
       console.error('Create project failed:', error);
@@ -47,6 +58,8 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
   const handleCancel = () => {
     setIsSubmitting(false);
+    setSelectedRole('');
+    setErrors({});
     onClose();
   };
 
@@ -98,6 +111,29 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           </div>
           
           <form onSubmit={handleSubmit} className="modal-form">
+            {availableRoles.length > 0 && (
+              <div className="form-group">
+                <label htmlFor="selectedRole" className="form-label">Select Your Role *</label>
+                <select
+                  id="selectedRole"
+                  value={selectedRole}
+                  onChange={(e) => {
+                    setSelectedRole(e.target.value);
+                    if (errors.selectedRole) setErrors({});
+                  }}
+                  className={`form-select ${errors.selectedRole ? 'error' : ''}`}
+                  disabled={isSubmitting}
+                >
+                  <option value="">Choose a role...</option>
+                  {availableRoles.map((role, index) => (
+                    <option key={index} value={role}>{role}</option>
+                  ))}
+                </select>
+                {errors.selectedRole && (
+                  <span className="error-message">{errors.selectedRole}</span>
+                )}
+              </div>
+            )}
             <div className="modal-actions">
               <button
                 type="button"
@@ -110,7 +146,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               <button
                 type="submit"
                 className="btn btn-primary"
-                disabled={isSubmitting}
+                disabled={isSubmitting || (availableRoles.length > 0 && !selectedRole)}
               >
                 {isSubmitting ? (
                   <>

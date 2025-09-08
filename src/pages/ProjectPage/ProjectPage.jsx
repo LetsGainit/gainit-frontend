@@ -95,12 +95,13 @@ function ProjectPage() {
     setIsCreateModalOpen(true);
   };
 
-  const handleCreateProjectSubmit = async () => {
+  const handleCreateProjectSubmit = async ({ selectedRole }) => {
     try {
       const response = await api.post('/projects/start-from-template', undefined, {
         params: {
           templateId: projectId,
           userId: userInfo?.userId || "",
+          requestedRole: selectedRole || undefined,
         }
       });
       
@@ -396,6 +397,7 @@ function ProjectPage() {
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreateProjectSubmit}
         projectTitle={title}
+        availableRoles={openRoles}
       />
 
       {/* Toast Notification */}
