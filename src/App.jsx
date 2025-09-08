@@ -16,6 +16,7 @@ import RoleCheck from "./components/RoleCheck";
 import WorkArea from "./pages/WorkArea/WorkArea";
 import ProjectWork from "./pages/WorkArea/ProjectWork";
 import TaskDetails from "./pages/WorkArea/ProjectWork/TaskDetails";
+import TempTasksScreen from "./pages/WorkArea/TempTasksScreen";
 import AIInsight from "./pages/AIInsight/AIInsight";
 import GainerProfilePage from "./pages/GainerProfilePage/GainerProfilePage";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -36,6 +37,7 @@ function App() {
           <Route path="/search-result" element={<SearchResult />} />
           <Route path="/home-page" element={<HomePage />} />
           <Route path="/work" element={<WorkArea />} />
+          <Route path="/work/tmp/:projectId" element={<TempTasksScreen />} />
           <Route path="/ai-insight" element={<AIInsight />} />
           <Route path="/project/:id" element={<ProjectPage />} />
           <Route path="/profile/:id" element={<ProfilePage />} />
@@ -62,6 +64,7 @@ function App() {
                 <Route path="/home-page" element={<HomePage />} />
                 <Route path="/work/projects/:projectId" element={<ProjectWork />} />
                 <Route path="/work/projects/:projectId/tasks/:taskId" element={<TaskDetails />} />
+                <Route path="/work/tmp/:projectId" element={<TempTasksScreen />} />
                 <Route path="/project/:id" element={<ProjectPage />} />
                 <Route path="/profile/:id" element={<ProfilePage />} />
                 <Route path="/profile/gainer/:id" element={<ProfilePage />} />

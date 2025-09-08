@@ -3,6 +3,9 @@ import { FaArrowRight } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import './ProjectCardWork.css';
 
+// Feature flag for temp tasks screen
+const ENABLE_TEMP_TASKS_SCREEN = true;
+
 interface ProjectCardWorkProps {
   project: {
     id?: string;
@@ -51,8 +54,14 @@ const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick,
     if (onCardClick) {
       onCardClick(normalizedProject);
     } else {
-      // Navigate to project work page
-      navigate(`/work/projects/${normalizedProject.id}`);
+      // Navigate based on feature flag
+      if (ENABLE_TEMP_TASKS_SCREEN) {
+        // Navigate to temp tasks screen
+        navigate(`/work/tmp/${normalizedProject.id}`);
+      } else {
+        // Navigate to project work page (original behavior)
+        navigate(`/work/projects/${normalizedProject.id}`);
+      }
     }
   };
 

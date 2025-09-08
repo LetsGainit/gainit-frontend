@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Clock, CheckCircle, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { getUserProjects, startProject, updateProjectRepository } from "../../services/projectsService";
 import ProjectCardWork from "../../components/project/ProjectCardWork";
 import Toast from "../../components/Toast";
 import "./MyProjects.css";
+
+// Feature flag for temp tasks screen
+const ENABLE_TEMP_TASKS_SCREEN = true;
 
 const MyProjects = () => {
   const [activeTab, setActiveTab] = useState("Active");
@@ -20,6 +24,7 @@ const MyProjects = () => {
   const [savingRepo, setSavingRepo] = useState(false);
   
   const { userInfo } = useAuth();
+  const navigate = useNavigate();
 
   // Status mapping between UI tabs and backend statuses
   const statusMapping = {
@@ -104,11 +109,20 @@ const MyProjects = () => {
     try {
       setStartingId(projectId);
       await startProject(projectId, correlationId);
+      
+      // Show success message
       setToastMessage("Project started. Status changed to Active.");
       setToastType("success");
       setShowToast(true);
+      
+      // Refresh projects list
       await fetchUserProjects();
       setActiveTab("Active");
+      
+      // Navigate to temp tasks screen if feature flag is enabled
+      if (ENABLE_TEMP_TASKS_SCREEN) {
+        navigate(`/work/tmp/${projectId}`);
+      }
     } catch (err) {
       const message = err?.response?.data?.message || "Failed to start project.";
       setToastMessage(message);
