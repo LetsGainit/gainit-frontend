@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { getUserProjects, startProject, updateProjectRepository } from "../../services/projectsService";
 import ProjectCardWork from "../../components/project/ProjectCardWork";
+import JoinRequestsModal from "../../components/JoinRequestsModal";
 import Toast from "../../components/Toast";
 import "./MyProjects.css";
 
@@ -22,6 +23,9 @@ const MyProjects = () => {
   const [showRepoModalFor, setShowRepoModalFor] = useState(null);
   const [repoUrl, setRepoUrl] = useState("");
   const [savingRepo, setSavingRepo] = useState(false);
+  const [showJoinRequestsModal, setShowJoinRequestsModal] = useState(false);
+  const [selectedProjectForRequests, setSelectedProjectForRequests] = useState(null);
+  const [joinRequestsLoading, setJoinRequestsLoading] = useState(false);
   
   const { userInfo } = useAuth();
   const navigate = useNavigate();
@@ -154,6 +158,51 @@ const MyProjects = () => {
     } finally {
       setSavingRepo(false);
     }
+  };
+
+  const handleViewJoinRequests = (projectId) => {
+    const project = allProjects.find(p => p.projectId === projectId);
+    if (project) {
+      setJoinRequestsLoading(true);
+      setSelectedProjectForRequests({
+        id: projectId,
+        name: project.projectName || 'Unknown Project'
+      });
+      setShowJoinRequestsModal(true);
+    }
+  };
+
+  const handleCloseJoinRequestsModal = () => {
+    setShowJoinRequestsModal(false);
+    setSelectedProjectForRequests(null);
+    setJoinRequestsLoading(false);
+  };
+
+  const handleJoinRequestDecision = (projectId, joinRequestId, isApproved) => {
+    // Refresh projects after decision to update any status changes
+    fetchUserProjects();
+    
+    // Show success message
+    setToastMessage(isApproved ? 'Join request approved!' : 'Join request rejected!');
+    setToastType('success');
+    setShowToast(true);
+  };
+
+  const handleJoinRequestError = (error) => {
+    let message = 'Failed to process join request';
+    
+    // Handle specific error cases
+    if (error?.response?.status === 401 || error?.response?.status === 403) {
+      message = 'You do not have permission to view join requests. Only project administrators can access this feature.';
+    } else if (error?.response?.data?.message) {
+      message = error.response.data.message;
+    } else if (error?.message) {
+      message = error.message;
+    }
+    
+    setToastMessage(message);
+    setToastType('error');
+    setShowToast(true);
   };
 
   const tabs = [
@@ -344,7 +393,10 @@ const MyProjects = () => {
                 startingId={startingId}
                 onStartProject={handleStartProject}
                 onConnectRepo={(pid) => setShowRepoModalFor(pid)}
+                onViewJoinRequests={handleViewJoinRequests}
                 hasRepository={Boolean(project.repositoryUrl || project.repositoryLink || project.RepositoryLink)}
+                loadingJoinRequests={joinRequestsLoading && selectedProjectForRequests?.id === project.projectId}
+                isProjectAdmin={project.isAdmin}
               />
             ))}
           </div>
@@ -384,6 +436,19 @@ const MyProjects = () => {
           message={toastMessage}
           type={toastType}
           onClose={() => setShowToast(false)}
+        />
+      )}
+
+      {/* Join Requests Modal */}
+      {showJoinRequestsModal && selectedProjectForRequests && (
+        <JoinRequestsModal
+          isOpen={showJoinRequestsModal}
+          onClose={handleCloseJoinRequestsModal}
+          projectId={selectedProjectForRequests.id}
+          projectName={selectedProjectForRequests.name}
+          onDecision={handleJoinRequestDecision}
+          onError={handleJoinRequestError}
+          loading={joinRequestsLoading}
         />
       )}
     </div>
