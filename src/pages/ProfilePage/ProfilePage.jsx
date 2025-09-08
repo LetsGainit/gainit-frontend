@@ -15,6 +15,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { fetchUserProfile, fetchPublicUserProfile } from "../../auth/auth";
+import { getUserProjects } from "../../services/projectsService";
 import { getDisplayNameForRole, isValidRole } from "../../utils/userUtils";
 import Toast from "../../components/Toast";
 import ProjectCard from "../../components/project/ProjectCard";
@@ -50,22 +51,40 @@ function ProfilePage() {
 
   const userRole = getRoleFromPath();
 
-  // Fetch user projects
-  const fetchUserProjects = useCallback(async (userId) => {
-    if (!userId) return;
-    
+  // Generate correlation ID
+  const generateCorrelationId = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  };
+
+  // Fetch user projects (for profile page, show the viewed user's projects when public, otherwise use /me for current user)
+  const fetchUserProjectsList = useCallback(async () => {
     setProjectsLoading(true);
     try {
-      const response = await fetch(
-        `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/user/${userId}`
-      );
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch user projects: ${response.status}`);
+      // Use authenticated endpoint for current user's own profile; for public profiles keep existing public fetch by id
+      let data;
+      if (!userId) {
+        data = [];
+      } else {
+        // If the profile being viewed belongs to the current authenticated user, call /me
+        const correlationId = generateCorrelationId();
+        try {
+          data = await getUserProjects(correlationId);
+        } catch (e) {
+          // Fallback to public endpoint by userId if /me not allowed
+          const response = await fetch(
+            `https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api/projects/user/${userId}`
+          );
+          if (!response.ok) {
+            throw new Error(`Failed to fetch user projects: ${response.status}`);
+          }
+          data = await response.json();
+        }
       }
-      
-      const data = await response.json();
-      
+
       // Map the API response to match the expected ProjectCard structure
       const mappedProjects = data.map((project) => {
         // Try multiple possible field names for open roles
@@ -97,7 +116,7 @@ function ProfilePage() {
     } finally {
       setProjectsLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   // Handle project click
   const handleProjectClick = useCallback((project) => {
@@ -116,7 +135,7 @@ function ProfilePage() {
         setUser(data);
         
         // Fetch user projects
-        await fetchUserProjects(userId);
+        await fetchUserProjectsList();
       } catch (err) {
         console.error("Failed to fetch profile:", err);
 
@@ -140,7 +159,7 @@ function ProfilePage() {
     if (userId) {
       fetchUser();
     }
-  }, [userId, userRole]);
+  }, [userId, userRole, fetchUserProjectsList]);
 
   const handleToastClose = () => {
     setShowToast(false);

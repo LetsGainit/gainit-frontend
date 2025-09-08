@@ -49,20 +49,15 @@ const MyProjects = () => {
 
   // Fetch user projects
   const fetchUserProjects = useCallback(async () => {
-    if (!userInfo?.userId) {
-      console.log('[MY-PROJECTS] No user ID available, skipping fetch');
-      return;
-    }
-
     const correlationId = generateCorrelationId();
-    console.log(`[MY-PROJECTS] Fetching projects for user ${userInfo.userId} with correlation ID: ${correlationId}`);
+    console.log(`[MY-PROJECTS] Fetching projects for current user via /projects/user/me with correlation ID: ${correlationId}`);
 
     try {
       setLoading(true);
       setError(null);
 
-      // Real API call
-      const projects = await getUserProjects(userInfo.userId, correlationId);
+      // Real API call using /projects/user/me (no userId required)
+      const projects = await getUserProjects(correlationId);
 
       console.log(`[MY-PROJECTS] Successfully fetched ${projects.length} projects`);
       setAllProjects(projects || []);

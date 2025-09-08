@@ -5,8 +5,8 @@ export async function getAllActiveProjects() {
     return response.data;
 }
 
-export async function getUserProjects(userId, correlationId) {
-    const response = await api.get(`/projects/user/${userId}`, {
+export async function getUserProjects(correlationId) {
+    const response = await api.get(`/projects/user/me`, {
         headers: {
             'X-Correlation-ID': correlationId
         }
