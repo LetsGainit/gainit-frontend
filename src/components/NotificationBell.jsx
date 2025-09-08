@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, BellRing, X, CheckCircle, AlertCircle, Info, Users, CheckSquare, MessageSquare, Play } from 'lucide-react';
+import { Bell, BellRing, X, CheckCircle, AlertCircle, Info, Users, CheckSquare, MessageSquare, Play, Check, X as XIcon } from 'lucide-react';
 import signalRService from '../services/signalRService';
+import api from '../services/api';
 import '../css/NotificationBell.css';
 
 const NotificationBell = () => {
@@ -9,6 +10,7 @@ const NotificationBell = () => {
     const [unreadCount, setUnreadCount] = useState(0);
     const [isConnected, setIsConnected] = useState(false);
     const [connectionError, setConnectionError] = useState(null);
+    const [processingRequests, setProcessingRequests] = useState(new Set());
     const notificationRef = useRef(null);
 
     useEffect(() => {
@@ -31,6 +33,7 @@ const NotificationBell = () => {
         };
         
         startConnection();
+
 
         // Listen for SignalR notifications
         const handleNotification = (event) => {
@@ -88,10 +91,7 @@ const NotificationBell = () => {
         setNotifications(prev => [notification, ...prev]);
         setUnreadCount(prev => prev + 1);
 
-        // Auto-remove after 10 seconds
-        setTimeout(() => {
-            removeNotification(notification.id);
-        }, 10000);
+    
     };
 
     // Get notification type based on event
@@ -208,35 +208,127 @@ const NotificationBell = () => {
         });
     };
 
+    // Handle quick actions for join requests
+    const handleApproveRequest = async (notification, e) => {
+        e.stopPropagation();
+        const requestId = notification.data.requestId || notification.data.joinRequestId;
+        
+        if (!requestId) {
+            console.warn('No request ID found for approval');
+            return;
+        }
+
+        setProcessingRequests(prev => new Set(prev).add(notification.id));
+
+        try {
+            // Use the correct endpoint: POST /api/projects/{projectId}/join-requests/{joinRequestId}/decision
+            await api.post(`/projects/${notification.data.projectId}/join-requests/${requestId}/decision`, {
+                isApproved: true
+            });
+            
+            // Remove the notification on success
+            removeNotification(notification.id);
+            
+            // Show success feedback (you could add a toast here)
+            console.log('Join request approved successfully');
+        } catch (error) {
+            console.error('Failed to approve join request:', error);
+            // You could show an error toast here
+        } finally {
+            setProcessingRequests(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(notification.id);
+                return newSet;
+            });
+        }
+    };
+
+    const handleRejectRequest = async (notification, e) => {
+        e.stopPropagation();
+        const requestId = notification.data.requestId || notification.data.joinRequestId;
+        
+        if (!requestId) {
+            console.warn('No request ID found for rejection');
+            return;
+        }
+
+        setProcessingRequests(prev => new Set(prev).add(notification.id));
+
+        try {
+            // Use the correct endpoint: POST /api/projects/{projectId}/join-requests/{joinRequestId}/decision
+            await api.post(`/projects/${notification.data.projectId}/join-requests/${requestId}/decision`, {
+                isApproved: false
+            });
+            
+            // Remove the notification on success
+            removeNotification(notification.id);
+            
+            // Show success feedback (you could add a toast here)
+            console.log('Join request rejected successfully');
+        } catch (error) {
+            console.error('Failed to reject join request:', error);
+            // You could show an error toast here
+        } finally {
+            setProcessingRequests(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(notification.id);
+                return newSet;
+            });
+        }
+    };
+
     // Handle notification click
     const handleNotificationClick = (notification) => {
         markAsRead(notification.id);
         
+
+         removeNotification(notification.id);
+        
         // Navigate based on notification type
         switch (notification.eventName) {
             case 'projectJoinRequested':
-                // Navigate to project join requests page
+                // Go to project's join requests management page (to approve/reject)
                 window.location.href = `/projects/${notification.data.projectId}/join-requests`;
+                break;
+            case 'projectJoinApproved':
+                // Go to the project you were approved for
+                window.location.href = `/projects/${notification.data.projectId}`;
+                break;
+            case 'projectJoinRejected':
+                // Go to home page (to find another project)
+                window.location.href = `/`;
+                break;
+            case 'projectJoinCancelled':
+                // Go to project overview (as admin to see what happened)
+                window.location.href = `/projects/${notification.data.projectId}`;
+                break;
+            case 'projectStarted':
+                // Go to project overview/dashboard
+                window.location.href = `/projects/${notification.data.projectId}`;
                 break;
             case 'taskCreated':
             case 'taskCompleted':
             case 'taskUnblocked':
-                // Navigate to project tasks page
+                // Go to project tasks page
                 window.location.href = `/projects/${notification.data.projectId}/tasks`;
+                break;
+            case 'milestoneCompleted':
+                // Go to project roadmap/milestones page
+                window.location.href = `/projects/${notification.data.projectId}`;
                 break;
             case 'postReplied':
             case 'postLiked':
             case 'replyLiked':
-                // Navigate to project forum
+                // Go to project forum (keep it simple - no specific post logic for now)
                 window.location.href = `/projects/${notification.data.projectId}/forum`;
                 break;
-            case 'projectStarted':
-                // Navigate to project overview
-                window.location.href = `/projects/${notification.data.projectId}`;
-                break;
             default:
-                // Navigate to project overview
-                window.location.href = `/projects/${notification.data.projectId}`;
+                // Fallback: Go to project overview or main projects page
+                if (notification.data.projectId) {
+                    window.location.href = `/projects/${notification.data.projectId}`;
+                } else {
+                    window.location.href = `/search-projects`;
+                }
         }
     };
 
@@ -258,7 +350,13 @@ const NotificationBell = () => {
         <div className="notification-bell-container" ref={notificationRef}>
             {/* Bell Icon */}
             <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={() => {
+                    setIsOpen(!isOpen);
+                    // Clear unread count when opening the dropdown
+                    if (!isOpen) {
+                        setUnreadCount(0);
+                    }
+                }}
                 className={`bell-button ${!isConnected ? 'disconnected' : ''}`}
                 aria-label="Notifications"
                 title={connectionError || (isConnected ? 'Connected' : 'Disconnected')}
@@ -350,6 +448,30 @@ const NotificationBell = () => {
                                             <p className="notification-item-time">
                                                 {formatTimestamp(notification.timestamp)}
                                             </p>
+                                            
+                                            {/* Quick Action Buttons for Join Requests */}
+                                            {notification.eventName === 'projectJoinRequested' && (
+                                                <div className="quick-actions">
+                                                    <button
+                                                        onClick={(e) => handleApproveRequest(notification, e)}
+                                                        className="quick-action-btn approve-btn"
+                                                        disabled={processingRequests.has(notification.id)}
+                                                        title="Approve Request"
+                                                    >
+                                                        <Check className="action-icon" />
+                                                        {processingRequests.has(notification.id) ? 'Processing...' : 'Approve'}
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => handleRejectRequest(notification, e)}
+                                                        className="quick-action-btn reject-btn"
+                                                        disabled={processingRequests.has(notification.id)}
+                                                        title="Reject Request"
+                                                    >
+                                                        <XIcon className="action-icon" />
+                                                        {processingRequests.has(notification.id) ? 'Processing...' : 'Reject'}
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
