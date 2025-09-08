@@ -49,17 +49,13 @@ const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick,
     console.log('[ProjectCardWork] Project data:', normalizedProject);
     console.log('[ProjectCardWork] Feature flag ENABLE_TEMP_TASKS_SCREEN:', ENABLE_TEMP_TASKS_SCREEN);
     
-    // TEMPORARY: Show alert for testing
-    alert(`Card clicked! Project ID: ${normalizedProject.id}, Status: ${normalizedProject.projectStatus}`);
-    
     // Block navigation if project is pending (backend status "Pending")
     if (normalizedProject.projectStatus === 'Pending') {
       console.log('[ProjectCardWork] Project is pending, blocking navigation');
       return;
     }
     
-    // TEMPORARY: Allow navigation for testing
-    console.log('[ProjectCardWork] Allowing navigation for testing');
+    console.log('[ProjectCardWork] Allowing navigation');
     
     if (onCardClick) {
       console.log('[ProjectCardWork] Using onCardClick handler');

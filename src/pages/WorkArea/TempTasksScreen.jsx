@@ -121,13 +121,13 @@ const TempTasksScreen = () => {
   }
 
   return (
-    <div className="temp-tasks-screen">
+    <div className="my-tasks-screen">
       {/* Header */}
-      <div className="temp-tasks-header">
+      <div className="my-tasks-header">
         <div className="header-content">
-          <h1 className="page-title">My Tasks (Temp)</h1>
+          <h1 className="page-title">My Tasks</h1>
           <p className="page-subtitle">
-            Project ID: {projectId}
+            Manage your assigned tasks and track progress
           </p>
         </div>
         <div className="header-actions">
@@ -142,7 +142,7 @@ const TempTasksScreen = () => {
       </div>
 
       {/* Controls */}
-      <div className="temp-tasks-controls">
+      <div className="my-tasks-controls">
         <div className="controls-info">
           <span className="info-badge">
             page={page} • size={pageSize} • sort={sort}
@@ -151,7 +151,7 @@ const TempTasksScreen = () => {
       </div>
 
       {/* Content */}
-      <div className="temp-tasks-content">
+      <div className="my-tasks-content">
         {/* Loading State */}
         {loading && (
           <div className="loading-state">

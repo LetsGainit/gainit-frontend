@@ -294,14 +294,6 @@ const MyProjects = () => {
         <p className="page-subtitle">
           Manage your active projects and track your contributions
         </p>
-        {/* TEMPORARY: Test button for temp tasks screen */}
-        <button 
-          className="btn-primary"
-          onClick={() => navigate('/work/tmp/test-project-id')}
-          style={{ marginTop: '10px' }}
-        >
-          Test Temp Tasks Screen
-        </button>
       </div>
 
       {/* Tabs Row */}
