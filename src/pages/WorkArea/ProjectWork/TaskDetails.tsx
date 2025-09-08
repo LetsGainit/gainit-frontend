@@ -24,9 +24,10 @@ const TaskDetails: React.FC = () => {
   const [activeView, setActiveView] = useState("my-projects");
   const [isAddingSubtask, setIsAddingSubtask] = useState(false);
 
-  // Derived counters
-  const completedSubtaskCount = task?.completedSubtaskCount || subtasks.filter(subtask => subtask.isDone).length;
-  const subtaskCount = task?.subtaskCount || subtasks.length;
+  // Derived counters - with safety checks
+  const safeSubtasks = Array.isArray(subtasks) ? subtasks : [];
+  const completedSubtaskCount = task?.completedSubtaskCount || safeSubtasks.filter(subtask => subtask && subtask.isDone).length;
+  const subtaskCount = task?.subtaskCount || safeSubtasks.length;
 
   // Fetch task data
   useEffect(() => {
@@ -74,7 +75,7 @@ const TaskDetails: React.FC = () => {
       const dto: CreateSubtaskDto = {
         title: newSubtaskTitle.trim(),
         description: undefined,
-        orderIndex: Math.max(...subtasks.map(s => s.orderIndex), 0) + 1
+        orderIndex: Math.max(...safeSubtasks.map(s => s && s.orderIndex ? s.orderIndex : 0), 0) + 1
       };
 
       console.log(`[TASK-DETAILS] Creating subtask for task ${taskId}`);
@@ -198,10 +199,11 @@ const TaskDetails: React.FC = () => {
     });
   };
 
-  // Sort subtasks: open first, then done
-  const sortedSubtasks = [...subtasks].sort((a, b) => {
+  // Sort subtasks: open first, then done - with safety checks
+  const sortedSubtasks = [...safeSubtasks].sort((a, b) => {
+    if (!a || !b) return 0;
     if (a.isDone === b.isDone) {
-      return a.orderIndex - b.orderIndex;
+      return (a.orderIndex || 0) - (b.orderIndex || 0);
     }
     return a.isDone ? 1 : -1;
   });
@@ -363,7 +365,7 @@ const TaskDetails: React.FC = () => {
                     onDelete={handleDeleteSubtask}
                   />
                 ))}
-                {subtasks.length === 0 && (
+                {safeSubtasks.length === 0 && (
                   <div className="empty-subtasks">
                     <p>No subtasks yet — add your first one!</p>
                   </div>
