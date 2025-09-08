@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Clock, CheckCircle, Users } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { getUserProjects } from "../../services/projectsService";
+import { getUserProjects, startProject } from "../../services/projectsService";
 import ProjectCardWork from "../../components/project/ProjectCardWork";
+import Toast from "../../components/Toast";
 import "./MyProjects.css";
 
 const MyProjects = () => {
@@ -10,6 +11,10 @@ const MyProjects = () => {
   const [allProjects, setAllProjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [startingId, setStartingId] = useState(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("info");
   
   const { userInfo } = useAuth();
 
@@ -88,6 +93,27 @@ const MyProjects = () => {
   useEffect(() => {
     fetchUserProjects();
   }, [fetchUserProjects]);
+
+  const handleStartProject = async (projectId) => {
+    if (!projectId) return;
+    const correlationId = generateCorrelationId();
+    try {
+      setStartingId(projectId);
+      await startProject(projectId, correlationId);
+      setToastMessage("Project started. Status changed to Active.");
+      setToastType("success");
+      setShowToast(true);
+      await fetchUserProjects();
+      setActiveTab("Active");
+    } catch (err) {
+      const message = err?.response?.data?.message || "Failed to start project.";
+      setToastMessage(message);
+      setToastType("error");
+      setShowToast(true);
+    } finally {
+      setStartingId(null);
+    }
+  };
 
   const tabs = [
     {
@@ -263,11 +289,20 @@ const MyProjects = () => {
               <ProjectCardWork 
                 key={project.projectId} 
                 project={mapProjectToCard(project)} 
+                startingId={startingId}
+                onStartProject={handleStartProject}
               />
             ))}
           </div>
         )}
       </div>
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setShowToast(false)}
+        />
+      )}
     </div>
   );
 };

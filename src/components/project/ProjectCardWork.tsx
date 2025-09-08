@@ -18,9 +18,11 @@ interface ProjectCardWorkProps {
     projectStatus?: string;
   };
   onCardClick?: (project: any) => void;
+  startingId?: string | null;
+  onStartProject?: (projectId: string) => void;
 }
 
-const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick }) => {
+const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick, startingId, onStartProject }) => {
   const navigate = useNavigate();
 
   // Normalize data to handle different types and missing fields
@@ -107,9 +109,24 @@ const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick 
 
         {/* CTA Link */}
         <div className="project-card-work__cta">
-          <span className="project-card-work__view-link">
-            Start Working <FaArrowRight className="project-card-work__arrow-icon" />
-          </span>
+          {(normalizedProject.projectStatus === 'Pending' || normalizedProject.projectStatus === 'Requested') && onStartProject ? (
+            <button
+              className="btn-primary px-4 py-2 rounded-xl font-medium"
+              disabled={startingId === normalizedProject.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (startingId !== normalizedProject.id) {
+                  onStartProject(normalizedProject.id);
+                }
+              }}
+            >
+              {startingId === normalizedProject.id ? 'Starting…' : 'Start Project'}
+            </button>
+          ) : (
+            <span className="project-card-work__view-link">
+              Start Working <FaArrowRight className="project-card-work__arrow-icon" />
+            </span>
+          )}
         </div>
       </div>
     </div>

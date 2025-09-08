@@ -33,3 +33,11 @@ export async function getMatchedProjects(userId, count = 5) {
     const response = await api.get(`/api/match/profile?userId=${userId}&count=${count}`);
     return response.data;
 }
+
+// Start a project (move from Pending to InProgress)
+export async function startProject(projectId, correlationId) {
+    const response = await api.post(`/projects/${projectId}/start`, undefined, {
+        headers: correlationId ? { 'X-Correlation-ID': correlationId } : undefined
+    });
+    return response.data;
+}
