@@ -21,7 +21,7 @@ import api from '../../services/api';
 import './AIInsight.css';
 
 const AIInsight = () => {
-  const { userInfo } = useAuth();
+  const { userInfo, loading: authLoading, isAuthenticated } = useAuth();
   const [summary, setSummary] = useState(null);
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,10 +29,20 @@ const AIInsight = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!userInfo?.userId) {
-        console.warn('[AIInsight] No userId found in auth context:', { userInfo });
+      if (authLoading) {
+        console.debug('[AIInsight] Waiting for auth to finish...');
+        return;
+      }
+
+      if (!isAuthenticated) {
+        console.warn('[AIInsight] Not authenticated.');
         setError('User not authenticated');
         setLoading(false);
+        return;
+      }
+
+      if (!userInfo?.userId) {
+        console.debug('[AIInsight] Auth finished but userId not ready yet.');
         return;
       }
 
@@ -71,7 +81,7 @@ const AIInsight = () => {
     };
 
     fetchData();
-  }, [userInfo?.userId]);
+  }, [userInfo?.userId, authLoading, isAuthenticated]);
 
   const getIcon = (iconName) => {
     const iconMap = {
