@@ -23,16 +23,28 @@ class SignalRService {
                 return false;
             }
 
+            // Try different possible endpoint paths
+            const possibleEndpoints = [
+                'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/hubs/notifications',
+                'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/hub/notifications',
+                'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/notifications',
+                'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/signalr/notifications'
+            ];
+            
+            const endpoint = possibleEndpoints[0]; // Start with the original
+            console.log('🔗 SignalR: Trying endpoint:', endpoint);
+            
             // Create connection - using your backend URL
             this.connection = new signalR.HubConnectionBuilder()
-                .withUrl('https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/hubs/notifications', {
+                .withUrl(endpoint, {
                     accessTokenFactory: async () => {
                         // This will be called whenever the connection needs a token
                         // It will automatically handle token refresh
                         return await this.getTokenFromAuthProviderAsync();
                     },
+                    // For Azure SignalR Service, use WebSockets only and skip negotiation
                     transport: signalR.HttpTransportType.WebSockets,
-                    skipNegotiation: true
+                    skipNegotiation: true // Skip negotiation for Azure SignalR Service
                 })
                 .withAutomaticReconnect([0, 2000, 10000, 30000]) // Auto-reconnect with backoff
                 .configureLogging(signalR.LogLevel.Information)
