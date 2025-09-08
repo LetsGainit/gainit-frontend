@@ -23,47 +23,64 @@ class SignalRService {
                 return false;
             }
 
-            // Try different possible endpoint paths
+            // Try different possible endpoint paths (NotificationsHub should be at /notifications)
             const possibleEndpoints = [
-                'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/hubs/notifications',
-                'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/hub/notifications',
                 'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/notifications',
+                'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/hub/notifications',
+                'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/hubs/notifications',
                 'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/signalr/notifications'
             ];
             
-            const endpoint = possibleEndpoints[0]; // Start with the original
-            console.log('🔗 SignalR: Trying endpoint:', endpoint);
-            
-            // Create connection - using your backend URL
-            this.connection = new signalR.HubConnectionBuilder()
-                .withUrl(endpoint, {
-                    accessTokenFactory: async () => {
-                        // This will be called whenever the connection needs a token
-                        // It will automatically handle token refresh
-                        return await this.getTokenFromAuthProviderAsync();
-                    },
-                    // For Azure SignalR Service, use WebSockets only and skip negotiation
-                    transport: signalR.HttpTransportType.WebSockets,
-                    skipNegotiation: true // Skip negotiation for Azure SignalR Service
-                })
-                .withAutomaticReconnect([0, 2000, 10000, 30000]) // Auto-reconnect with backoff
-                .configureLogging(signalR.LogLevel.Information)
-                .build();
+            // Try each endpoint until one works
+            for (let i = 0; i < possibleEndpoints.length; i++) {
+                const endpoint = possibleEndpoints[i];
+                console.log(`🔗 SignalR: Trying endpoint ${i + 1}/${possibleEndpoints.length}:`, endpoint);
+                
+                try {
+                    // Create connection - using your backend URL
+                    this.connection = new signalR.HubConnectionBuilder()
+                        .withUrl(endpoint, {
+                            accessTokenFactory: async () => {
+                                // This will be called whenever the connection needs a token
+                                // It will automatically handle token refresh
+                                return await this.getTokenFromAuthProviderAsync();
+                            },
+                            // For Azure SignalR Service, use WebSockets only and skip negotiation
+                            transport: signalR.HttpTransportType.WebSockets,
+                            skipNegotiation: true // Skip negotiation for Azure SignalR Service
+                        })
+                        .withAutomaticReconnect([0, 2000, 10000, 30000]) // Auto-reconnect with backoff
+                        .configureLogging(signalR.LogLevel.Information)
+                        .build();
 
-            // Set up event handlers
-            this.setupEventHandlers();
+                    // Set up event handlers
+                    this.setupEventHandlers();
 
-            // Start connection
-            console.log('🔗 SignalR: Attempting to start connection...');
-            await this.connection.start();
-            this.isConnected = true;
-            this.reconnectAttempts = 0;
+                    // Start connection
+                    console.log('🔗 SignalR: Attempting to start connection...');
+                    await this.connection.start();
+                    this.isConnected = true;
+                    this.reconnectAttempts = 0;
 
-            console.log('🔗 SignalR: Connected successfully!');
-            return true;
+                    console.log(`🔗 SignalR: Connected successfully to ${endpoint}!`);
+                    return true;
+                    
+                } catch (endpointError) {
+                    console.warn(`🔗 SignalR: Failed to connect to ${endpoint}:`, endpointError.message);
+                    if (this.connection) {
+                        await this.connection.stop();
+                        this.connection = null;
+                    }
+                    
+                    // If this is the last endpoint, throw the error
+                    if (i === possibleEndpoints.length - 1) {
+                        throw endpointError;
+                    }
+                }
+            }
 
         } catch (error) {
-            console.error('🔗 SignalR: Connection failed:', error);
+            console.error('🔗 SignalR: All endpoints failed:', error);
             this.handleConnectionError(error);
             return false;
         }
