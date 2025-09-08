@@ -100,7 +100,6 @@ function ProjectPage() {
       const response = await api.post('/projects/start-from-template', undefined, {
         params: {
           templateId: projectId,
-          userId: userInfo?.userId || "",
           requestedRole: selectedRole || undefined,
         }
       });
