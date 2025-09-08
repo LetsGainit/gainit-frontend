@@ -393,8 +393,8 @@ const NotificationBell = () => {
                     <Bell className="bell-icon" />
                 )}
                 
-                {/* Connection Status Indicator */}
-                <div className={`connection-indicator ${isConnected ? 'connected' : 'disconnected'}`}></div>
+                {/* Connection Status Indicator - Hidden */}
+                {false && <div className={`connection-indicator ${isConnected ? 'connected' : 'disconnected'}`}></div>}
                 
                 {/* Unread Count Badge - Removed */}
             </button>

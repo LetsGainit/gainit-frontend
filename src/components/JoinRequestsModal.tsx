@@ -130,11 +130,6 @@ const JoinRequestsModal: React.FC<JoinRequestsModalProps> = ({
       // Remove the processed request from the list
       setJoinRequests(prev => prev.filter(req => req.joinRequestId !== pendingDecision.requestId));
       
-      // Close decision modal
-      setShowDecisionModal(false);
-      setPendingDecision(null);
-      setDecisionReason('');
-      
       // If we were viewing this request, clear selection
       if (selectedRequest?.joinRequestId === pendingDecision.requestId) {
         setSelectedRequest(null);
@@ -146,6 +141,10 @@ const JoinRequestsModal: React.FC<JoinRequestsModalProps> = ({
         onError(err);
       }
     } finally {
+      // Always close decision modal and reset state, regardless of success/failure
+      setShowDecisionModal(false);
+      setPendingDecision(null);
+      setDecisionReason('');
       setDecisionLoading(null);
     }
   };
