@@ -39,7 +39,7 @@ const AIInsight = () => {
         setLoading(true);
         const [summaryRes, dashboardRes] = await Promise.all([
           api.get('/me/summary'),
-          api.get(`/${userInfo.userId}/dashboard`)
+          api.get('/me/dashboard')
         ]);
         
         setSummary(summaryRes.data);
