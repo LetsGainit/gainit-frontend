@@ -151,6 +151,18 @@ const AIInsight = () => {
     return iconMap[iconName] || Activity;
   };
 
+  // Convert markdown-style bold text (*text*) to HTML bold tags
+  const formatBoldText = (text) => {
+    if (!text) return '';
+    return text.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+  };
+
+  // Render formatted text with bold styling
+  const renderFormattedText = (text) => {
+    const formattedText = formatBoldText(text);
+    return <span dangerouslySetInnerHTML={{ __html: formattedText }} />;
+  };
+
   if (loading) {
     return (
       <div className="ai-insight-page">
@@ -225,7 +237,9 @@ const AIInsight = () => {
         <div className="summary-section">
           <div className="summary-card">
             <h2 className="section-title">Overall Summary</h2>
-            <p className="summary-text">{summary.overallSummary}</p>
+            <div className="summary-text">
+              {renderFormattedText(summary.overallSummary)}
+            </div>
           </div>
         </div>
       )}
