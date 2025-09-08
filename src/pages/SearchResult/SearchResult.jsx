@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import SearchBarContainer from "../../components/SearchBarContainer";
 import ProjectCard from "../../components/project/ProjectCard";
 import publicApi from "../../services/publicApi";
@@ -11,6 +12,7 @@ function SearchResult() {
   const [error, setError] = useState("");
   const [projects, setProjects] = useState([]);
   const hasAutoSearched = useRef(false);
+  const navigate = useNavigate();
 
   const handleSearch = useCallback(async () => {
     const trimmed = (searchTerm || "").trim();
@@ -49,6 +51,19 @@ function SearchResult() {
   const handleOpenFilters = useCallback(() => {
     console.log("Open filters clicked");
   }, []);
+
+  const handleProjectClick = useCallback((project) => {
+    const projectId = project?.id || project?.projectId;
+    const rawStatus = project?.projectStatus || project?.status || "";
+    const normalized = String(rawStatus).toLowerCase();
+    const isActive = normalized === "pending" || normalized === "inprogress" || normalized === "in_progress";
+    if (!projectId) return;
+    if (isActive) {
+      navigate(`/project/${projectId}`);
+    } else {
+      navigate(`/templates/${projectId}`);
+    }
+  }, [navigate]);
 
   // Auto-run search on initial load if there is a query param
   useEffect(() => {
@@ -94,6 +109,7 @@ function SearchResult() {
                   key={project.id || project.projectId}
                   project={project}
                   variant="catalog"
+                  onCardClick={handleProjectClick}
                 />
               ))}
             </div>
