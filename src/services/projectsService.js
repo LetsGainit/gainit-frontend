@@ -99,7 +99,7 @@ export async function cancelJoinRequest(projectId, joinRequestId, reason = null,
 }
 
 export async function decideJoinRequest(projectId, joinRequestId, isApproved, reason, correlationId) {
-    const response = await api.post(`/projects/${projectId}/joinrequests/${joinRequestId}/decision`, {
+    const response = await api.post(`/projects/${projectId}/${joinRequestId}/decision`, {
         isApproved: isApproved,
         reason: reason
     }, {
