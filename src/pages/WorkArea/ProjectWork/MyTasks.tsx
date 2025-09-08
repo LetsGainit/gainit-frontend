@@ -21,7 +21,7 @@ interface Task {
 
 const MyTasks: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  const { userInfo } = useAuth();
+  const { userInfo, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -40,7 +40,7 @@ const MyTasks: React.FC = () => {
 
   // Fetch tasks
   const fetchTasks = useCallback(async () => {
-    if (!projectId) return;
+    if (!projectId || !userInfo?.userId) return;
 
     console.log(`[MY-TASKS] Fetching tasks for project ${projectId}`);
     setLoading(true);
@@ -67,7 +67,7 @@ const MyTasks: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [projectId]);
+  }, [projectId, userInfo?.userId]);
 
   // Load tasks on mount
   useEffect(() => {
@@ -78,7 +78,7 @@ const MyTasks: React.FC = () => {
     } else {
       console.log(`[MY-TASKS] No projectId, not fetching tasks`);
     }
-  }, [projectId, fetchTasks]);
+  }, [projectId, fetchTasks, userInfo?.userId]);
 
   // Handle task click
   const handleTaskClick = (taskId: string) => {
@@ -175,7 +175,19 @@ const MyTasks: React.FC = () => {
   // Group tasks by status - ensure tasks is always an array
   const safeTasks = Array.isArray(tasks) ? tasks : [];
   const groupedTasks = groupTasksByStatus(safeTasks);
-  const statusGroups = Object.entries(groupedTasks).filter(([_, taskList]) => Array.isArray(taskList) && taskList.length > 0);
+  const statusGroups = Object.entries(groupedTasks).filter(([_, taskList]) => Array.isArray(taskList) && taskList && taskList.length > 0);
+
+  // Show loading state while authentication is loading
+  if (authLoading || !userInfo?.userId) {
+    return (
+      <div className="my-tasks-container">
+        <div className="my-tasks-loading">
+          <div className="loading-spinner"></div>
+          <p>Loading tasks...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="my-tasks-container">
@@ -213,10 +225,10 @@ const MyTasks: React.FC = () => {
                     />
                     <h3 className="status-group-title">{config.title}</h3>
                   </div>
-                  <span className="status-group-count">{Array.isArray(statusTasks) ? statusTasks.length : 0}</span>
+                  <span className="status-group-count">{Array.isArray(statusTasks) && statusTasks ? statusTasks.length : 0}</span>
                 </div>
                 <div className="status-group-content">
-                  {Array.isArray(statusTasks) && statusTasks.map((task) => (
+                  {Array.isArray(statusTasks) && statusTasks && statusTasks.map((task) => (
                     <TaskCard
                       key={task.taskId}
                       task={task}

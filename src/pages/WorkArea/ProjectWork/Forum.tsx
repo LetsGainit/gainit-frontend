@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
+import { useAuth } from "../../../hooks/useAuth";
 import { 
   MessageSquare, 
   Plus, 
@@ -35,6 +36,7 @@ import "./Forum.css";
 
 const Forum: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
+  const { userInfo, loading: authLoading } = useAuth();
   
   // Local state
   const [posts, setPosts] = useState<Post[]>([]);
@@ -49,7 +51,7 @@ const Forum: React.FC = () => {
 
   // Fetch posts
   const fetchPosts = useCallback(async () => {
-    if (!projectId) return;
+    if (!projectId || !userInfo?.userId) return;
 
     setLoading(true);
     setError(null);
@@ -65,12 +67,12 @@ const Forum: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [projectId]);
+  }, [projectId, userInfo?.userId]);
 
   // Load posts on mount
   useEffect(() => {
     fetchPosts();
-  }, [fetchPosts]);
+  }, [fetchPosts, userInfo?.userId]);
 
   // Filter and sort posts
   const filteredAndSortedPosts = useMemo(() => {
@@ -277,6 +279,18 @@ const Forum: React.FC = () => {
       </div>
     </div>
   );
+
+  // Show loading state while authentication is loading
+  if (authLoading || !userInfo?.userId) {
+    return (
+      <div className="forum-container">
+        <div className="forum-loading">
+          <div className="loading-spinner"></div>
+          <p>Loading forum...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="forum-container">

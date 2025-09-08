@@ -64,11 +64,11 @@ const AIInsight = () => {
         setLoading(true);
         console.debug('[AIInsight] Starting data fetch', { userId: userInfo.userId });
         const [summaryRes, dashboardRes] = await Promise.all([
-          api.get('/users/me/summary').then(r => {
+          api.get('/users/me/summary', { timeout: 60000 }).then(r => {
             console.debug('[AIInsight] /me/summary response', { status: r.status, ok: r.status >= 200 && r.status < 300 });
             return r;
           }),
-          api.get('/users/me/dashboard').then(r => {
+          api.get('/users/me/dashboard', { timeout: 60000 }).then(r => {
             console.debug('[AIInsight] /me/dashboard response', { status: r.status, ok: r.status >= 200 && r.status < 300 });
             return r;
           })
