@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import SearchBarContainer from "../../components/SearchBarContainer";
 import ProjectCard from "../../components/project/ProjectCard";
 import publicApi from "../../services/publicApi";
@@ -10,6 +10,7 @@ function SearchResult() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [projects, setProjects] = useState([]);
+  const hasAutoSearched = useRef(false);
 
   const handleSearch = useCallback(async () => {
     const trimmed = (searchTerm || "").trim();
@@ -48,6 +49,15 @@ function SearchResult() {
   const handleOpenFilters = useCallback(() => {
     console.log("Open filters clicked");
   }, []);
+
+  // Auto-run search on initial load if there is a query param
+  useEffect(() => {
+    const trimmed = (initialQuery || "").trim();
+    if (!hasAutoSearched.current && trimmed) {
+      hasAutoSearched.current = true;
+      handleSearch();
+    }
+  }, [initialQuery, handleSearch]);
 
   return (
     <div className="search-projects-page">
