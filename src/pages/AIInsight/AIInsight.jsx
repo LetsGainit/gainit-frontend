@@ -119,7 +119,9 @@ const AIInsight = () => {
       }
 
       console.debug('[AIInsight] Sync start', { projectId: effectiveProjectId });
-      await api.post(`/github/projects/${effectiveProjectId}/sync`);
+      await api.post(`/github/projects/${effectiveProjectId}/sync`, {}, {
+        timeout: 60000 // 60 second timeout for sync operations
+      });
       console.debug('[AIInsight] Sync completed');
       setSynced(true);
     } catch (e) {

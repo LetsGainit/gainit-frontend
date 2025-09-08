@@ -50,12 +50,20 @@ const MyTasks: React.FC = () => {
       const correlationId = generateCorrelationId();
       const tasksData = await getProjectTasks(projectId!, { includeCompleted: false, sortBy: "CreatedAtUtc" }, correlationId);
       
+      // Enhanced logging for debugging
+      console.log(`[MY-TASKS] Raw API response:`, tasksData);
+      console.log(`[MY-TASKS] Response type:`, typeof tasksData);
+      console.log(`[MY-TASKS] Is array:`, Array.isArray(tasksData));
+      
+      // Ensure we always have a valid array
       const safeTasksData = Array.isArray(tasksData) ? tasksData : [];
       console.log(`[MY-TASKS] Successfully fetched ${safeTasksData.length} tasks for project ${projectId}`);
       setTasks(safeTasksData);
     } catch (err) {
       console.error(`[MY-TASKS] Error fetching tasks:`, err);
       setError(err instanceof Error ? err.message : 'Failed to load tasks');
+      // Set empty array on error to prevent undefined state
+      setTasks([]);
     } finally {
       setLoading(false);
     }
@@ -83,21 +91,15 @@ const MyTasks: React.FC = () => {
   };
 
   // Group tasks by status
-  const groupTasksByStatus = (tasks: Task[]) => {
-    if (!tasks || !Array.isArray(tasks)) {
-      return {
-        Todo: [],
-        InProgress: [],
-        Blocked: [],
-        Done: []
-      };
-    }
+  const groupTasksByStatus = (tasks: Task[] | undefined | null) => {
+    // Ensure we always have a valid array to work with
+    const safeTasks = Array.isArray(tasks) ? tasks : [];
     
     const grouped = {
-      Todo: tasks.filter(task => task.status === "Todo"),
-      InProgress: tasks.filter(task => task.status === "InProgress"),
-      Blocked: tasks.filter(task => task.status === "Blocked"),
-      Done: tasks.filter(task => task.status === "Done")
+      Todo: safeTasks.filter(task => task && task.status === "Todo"),
+      InProgress: safeTasks.filter(task => task && task.status === "InProgress"),
+      Blocked: safeTasks.filter(task => task && task.status === "Blocked"),
+      Done: safeTasks.filter(task => task && task.status === "Done")
     };
     return grouped;
   };
@@ -170,9 +172,10 @@ const MyTasks: React.FC = () => {
     </div>
   );
 
-  // Group tasks by status
-  const groupedTasks = groupTasksByStatus(tasks || []);
-  const statusGroups = Object.entries(groupedTasks).filter(([_, taskList]) => taskList && taskList.length > 0);
+  // Group tasks by status - ensure tasks is always an array
+  const safeTasks = Array.isArray(tasks) ? tasks : [];
+  const groupedTasks = groupTasksByStatus(safeTasks);
+  const statusGroups = Object.entries(groupedTasks).filter(([_, taskList]) => Array.isArray(taskList) && taskList.length > 0);
 
   return (
     <div className="my-tasks-container">
@@ -191,9 +194,9 @@ const MyTasks: React.FC = () => {
       
       {error && !loading && renderError()}
       
-      {!loading && !error && (!Array.isArray(tasks) || tasks.length === 0) && renderEmpty()}
+      {!loading && !error && safeTasks.length === 0 && renderEmpty()}
       
-      {!loading && !error && Array.isArray(tasks) && tasks.length > 0 && (
+      {!loading && !error && safeTasks.length > 0 && (
         <div className="my-tasks-grid">
           {statusGroups.map(([status, statusTasks]) => {
             const config = getStatusGroupConfig(status);

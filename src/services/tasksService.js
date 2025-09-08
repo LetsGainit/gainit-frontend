@@ -10,7 +10,10 @@ export async function getMyTasks(projectId, params = {}, correlationId) {
             ...params
         }
     });
-    return response.data;
+    
+    // Ensure we always return an array, even if the API returns null/undefined
+    const data = response.data;
+    return Array.isArray(data) ? data : [];
 }
 
 // Get board data for a specific project
@@ -22,7 +25,10 @@ export async function getBoardData(projectId, params = {}, correlationId) {
             ...params
         }
     });
-    return response.data;
+    
+    // Ensure we always return an array, even if the API returns null/undefined
+    const data = response.data;
+    return Array.isArray(data) ? data : [];
 }
 
 // Backwards-compatible alias to getMyTasks for a project
