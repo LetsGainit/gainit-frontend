@@ -21,10 +21,13 @@ interface ProjectCardWorkProps {
   startingId?: string | null;
   onStartProject?: (projectId: string) => void;
   onConnectRepo?: (projectId: string) => void;
+  onViewJoinRequests?: (projectId: string) => void;
   hasRepository?: boolean;
+  loadingJoinRequests?: boolean;
+  isProjectAdmin?: boolean;
 }
 
-const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick, startingId, onStartProject, onConnectRepo, hasRepository }) => {
+const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick, startingId, onStartProject, onConnectRepo, onViewJoinRequests, hasRepository, loadingJoinRequests = false, isProjectAdmin = true }) => {
   const navigate = useNavigate();
 
   // Normalize data to handle different types and missing fields
@@ -111,29 +114,52 @@ const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick,
 
         {/* CTA Link */}
         <div className="project-card-work__cta">
-          {(normalizedProject.projectStatus === 'Pending' || normalizedProject.projectStatus === 'Requested') && onConnectRepo && !hasRepository ? (
-            <button
-              className="btn-primary px-4 py-2 rounded-xl font-medium"
-              onClick={(e) => {
-                e.stopPropagation();
-                onConnectRepo(normalizedProject.id);
-              }}
-            >
-              Connect Repository
-            </button>
-          ) : (normalizedProject.projectStatus === 'Pending' || normalizedProject.projectStatus === 'Requested') && onStartProject ? (
-            <button
-              className="btn-primary px-4 py-2 rounded-xl font-medium"
-              disabled={startingId === normalizedProject.id}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (startingId !== normalizedProject.id) {
-                  onStartProject(normalizedProject.id);
-                }
-              }}
-            >
-              {startingId === normalizedProject.id ? 'Starting…' : 'Start Project'}
-            </button>
+          {(normalizedProject.projectStatus === 'Pending' || normalizedProject.projectStatus === 'Requested') ? (
+            <div className="project-card-work__action-buttons">
+              {onViewJoinRequests && isProjectAdmin && (
+                <button
+                  className="btn-secondary px-3 py-2 rounded-lg font-medium text-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewJoinRequests(normalizedProject.id);
+                  }}
+                  disabled={loadingJoinRequests}
+                >
+                  {loadingJoinRequests ? (
+                    <>
+                      <div className="button-spinner"></div>
+                      Loading...
+                    </>
+                  ) : (
+                    'View Requests'
+                  )}
+                </button>
+              )}
+              {onConnectRepo && !hasRepository && isProjectAdmin ? (
+                <button
+                  className="btn-primary px-4 py-2 rounded-xl font-medium"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onConnectRepo(normalizedProject.id);
+                  }}
+                >
+                  Connect Repository
+                </button>
+              ) : onStartProject && isProjectAdmin ? (
+                <button
+                  className="btn-primary px-4 py-2 rounded-xl font-medium"
+                  disabled={startingId === normalizedProject.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (startingId !== normalizedProject.id) {
+                      onStartProject(normalizedProject.id);
+                    }
+                  }}
+                >
+                  {startingId === normalizedProject.id ? 'Starting…' : 'Start Project'}
+                </button>
+              ) : null}
+            </div>
           ) : (
             <span className="project-card-work__view-link">
               Start Working <FaArrowRight className="project-card-work__arrow-icon" />

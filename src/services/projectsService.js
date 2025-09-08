@@ -52,3 +52,61 @@ export async function updateProjectRepository(projectId, repositoryUrl, correlat
     });
     return response.data;
 }
+
+// Join Requests API functions
+export async function getJoinRequests(projectId, status = null, correlationId) {
+    const url = status ? `/api/projects/${projectId}/myrequests?status=${status}` : `/api/projects/${projectId}/myrequests`;
+    const response = await api.get(url, {
+        headers: {
+            ...(correlationId ? { 'X-Correlation-ID': correlationId } : {})
+        }
+    });
+    return response.data;
+}
+
+export async function getJoinRequestById(projectId, joinRequestId, correlationId) {
+    const response = await api.get(`/api/projects/${projectId}/joinrequests/${joinRequestId}`, {
+        headers: {
+            ...(correlationId ? { 'X-Correlation-ID': correlationId } : {})
+        }
+    });
+    return response.data;
+}
+
+export async function createJoinRequest(projectId, message, requestedRole, correlationId) {
+    const response = await api.post(`/api/projects/${projectId}/createrequest`, {
+        message: message,
+        requestedRole: requestedRole
+    }, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...(correlationId ? { 'X-Correlation-ID': correlationId } : {})
+        }
+    });
+    return response.data;
+}
+
+export async function cancelJoinRequest(projectId, joinRequestId, reason = null, correlationId) {
+    const response = await api.post(`/api/projects/${projectId}/joinrequests/${joinRequestId}/cancel`, {
+        reason: reason
+    }, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...(correlationId ? { 'X-Correlation-ID': correlationId } : {})
+        }
+    });
+    return response.data;
+}
+
+export async function decideJoinRequest(projectId, joinRequestId, isApproved, reason, correlationId) {
+    const response = await api.post(`/api/projects/${projectId}/joinrequests/${joinRequestId}/decision`, {
+        isApproved: isApproved,
+        reason: reason
+    }, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...(correlationId ? { 'X-Correlation-ID': correlationId } : {})
+        }
+    });
+    return response.data;
+}
