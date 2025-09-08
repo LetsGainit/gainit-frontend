@@ -3,7 +3,7 @@ import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import "./TempTasksScreen.css";
 
-const ENABLE_TEMP_TASKS_SCREEN = true; // Feature flag
+const ENABLE_TEMP_TASKS_SCREEN = true; // Feature flag - keeping temp screen enabled
 
 const TempTasksScreen = () => {
   const { projectId } = useParams();
@@ -31,6 +31,13 @@ const TempTasksScreen = () => {
       return;
     }
 
+    // Validate projectId is not a placeholder
+    if (projectId === 'test-project-id') {
+      setError("Invalid project ID. Please select a valid project.");
+      setLoading(false);
+      return;
+    }
+
     // Create new abort controller for this request
     abortControllerRef.current = new AbortController();
 
@@ -53,6 +60,7 @@ const TempTasksScreen = () => {
       const url = `/projects/${projectId}/tasks/my-tasks?${params.toString()}`;
       
       console.log(`[TempTasksScreen] fetching my-tasks for projectId=${projectId}, status=${status || 'none'}`);
+      console.log(`[TempTasksScreen] Full API URL: ${url}`);
 
       const response = await api.get(url, {
         signal: abortControllerRef.current.signal
