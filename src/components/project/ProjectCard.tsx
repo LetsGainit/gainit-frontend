@@ -28,7 +28,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onCardClick }) => {
 
   // Normalize data to handle different types and missing fields
   const normalizedProject = {
-    id: project?.id || project?.projectId || "",
+    id: (project?.id || project?.projectId || (project as any)?.Id || (project as any)?.ID || (project as any)?.projectID || (project as any)?.ProjectId || (project as any)?.ProjectID || "") as string,
     title: project?.title || project?.projectName || "Untitled Project",
     description: project?.description || project?.projectDescription || "No description available",
     image: project?.image || project?.projectPictureUrl || "/default-featured-image.png",

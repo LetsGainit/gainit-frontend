@@ -44,8 +44,11 @@ export async function startProject(projectId, correlationId) {
 
 // Update a project's connected repository
 export async function updateProjectRepository(projectId, repositoryUrl, correlationId) {
-    const response = await api.put(`/projects/${projectId}/repository`, { repositoryUrl }, {
-        headers: correlationId ? { 'X-Correlation-ID': correlationId } : undefined
+    const response = await api.post(`/projects/${projectId}/repository`, repositoryUrl, {
+        headers: {
+            'Content-Type': 'text/plain',
+            ...(correlationId ? { 'X-Correlation-ID': correlationId } : {})
+        }
     });
     return response.data;
 }

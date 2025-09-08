@@ -91,7 +91,14 @@ function SearchResult() {
   }, []);
 
   const handleProjectClick = useCallback((project) => {
-    const projectId = project?.id || project?.projectId;
+    const projectId =
+      project?.id ||
+      project?.projectId ||
+      project?.Id ||
+      project?.ID ||
+      project?.projectID ||
+      project?.ProjectId ||
+      project?.ProjectID;
     if (!projectId) return;
     // Save current results and scroll position into cache for the active query
     const trimmed = (searchTerm || "").trim();

@@ -151,9 +151,13 @@ export const validateRepoUrl = async (url: string): Promise<ValidateUrlResponse>
 
 // Link repository to project
 export const linkProjectRepository = async (projectId: string, repositoryUrl: string): Promise<void> => {
-  await makeApiCall(`/api/github/projects/${projectId}/link`, {
+  await makeApiCall(`/api/projects/${projectId}/repository`, {
     method: 'POST',
-    body: JSON.stringify({ repositoryUrl }),
+    // Send raw URL as text/plain per backend contract
+    body: repositoryUrl,
+    headers: {
+      'Content-Type': 'text/plain',
+    },
   });
   
   // Clear cache for this project
