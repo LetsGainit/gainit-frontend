@@ -30,6 +30,7 @@ const AIInsight = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!userInfo?.userId) {
+        console.warn('[AIInsight] No userId found in auth context:', { userInfo });
         setError('User not authenticated');
         setLoading(false);
         return;
@@ -37,18 +38,35 @@ const AIInsight = () => {
 
       try {
         setLoading(true);
+        console.debug('[AIInsight] Starting data fetch', { userId: userInfo.userId });
         const [summaryRes, dashboardRes] = await Promise.all([
-          api.get('/me/summary'),
-          api.get('/me/dashboard')
+          api.get('/me/summary').then(r => {
+            console.debug('[AIInsight] /me/summary response', { status: r.status, ok: r.status >= 200 && r.status < 300 });
+            return r;
+          }),
+          api.get('/me/dashboard').then(r => {
+            console.debug('[AIInsight] /me/dashboard response', { status: r.status, ok: r.status >= 200 && r.status < 300 });
+            return r;
+          })
         ]);
         
+        console.debug('[AIInsight] Parsed responses', {
+          summaryKeys: summaryRes?.data ? Object.keys(summaryRes.data) : null,
+          dashboardKeys: dashboardRes?.data ? Object.keys(dashboardRes.data) : null
+        });
+
         setSummary(summaryRes.data);
         setDashboard(dashboardRes.data);
       } catch (err) {
         setError('Failed to load insights data');
-        console.error('Error fetching data:', err);
+        console.error('[AIInsight] Error fetching data', {
+          message: err?.message,
+          status: err?.response?.status,
+          responseData: err?.response?.data
+        });
       } finally {
         setLoading(false);
+        console.debug('[AIInsight] Finished data fetch');
       }
     };
 
@@ -82,6 +100,7 @@ const AIInsight = () => {
   }
 
   if (error) {
+    console.warn('[AIInsight] Rendering error state:', error);
     return (
       <div className="ai-insight-page">
         <div className="error-container">
