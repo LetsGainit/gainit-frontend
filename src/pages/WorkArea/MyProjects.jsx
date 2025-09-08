@@ -318,7 +318,7 @@ const MyProjects = () => {
                 startingId={startingId}
                 onStartProject={handleStartProject}
                 onConnectRepo={(pid) => setShowRepoModalFor(pid)}
-                hasRepository={Boolean(project.repositoryUrl || project.RepositoryLink)}
+                hasRepository={Boolean(project.repositoryUrl || project.repositoryLink || project.RepositoryLink)}
               />
             ))}
           </div>
