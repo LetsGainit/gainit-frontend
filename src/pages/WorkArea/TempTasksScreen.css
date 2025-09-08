@@ -365,3 +365,358 @@
     text-align: left;
   }
 }
+
+/* MyTasks Styling - Status Groups */
+.my-tasks-container {
+  width: 100%;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.my-tasks-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.add-task-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #9333ea;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.add-task-button:hover {
+  background-color: #7c3aed;
+}
+
+.add-task-button:focus {
+  outline: 2px solid #9333ea;
+  outline-offset: 2px;
+}
+
+/* Grid Layout */
+.my-tasks-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Status Group */
+.status-group {
+  border-radius: 1rem;
+  padding: 1.5rem;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Status Group Background Colors */
+.status-group.bg-gray-50 {
+  background-color: #f9fafb;
+}
+
+.status-group.bg-indigo-50 {
+  background-color: #eef2ff;
+}
+
+.status-group.bg-red-50 {
+  background-color: #fef2f2;
+}
+
+.status-group.bg-green-50 {
+  background-color: #f0fdf4;
+}
+
+.status-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.status-group-title-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-group-icon {
+  flex-shrink: 0;
+}
+
+/* Icon colors */
+.status-group-icon.text-gray-500 {
+  color: #6b7280;
+}
+
+.status-group-icon.text-indigo-500 {
+  color: #6366f1;
+}
+
+.status-group-icon.text-red-500 {
+  color: #ef4444;
+}
+
+.status-group-icon.text-green-500 {
+  color: #22c55e;
+}
+
+/* Spinning animation for In Progress */
+.status-group-icon.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.status-group-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.status-group-count {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.status-group-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+/* Custom scrollbar for status group content */
+.status-group-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.status-group-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.status-group-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+}
+
+.status-group-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Task Card Styling */
+.task-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease;
+}
+
+.task-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.task-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.4;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.task-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.priority-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.priority-badge.priority-low {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.priority-badge.priority-medium {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.priority-badge.priority-high {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.priority-badge.priority-critical {
+  background-color: #fecaca;
+  color: #dc2626;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.status-badge.status-todo {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.status-badge.status-inprogress {
+  background-color: #eef2ff;
+  color: #6366f1;
+}
+
+.status-badge.status-blocked {
+  background-color: #fef2f2;
+  color: #ef4444;
+}
+
+.status-badge.status-done {
+  background-color: #f0fdf4;
+  color: #22c55e;
+}
+
+.task-description {
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0 0 1rem 0;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.task-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.task-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.task-type {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.task-milestone {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.task-progress {
+  display: flex;
+  align-items: center;
+}
+
+.subtask-count {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+/* Responsive Design for Status Groups */
+@media (max-width: 1024px) {
+  .my-tasks-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .my-tasks-header {
+    margin-bottom: 1rem;
+  }
+  
+  .add-task-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .my-tasks-grid {
+    gap: 0.75rem;
+  }
+  
+  .status-group {
+    padding: 1rem;
+    min-height: 150px;
+  }
+  
+  .status-group-header {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .status-group-title {
+    font-size: 1rem;
+  }
+  
+  .status-group-content {
+    max-height: 300px;
+    gap: 0.5rem;
+  }
+  
+  .task-card {
+    padding: 1.25rem;
+  }
+}

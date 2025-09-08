@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { ClipboardList, Loader, AlertCircle, CheckCircle2, Plus } from "lucide-react";
 import api from "../../services/api";
 import "./TempTasksScreen.css";
 
@@ -115,39 +116,75 @@ const TempTasksScreen = () => {
     navigate('/work');
   };
 
+  // Group tasks by status
+  const groupTasksByStatus = (tasks) => {
+    // Ensure we always have a valid array to work with
+    const safeTasks = Array.isArray(tasks) ? tasks : [];
+    
+    const grouped = {
+      Todo: safeTasks.filter(task => task && task.status === "Todo"),
+      InProgress: safeTasks.filter(task => task && task.status === "InProgress"),
+      Blocked: safeTasks.filter(task => task && task.status === "Blocked"),
+      Done: safeTasks.filter(task => task && task.status === "Done")
+    };
+    return grouped;
+  };
+
+  // Get status group configuration
+  const getStatusGroupConfig = (status) => {
+    const configs = {
+      Todo: {
+        title: "Todo",
+        bgClass: "bg-gray-50",
+        icon: ClipboardList,
+        iconColor: "text-gray-500"
+      },
+      InProgress: {
+        title: "In Progress",
+        bgClass: "bg-indigo-50",
+        icon: Loader,
+        iconColor: "text-indigo-500"
+      },
+      Blocked: {
+        title: "Blocked",
+        bgClass: "bg-red-50",
+        icon: AlertCircle,
+        iconColor: "text-red-500"
+      },
+      Done: {
+        title: "Completed",
+        bgClass: "bg-green-50",
+        icon: CheckCircle2,
+        iconColor: "text-green-500"
+      }
+    };
+    return configs[status] || configs.Todo;
+  };
+
   // Don't render if feature flag is disabled
   if (!ENABLE_TEMP_TASKS_SCREEN) {
     return null;
   }
 
-  return (
-    <div className="my-tasks-screen">
-      {/* Header */}
-      <div className="my-tasks-header">
-        <div className="header-content">
-          <h1 className="page-title">My Tasks</h1>
-          <p className="page-subtitle">
-            Manage your assigned tasks and track progress
-          </p>
-        </div>
-        <div className="header-actions">
-          <button 
-            className="btn-secondary"
-            onClick={handleRefresh}
-            disabled={loading}
-          >
-            {loading ? 'Refreshing...' : 'Refresh'}
-          </button>
-        </div>
-      </div>
+  // Group tasks by status - ensure tasks is always an array
+  const safeTasks = Array.isArray(tasks) ? tasks : [];
+  const groupedTasks = groupTasksByStatus(safeTasks);
+  const statusGroups = Object.entries(groupedTasks).filter(([_, taskList]) => Array.isArray(taskList) && taskList && taskList.length > 0);
 
-      {/* Controls */}
-      <div className="my-tasks-controls">
-        <div className="controls-info">
-          <span className="info-badge">
-            page={page} • size={pageSize} • sort={sort}
-          </span>
-        </div>
+  return (
+    <div className="my-tasks-container">
+      {/* Add Task Button */}
+      <div className="my-tasks-header">
+        <button 
+          className="add-task-button"
+          onClick={() => {
+            // TODO: Implement add task functionality
+            console.log('Add task clicked');
+          }}
+        >
+          <Plus size={16} />
+          Add Task
+        </button>
       </div>
 
       {/* Content */}
@@ -201,52 +238,69 @@ const TempTasksScreen = () => {
           </div>
         )}
 
-        {/* Tasks List */}
-        {!loading && !error && tasks.length > 0 && (
-          <div className="tasks-list">
-            <div className="tasks-header">
-              <h3>Tasks ({tasks.length})</h3>
-            </div>
-            <div className="tasks-grid">
-              {tasks.map((task) => (
-                <div key={task.taskId} className="task-card">
-                  <div className="task-header">
-                    <h4 className="task-title">{task.title}</h4>
-                    <div className="task-badges">
-                      <span className={`priority-badge priority-${task.priority?.toLowerCase()}`}>
-                        {task.priority}
-                      </span>
-                      <span className={`status-badge status-${task.status?.toLowerCase()}`}>
-                        {task.status}
-                      </span>
+        {/* Tasks Grid with Status Groups */}
+        {!loading && !error && safeTasks.length > 0 && (
+          <div className="my-tasks-grid">
+            {statusGroups.map(([status, statusTasks]) => {
+              const config = getStatusGroupConfig(status);
+              return (
+                <div
+                  key={status}
+                  className={`status-group ${config.bgClass}`}
+                >
+                  <div className="status-group-header">
+                    <div className="status-group-title-container">
+                      <config.icon 
+                        size={20} 
+                        className={`status-group-icon ${config.iconColor} ${status === 'InProgress' ? 'animate-spin' : ''}`} 
+                      />
+                      <h3 className="status-group-title">{config.title}</h3>
                     </div>
+                    <span className="status-group-count">{Array.isArray(statusTasks) ? statusTasks.length : 0}</span>
                   </div>
-                  
-                  {task.description && (
-                    <p className="task-description">
-                      {task.description.length > 100 
-                        ? `${task.description.substring(0, 100)}...` 
-                        : task.description
-                      }
-                    </p>
-                  )}
-                  
-                  <div className="task-meta">
-                    <div className="task-info">
-                      <span className="task-type">{task.type}</span>
-                      {task.milestoneTitle && (
-                        <span className="task-milestone">Milestone: {task.milestoneTitle}</span>
-                      )}
-                    </div>
-                    <div className="task-progress">
-                      <span className="subtask-count">
-                        {task.completedSubtaskCount}/{task.subtaskCount} subtasks
-                      </span>
-                    </div>
+                  <div className="status-group-content">
+                    {Array.isArray(statusTasks) && statusTasks.map((task) => (
+                      <div key={task.taskId} className="task-card">
+                        <div className="task-header">
+                          <h4 className="task-title">{task.title}</h4>
+                          <div className="task-badges">
+                            <span className={`priority-badge priority-${task.priority?.toLowerCase()}`}>
+                              {task.priority}
+                            </span>
+                            <span className={`status-badge status-${task.status?.toLowerCase()}`}>
+                              {task.status}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {task.description && (
+                          <p className="task-description">
+                            {task.description.length > 100 
+                              ? `${task.description.substring(0, 100)}...` 
+                              : task.description
+                            }
+                          </p>
+                        )}
+                        
+                        <div className="task-meta">
+                          <div className="task-info">
+                            <span className="task-type">{task.type}</span>
+                            {task.milestoneTitle && (
+                              <span className="task-milestone">Milestone: {task.milestoneTitle}</span>
+                            )}
+                          </div>
+                          <div className="task-progress">
+                            <span className="subtask-count">
+                              {task.completedSubtaskCount}/{task.subtaskCount} subtasks
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
         )}
       </div>

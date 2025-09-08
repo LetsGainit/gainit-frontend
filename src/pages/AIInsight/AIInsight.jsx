@@ -16,7 +16,8 @@ import {
   Eye,
   Trophy,
   Activity,
-  Loader2
+  Loader2,
+  Users
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
@@ -374,6 +375,175 @@ const AIInsight = () => {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Collaboration Analytics */}
+      {synced && dashboard?.collaborationIndex && (
+        <div className="analytics-section">
+          <h2 className="section-title">Collaboration Analytics</h2>
+          <div className="analytics-card">
+            <div className="analytics-grid">
+              <div className="analytics-item">
+                <div className="analytics-icon">
+                  <GitPullRequest className="w-6 h-6" />
+                </div>
+                <div className="analytics-content">
+                  <div className="analytics-value">{dashboard.collaborationIndex.pullRequests}</div>
+                  <div className="analytics-label">Pull Requests</div>
+                </div>
+              </div>
+              <div className="analytics-item">
+                <div className="analytics-icon">
+                  <GitCommit className="w-6 h-6" />
+                </div>
+                <div className="analytics-content">
+                  <div className="analytics-value">{dashboard.collaborationIndex.pushes}</div>
+                  <div className="analytics-label">Pushes</div>
+                </div>
+              </div>
+              <div className="analytics-item">
+                <div className="analytics-icon">
+                  <Users className="w-6 h-6" />
+                </div>
+                <div className="analytics-content">
+                  <div className="analytics-value">{dashboard.collaborationIndex.collaborationRatioPercentage}%</div>
+                  <div className="analytics-label">Collaboration Ratio</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Completion Tracker */}
+      {synced && dashboard?.completionTracker && (
+        <div className="analytics-section">
+          <h2 className="section-title">Task Completion</h2>
+          <div className="analytics-card">
+            <div className="completion-tracker">
+              <div className="completion-stats">
+                <div className="completion-stat">
+                  <div className="completion-value">{dashboard.completionTracker.tasksStarted}</div>
+                  <div className="completion-label">Tasks Started</div>
+                </div>
+                <div className="completion-stat">
+                  <div className="completion-value">{dashboard.completionTracker.tasksCompleted}</div>
+                  <div className="completion-label">Tasks Completed</div>
+                </div>
+                <div className="completion-stat">
+                  <div className="completion-value">{dashboard.completionTracker.completionRatePercentage}%</div>
+                  <div className="completion-label">Completion Rate</div>
+                </div>
+              </div>
+              <div className="completion-progress">
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill" 
+                    style={{ width: `${dashboard.completionTracker.completionRatePercentage}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Refactoring Rate */}
+      {synced && dashboard?.refactoringRate && (
+        <div className="analytics-section">
+          <h2 className="section-title">Code Quality</h2>
+          <div className="analytics-card">
+            <div className="refactoring-stats">
+              <div className="refactoring-item">
+                <div className="refactoring-icon">
+                  <Code className="w-6 h-6" />
+                </div>
+                <div className="refactoring-content">
+                  <div className="refactoring-value">{dashboard.refactoringRate.linesAdded.toLocaleString()}</div>
+                  <div className="refactoring-label">Lines Added</div>
+                </div>
+              </div>
+              <div className="refactoring-item">
+                <div className="refactoring-icon">
+                  <Database className="w-6 h-6" />
+                </div>
+                <div className="refactoring-content">
+                  <div className="refactoring-value">{dashboard.refactoringRate.linesDeleted.toLocaleString()}</div>
+                  <div className="refactoring-label">Lines Deleted</div>
+                </div>
+              </div>
+              <div className="refactoring-item">
+                <div className="refactoring-icon">
+                  <Activity className="w-6 h-6" />
+                </div>
+                <div className="refactoring-content">
+                  <div className="refactoring-value">{dashboard.refactoringRate.refactoringRatioPercentage}%</div>
+                  <div className="refactoring-label">Refactoring Ratio</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Achievements */}
+      {synced && dashboard?.achievements && dashboard.achievements.length > 0 && (
+        <div className="analytics-section">
+          <h2 className="section-title">Achievements</h2>
+          <div className="analytics-card">
+            <div className="achievements-grid">
+              {dashboard.achievements.map((achievement, index) => (
+                <div key={index} className={`achievement-card ${achievement.earned ? 'earned' : 'pending'}`}>
+                  <div className="achievement-icon">
+                    <Trophy className="w-6 h-6" />
+                  </div>
+                  <div className="achievement-content">
+                    <h3 className="achievement-title">{achievement.title}</h3>
+                    <p className="achievement-description">{achievement.description}</p>
+                    {!achievement.earned && (
+                      <div className="achievement-progress">
+                        <div className="progress-bar">
+                          <div 
+                            className="progress-fill" 
+                            style={{ width: `${achievement.progressPercentage}%` }}
+                          ></div>
+                        </div>
+                        <span className="progress-text">{achievement.progressPercentage}%</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Community Collaboration */}
+      {synced && dashboard?.communityCollaboration && (
+        <div className="analytics-section">
+          <h2 className="section-title">Community Engagement</h2>
+          <div className="analytics-card">
+            <div className="community-stats">
+              <div className="community-item">
+                <div className="community-value">{dashboard.communityCollaboration.posts}</div>
+                <div className="community-label">Posts</div>
+              </div>
+              <div className="community-item">
+                <div className="community-value">{dashboard.communityCollaboration.replies}</div>
+                <div className="community-label">Replies</div>
+              </div>
+              <div className="community-item">
+                <div className="community-value">{dashboard.communityCollaboration.likesReceived}</div>
+                <div className="community-label">Likes Received</div>
+              </div>
+              <div className="community-item">
+                <div className="community-value">{dashboard.communityCollaboration.uniquePeersInteracted}</div>
+                <div className="community-label">Peers Interacted</div>
+              </div>
             </div>
           </div>
         </div>
