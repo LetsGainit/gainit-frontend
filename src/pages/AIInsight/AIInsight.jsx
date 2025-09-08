@@ -119,7 +119,7 @@ const AIInsight = () => {
       }
 
       console.debug('[AIInsight] Sync start', { projectId: effectiveProjectId });
-      await api.post(`/projects/${effectiveProjectId}/sync`);
+      await api.post(`/github/projects/${effectiveProjectId}/sync`);
       console.debug('[AIInsight] Sync completed');
       setSynced(true);
     } catch (e) {
@@ -334,7 +334,7 @@ const AIInsight = () => {
               </div>
             </div>
             <div className="tech-lists">
-              {dashboard.technologies.languages?.length > 0 && (
+              {Array.isArray(dashboard.technologies.languages) && dashboard.technologies.languages.length > 0 && (
                 <div className="tech-list">
                   <h4>Languages</h4>
                   <div className="tech-tags">
@@ -344,7 +344,7 @@ const AIInsight = () => {
                   </div>
                 </div>
               )}
-              {dashboard.technologies.technologies?.length > 0 && (
+              {Array.isArray(dashboard.technologies.technologies) && dashboard.technologies.technologies.length > 0 && (
                 <div className="tech-list">
                   <h4>Technologies</h4>
                   <div className="tech-tags">

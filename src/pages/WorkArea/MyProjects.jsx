@@ -67,8 +67,9 @@ const MyProjects = () => {
       // Real API call using /projects/user/me (no userId required)
       const projects = await getUserProjects(correlationId);
 
-      console.log(`[MY-PROJECTS] Successfully fetched ${projects.length} projects`);
-      setAllProjects(projects || []);
+      const safeProjects = Array.isArray(projects) ? projects : [];
+      console.log(`[MY-PROJECTS] Successfully fetched ${safeProjects.length} projects`);
+      setAllProjects(safeProjects);
     } catch (err) {
       console.error("[MY-PROJECTS] Failed to fetch projects:", err);
       
@@ -198,7 +199,7 @@ const MyProjects = () => {
       description: project.projectDescription || "No description available",
       image: project.projectPictureUrl || "/default-featured-image.png",
       duration: durationText,
-      openPositions: project.openRoles?.length || 0,
+      openPositions: Array.isArray(project.openRoles) ? project.openRoles.length : 0,
       technologies: allTechnologies,
       status: activeTab,
       projectStatus: project.projectStatus

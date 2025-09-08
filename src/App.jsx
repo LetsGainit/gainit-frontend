@@ -1,4 +1,5 @@
 import "./css/App.css";
+import "./css/ErrorBoundary.css";
 import SearchProjects from "./pages/SearchProjects/SearchProjects";
 import SearchResult from "./pages/SearchResult/SearchResult";
 import HomePage from "./pages/HomePage/HomePage";
@@ -17,15 +18,17 @@ import ProjectWork from "./pages/WorkArea/ProjectWork";
 import TaskDetails from "./pages/WorkArea/ProjectWork/TaskDetails";
 import AIInsight from "./pages/AIInsight/AIInsight";
 import GainerProfilePage from "./pages/GainerProfilePage/GainerProfilePage";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
   return (
-    <div>
-      <PlatformNavBar />
-      <ScrollToTop />
+    <ErrorBoundary>
+      <div>
+        <PlatformNavBar />
+        <ScrollToTop />
 
-      <main className="main-content">
-        <Routes>
+        <main className="main-content">
+          <Routes>
           {/* Public routes - no authentication required */}
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<About />} />
@@ -71,9 +74,10 @@ function App() {
               </Routes>
             </RoleCheck>
           } />
-        </Routes>
-      </main>
-    </div>
+          </Routes>
+        </main>
+      </div>
+    </ErrorBoundary>
   );
 }
 

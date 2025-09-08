@@ -50,8 +50,9 @@ const MyTasks: React.FC = () => {
       const correlationId = generateCorrelationId();
       const tasksData = await getProjectTasks(projectId!, { includeCompleted: false, sortBy: "CreatedAtUtc" }, correlationId);
       
-      console.log(`[MY-TASKS] Successfully fetched ${tasksData.length} tasks for project ${projectId}`);
-      setTasks(tasksData);
+      const safeTasksData = Array.isArray(tasksData) ? tasksData : [];
+      console.log(`[MY-TASKS] Successfully fetched ${safeTasksData.length} tasks for project ${projectId}`);
+      setTasks(safeTasksData);
     } catch (err) {
       console.error(`[MY-TASKS] Error fetching tasks:`, err);
       setError(err instanceof Error ? err.message : 'Failed to load tasks');
@@ -190,9 +191,9 @@ const MyTasks: React.FC = () => {
       
       {error && !loading && renderError()}
       
-      {!loading && !error && (!tasks || tasks.length === 0) && renderEmpty()}
+      {!loading && !error && (!Array.isArray(tasks) || tasks.length === 0) && renderEmpty()}
       
-      {!loading && !error && tasks && tasks.length > 0 && (
+      {!loading && !error && Array.isArray(tasks) && tasks.length > 0 && (
         <div className="my-tasks-grid">
           {statusGroups.map(([status, statusTasks]) => {
             const config = getStatusGroupConfig(status);
@@ -209,10 +210,10 @@ const MyTasks: React.FC = () => {
                     />
                     <h3 className="status-group-title">{config.title}</h3>
                   </div>
-                  <span className="status-group-count">{statusTasks.length}</span>
+                  <span className="status-group-count">{Array.isArray(statusTasks) ? statusTasks.length : 0}</span>
                 </div>
                 <div className="status-group-content">
-                  {statusTasks.map((task) => (
+                  {Array.isArray(statusTasks) && statusTasks.map((task) => (
                     <TaskCard
                       key={task.taskId}
                       task={task}

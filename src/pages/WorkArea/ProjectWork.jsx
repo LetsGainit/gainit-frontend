@@ -25,11 +25,11 @@ const ProjectWork = () => {
     authLoading
   });
   
-  // State management
-  const [project, setProject] = useState(null);
+  // State management - initialize all arrays as empty arrays, objects as empty objects
+  const [project, setProject] = useState({});
   const [myTasks, setMyTasks] = useState([]);
   const [board, setBoard] = useState([]);
-  const [githubStats, setGithubStats] = useState(null);
+  const [githubStats, setGithubStats] = useState({});
   const [activeTab, setActiveTab] = useState("My Tasks");
   const [activeView, setActiveView] = useState("my-projects");
   
@@ -79,11 +79,12 @@ const ProjectWork = () => {
 
       if (projectData) {
         console.log(`[PROJECT-WORK] Successfully fetched project:`, projectData);
-        setProject(projectData);
+        setProject(projectData || {});
         updateKpiState('daysLeft', { loading: false, data: projectData });
       } else {
         console.error("[PROJECT-WORK] Project data is null/undefined");
         setError("Project not found");
+        setProject({});
         updateKpiState('daysLeft', { loading: false, error: "Project not found" });
       }
     } catch (err) {
@@ -105,9 +106,10 @@ const ProjectWork = () => {
 
       const tasksData = await getMyTasks(projectId, { includeCompleted: false, sortBy: 'CreatedAtUtc' }, correlationId);
 
-      console.log(`[PROJECT-WORK] Successfully fetched ${tasksData.length} tasks`);
-      setMyTasks(tasksData || []);
-      updateKpiState('myOpenTasks', { loading: false, data: tasksData || [] });
+      const safeTasksData = Array.isArray(tasksData) ? tasksData : [];
+      console.log(`[PROJECT-WORK] Successfully fetched ${safeTasksData.length} tasks`);
+      setMyTasks(safeTasksData);
+      updateKpiState('myOpenTasks', { loading: false, data: safeTasksData });
     } catch (err) {
       console.error("[PROJECT-WORK] Failed to fetch my tasks:", err);
       updateKpiState('myOpenTasks', { loading: false, error: err.message || "Failed to load tasks" });
@@ -126,9 +128,10 @@ const ProjectWork = () => {
 
       const boardData = await getBoardData(projectId, { includeCompleted: true }, correlationId);
 
-      console.log(`[PROJECT-WORK] Successfully fetched ${boardData.length} board items`);
-      setBoard(boardData || []);
-      updateKpiState('progress', { loading: false, data: boardData || [] });
+      const safeBoardData = Array.isArray(boardData) ? boardData : [];
+      console.log(`[PROJECT-WORK] Successfully fetched ${safeBoardData.length} board items`);
+      setBoard(safeBoardData);
+      updateKpiState('progress', { loading: false, data: safeBoardData });
     } catch (err) {
       console.error("[PROJECT-WORK] Failed to fetch board data:", err);
       updateKpiState('progress', { loading: false, error: err.message || "Failed to load board data" });
@@ -147,9 +150,10 @@ const ProjectWork = () => {
 
       const statsData = await getProjectGitHubStats(projectId);
       
-      console.log(`[PROJECT-WORK] Successfully fetched GitHub stats:`, statsData);
-      setGithubStats(statsData);
-      updateKpiState('openPRs', { loading: false, data: statsData });
+      const safeStatsData = statsData || {};
+      console.log(`[PROJECT-WORK] Successfully fetched GitHub stats:`, safeStatsData);
+      setGithubStats(safeStatsData);
+      updateKpiState('openPRs', { loading: false, data: safeStatsData });
     } catch (err) {
       console.error("[PROJECT-WORK] Failed to fetch GitHub stats:", err);
       updateKpiState('openPRs', { loading: false, error: err.message || "Failed to load GitHub stats" });
@@ -429,7 +433,7 @@ const ProjectWork = () => {
                   {kpiStates.daysLeft.loading ? (
                     <div className="title-skeleton"></div>
                   ) : (
-                    project?.projectName || `Project ${projectId || 'Unknown'}`
+                    (project && project.projectName) || `Project ${projectId || 'Unknown'}`
                   )}
                 </h1>
               </div>
