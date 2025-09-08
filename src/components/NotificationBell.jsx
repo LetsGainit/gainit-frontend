@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bell, BellRing, X, CheckCircle, AlertCircle, Info, Users, CheckSquare, MessageSquare, Play, Check, X as XIcon } from 'lucide-react';
 import signalRService from '../services/signalRService';
 import api from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 import '../css/NotificationBell.css';
 
 const NotificationBell = () => {
+    const { isAuthenticated, loading } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -14,7 +16,16 @@ const NotificationBell = () => {
     const notificationRef = useRef(null);
 
     useEffect(() => {
-        // Add error handling for SignalR connection
+        // Only connect SignalR if user is authenticated
+        if (!isAuthenticated || loading) {
+            // User not authenticated or still loading, stop any existing connection
+            signalRService.stopConnection();
+            setIsConnected(false);
+            setConnectionError(null);
+            return;
+        }
+
+        // User is authenticated, start SignalR connection
         const startConnection = async () => {
             try {
                 const connected = await signalRService.startConnection();
@@ -73,7 +84,7 @@ const NotificationBell = () => {
             document.removeEventListener('mousedown', handleClickOutside);
             signalRService.stopConnection();
         };
-    }, []);
+    }, [isAuthenticated, loading]); // Re-run when auth status changes
 
     // Add new notification
     const addNotification = (eventName, data) => {
@@ -345,6 +356,11 @@ const NotificationBell = () => {
         if (hours < 24) return `${hours}h ago`;
         return `${days}d ago`;
     };
+
+    // Don't render the notification bell if user is not authenticated
+    if (!isAuthenticated) {
+        return null;
+    }
 
     return (
         <div className="notification-bell-container" ref={notificationRef}>
