@@ -21,7 +21,7 @@ import api from '../../services/api';
 import './AIInsight.css';
 
 const AIInsight = () => {
-  const { user } = useAuth();
+  const { userInfo } = useAuth();
   const [summary, setSummary] = useState(null);
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,7 +29,7 @@ const AIInsight = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user?.userId) {
+      if (!userInfo?.userId) {
         setError('User not authenticated');
         setLoading(false);
         return;
@@ -39,7 +39,7 @@ const AIInsight = () => {
         setLoading(true);
         const [summaryRes, dashboardRes] = await Promise.all([
           api.get('/me/summary'),
-          api.get(`/${user.userId}/dashboard`)
+          api.get(`/${userInfo.userId}/dashboard`)
         ]);
         
         setSummary(summaryRes.data);
@@ -53,7 +53,7 @@ const AIInsight = () => {
     };
 
     fetchData();
-  }, [user?.userId]);
+  }, [userInfo?.userId]);
 
   const getIcon = (iconName) => {
     const iconMap = {
