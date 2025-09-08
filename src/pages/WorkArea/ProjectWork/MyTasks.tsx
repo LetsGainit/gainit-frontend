@@ -83,6 +83,15 @@ const MyTasks: React.FC = () => {
 
   // Group tasks by status
   const groupTasksByStatus = (tasks: Task[]) => {
+    if (!tasks || !Array.isArray(tasks)) {
+      return {
+        Todo: [],
+        InProgress: [],
+        Blocked: [],
+        Done: []
+      };
+    }
+    
     const grouped = {
       Todo: tasks.filter(task => task.status === "Todo"),
       InProgress: tasks.filter(task => task.status === "InProgress"),
@@ -161,8 +170,8 @@ const MyTasks: React.FC = () => {
   );
 
   // Group tasks by status
-  const groupedTasks = groupTasksByStatus(tasks);
-  const statusGroups = Object.entries(groupedTasks).filter(([_, tasks]) => tasks.length > 0);
+  const groupedTasks = groupTasksByStatus(tasks || []);
+  const statusGroups = Object.entries(groupedTasks).filter(([_, taskList]) => taskList && taskList.length > 0);
 
   return (
     <div className="my-tasks-container">
@@ -181,9 +190,9 @@ const MyTasks: React.FC = () => {
       
       {error && !loading && renderError()}
       
-      {!loading && !error && tasks.length === 0 && renderEmpty()}
+      {!loading && !error && (!tasks || tasks.length === 0) && renderEmpty()}
       
-      {!loading && !error && tasks.length > 0 && (
+      {!loading && !error && tasks && tasks.length > 0 && (
         <div className="my-tasks-grid">
           {statusGroups.map(([status, statusTasks]) => {
             const config = getStatusGroupConfig(status);

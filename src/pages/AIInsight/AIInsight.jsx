@@ -15,7 +15,8 @@ import {
   GitCommit,
   Eye,
   Trophy,
-  Activity
+  Activity,
+  Loader2
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
@@ -27,7 +28,7 @@ const AIInsight = () => {
   const projectId = projectIdFromRoute || idFromRoute;
   const [summary, setSummary] = useState(null);
   const [dashboard, setDashboard] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [synced, setSynced] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -54,6 +55,7 @@ const AIInsight = () => {
 
       if (!synced) {
         console.debug('[AIInsight] Skipping data fetch until sync completes');
+        setLoading(false);
         return;
       }
 
@@ -183,7 +185,14 @@ const AIInsight = () => {
                 onClick={handleSync}
                 disabled={syncing}
               >
-                {syncing ? 'Syncing…' : 'Show me summary'}
+                {syncing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Syncing…
+                  </>
+                ) : (
+                  'Show me summary'
+                )}
               </button>
             </div>
             {syncError && (
