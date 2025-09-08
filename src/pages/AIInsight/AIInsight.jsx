@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { 
   Brain, 
   CheckCircle, 
@@ -22,10 +23,15 @@ import './AIInsight.css';
 
 const AIInsight = () => {
   const { userInfo, loading: authLoading, isAuthenticated } = useAuth();
+  const { projectId: projectIdFromRoute, id: idFromRoute } = useParams();
+  const projectId = projectIdFromRoute || idFromRoute;
   const [summary, setSummary] = useState(null);
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [synced, setSynced] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncError, setSyncError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,6 +49,11 @@ const AIInsight = () => {
 
       if (!userInfo?.userId) {
         console.debug('[AIInsight] Auth finished but userId not ready yet.');
+        return;
+      }
+
+      if (!synced) {
+        console.debug('[AIInsight] Skipping data fetch until sync completes');
         return;
       }
 
@@ -81,7 +92,31 @@ const AIInsight = () => {
     };
 
     fetchData();
-  }, [userInfo?.userId, authLoading, isAuthenticated]);
+  }, [userInfo?.userId, authLoading, isAuthenticated, synced]);
+
+  const handleSync = async () => {
+    if (!projectId) {
+      setSyncError('Missing project id');
+      return;
+    }
+    setSyncError(null);
+    setSyncing(true);
+    try {
+      console.debug('[AIInsight] Sync start', { projectId });
+      await api.post(`/projects/${projectId}/sync`);
+      console.debug('[AIInsight] Sync completed');
+      setSynced(true);
+    } catch (e) {
+      console.error('[AIInsight] Sync failed', {
+        message: e?.message,
+        status: e?.response?.status,
+        data: e?.response?.data
+      });
+      setSyncError('Failed to sync project. Please try again.');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const getIcon = (iconName) => {
     const iconMap = {
@@ -137,8 +172,31 @@ const AIInsight = () => {
         </div>
       </div>
 
+      {!synced && (
+        <div className="summary-section">
+          <div className="summary-card">
+            <h2 className="section-title">Prepare Your Insights</h2>
+            <p className="summary-text">Click the button to sync your latest project data and generate insights.</p>
+            <div style={{ marginTop: '12px' }}>
+              <button
+                className="github-connect-btn"
+                onClick={handleSync}
+                disabled={syncing}
+              >
+                {syncing ? 'Syncing…' : 'Show me summary'}
+              </button>
+            </div>
+            {syncError && (
+              <div className="error-container" style={{ marginTop: '12px' }}>
+                <p>{syncError}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Overall Summary */}
-      {summary?.overallSummary && (
+      {synced && summary?.overallSummary && (
         <div className="summary-section">
           <div className="summary-card">
             <h2 className="section-title">Overall Summary</h2>
@@ -148,7 +206,7 @@ const AIInsight = () => {
       )}
 
       {/* KPIs */}
-      {dashboard?.kpis && (
+      {synced && dashboard?.kpis && (
         <div className="kpis-section">
           <h2 className="section-title">Key Performance Indicators</h2>
           <div className="kpis-grid">
@@ -172,7 +230,7 @@ const AIInsight = () => {
       )}
 
       {/* Skill Distribution */}
-      {dashboard?.skillDistribution && (
+      {synced && dashboard?.skillDistribution && (
         <div className="skills-section">
           <h2 className="section-title">Skill Distribution</h2>
           <div className="skills-card">
@@ -195,7 +253,7 @@ const AIInsight = () => {
       )}
 
       {/* Activity Metrics */}
-      {dashboard?.activityMetrics && (
+      {synced && dashboard?.activityMetrics && (
         <div className="metrics-section">
           <h2 className="section-title">Activity Metrics</h2>
           <div className="metrics-card">
@@ -238,7 +296,7 @@ const AIInsight = () => {
       )}
 
       {/* Technologies */}
-      {dashboard?.technologies && (
+      {synced && dashboard?.technologies && (
         <div className="technologies-section">
           <h2 className="section-title">Technologies</h2>
           <div className="technologies-card">
@@ -279,7 +337,7 @@ const AIInsight = () => {
       )}
 
       {/* GitHub Data */}
-      {dashboard?.githubData && (
+      {synced && dashboard?.githubData && (
         <div className="github-section">
           <h2 className="section-title">GitHub Activity</h2>
           <div className="github-card">
