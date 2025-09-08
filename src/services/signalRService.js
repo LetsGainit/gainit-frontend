@@ -23,12 +23,11 @@ class SignalRService {
                 return false;
             }
 
-            // Try different possible endpoint paths (NotificationsHub should be at /notifications)
+            // ✅ CORRECT Azure SignalR Service endpoints
             const possibleEndpoints = [
-                'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/notifications',
-                'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/hub/notifications',
-                'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/hubs/notifications',
-                'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/signalr/notifications'
+                'https://gainit-signalr.service.signalr.net/client/?hub=notifications',
+                // Fallback to app endpoint if needed
+                'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/hubs/notifications'
             ];
             
             // Try each endpoint until one works
@@ -37,7 +36,7 @@ class SignalRService {
                 console.log(`🔗 SignalR: Trying endpoint ${i + 1}/${possibleEndpoints.length}:`, endpoint);
                 
                 try {
-                    // Create connection - using your backend URL
+                    // ✅ CORRECT connection configuration for Azure SignalR Service
                     this.connection = new signalR.HubConnectionBuilder()
                         .withUrl(endpoint, {
                             accessTokenFactory: async () => {
@@ -45,9 +44,8 @@ class SignalRService {
                                 // It will automatically handle token refresh
                                 return await this.getTokenFromAuthProviderAsync();
                             },
-                            // For Azure SignalR Service, use WebSockets only and skip negotiation
-                            transport: signalR.HttpTransportType.WebSockets,
-                            skipNegotiation: true // Skip negotiation for Azure SignalR Service
+                            // ✅ CORRECT - Let SignalR handle transport negotiation
+                            // Remove transport and skipNegotiation for Azure SignalR Service
                         })
                         .withAutomaticReconnect([0, 2000, 10000, 30000]) // Auto-reconnect with backoff
                         .configureLogging(signalR.LogLevel.Information)
