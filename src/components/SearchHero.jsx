@@ -81,7 +81,7 @@ const SearchHero = ({ onSearch }) => {
       count: "12",
     });
 
-    navigate(`/search-projects?${searchParams.toString()}`);
+    navigate(`/search-result?${searchParams.toString()}`);
 
     // Call original onSearch if provided
     if (onSearch) {

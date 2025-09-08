@@ -1,0 +1,99 @@
+import { useMemo, useState, useCallback, useEffect } from "react";
+import SearchBarContainer from "../../components/SearchBarContainer";
+import ProjectCard from "../../components/project/ProjectCard";
+import publicApi from "../../services/publicApi";
+
+function SearchResult() {
+  const params = useMemo(() => new URLSearchParams(window.location.search), []);
+  const initialQuery = params.get("q") || params.get("query") || "";
+  const [searchTerm, setSearchTerm] = useState(initialQuery);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [projects, setProjects] = useState([]);
+
+  const handleSearch = useCallback(async () => {
+    const trimmed = (searchTerm || "").trim();
+    if (!trimmed) {
+      setError("Please enter a search term");
+      setProjects([]);
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await publicApi.get(`/projects/search/vector`, {
+        params: { query: trimmed, count: 6 },
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = response.data || {};
+      const items = Array.isArray(data.projects) ? data.projects : [];
+      setProjects(items);
+
+      const next = new URL(window.location.href);
+      next.searchParams.set("q", trimmed);
+      next.searchParams.set("count", "6");
+      window.history.replaceState({}, "", next.toString());
+    } catch (e) {
+      const message = e?.response?.data?.message || e?.message || "Unknown error";
+      setError(`Search Error: ${message}`);
+      setProjects([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [searchTerm]);
+
+  const handleOpenFilters = useCallback(() => {
+    console.log("Open filters clicked");
+  }, []);
+
+  return (
+    <div className="search-projects-page">
+      <SearchBarContainer
+        value={searchTerm}
+        onChange={setSearchTerm}
+        onSearch={handleSearch}
+        onOpenFilters={handleOpenFilters}
+        placeholder="Search projects, technologies..."
+        disabled={isLoading}
+        isLoading={isLoading}
+      />
+      <div className="projects-section">
+        <div className="page-container">
+          {error && (
+            <div className="no-results" style={{ color: "#b3261e", marginBottom: "12px" }}>
+              {error}
+            </div>
+          )}
+
+          {!error && !isLoading && projects.length === 0 && (
+            <div className="no-results">
+              <p>No projects found</p>
+              <p style={{ color: "#666", marginTop: "8px" }}>
+                Try refining your keywords or use different terms.
+              </p>
+            </div>
+          )}
+
+          {!isLoading && projects.length > 0 && (
+            <div className="projects-grid">
+              {projects.map((project) => (
+                <ProjectCard
+                  key={project.id || project.projectId}
+                  project={project}
+                  variant="catalog"
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default SearchResult;
+
+

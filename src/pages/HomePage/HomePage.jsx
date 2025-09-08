@@ -88,7 +88,7 @@ function HomePage() {
     const q = query.trim();
     if (!q) return;
 
-    const target = `/search-projects?query=${encodeURIComponent(q)}`;
+    const target = `/search-result?q=${encodeURIComponent(q)}`;
 
     if (accounts.length === 0) {
       try {

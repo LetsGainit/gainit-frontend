@@ -1,5 +1,6 @@
 import "./css/App.css";
 import SearchProjects from "./pages/SearchProjects/SearchProjects";
+import SearchResult from "./pages/SearchResult/SearchResult";
 import HomePage from "./pages/HomePage/HomePage";
 import ProjectPage from "./pages/ProjectPage/ProjectPage";
 import { Routes, Route } from "react-router-dom";
@@ -29,6 +30,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<About />} />
           <Route path="/search-projects" element={<SearchProjects />} />
+          <Route path="/search-result" element={<SearchResult />} />
           <Route path="/home-page" element={<HomePage />} />
           <Route path="/work" element={<WorkArea />} />
           <Route path="/ai-insight" element={<AIInsight />} />
@@ -53,6 +55,7 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/search-projects" element={<SearchProjects />} />
+                <Route path="/search-result" element={<SearchResult />} />
                 <Route path="/home-page" element={<HomePage />} />
                 <Route path="/work/projects/:projectId" element={<ProjectWork />} />
                 <Route path="/work/projects/:projectId/tasks/:taskId" element={<TaskDetails />} />
