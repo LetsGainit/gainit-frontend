@@ -68,8 +68,8 @@ const AIInsight = () => {
             console.debug('[AIInsight] /me/summary response', { status: r.status, ok: r.status >= 200 && r.status < 300 });
             return r;
           }),
-          api.get('/users/me/dashboard', { timeout: 60000 }).then(r => {
-            console.debug('[AIInsight] /me/dashboard response', { status: r.status, ok: r.status >= 200 && r.status < 300 });
+          api.get(`/users/${userInfo.userId}/dashboard?forceRefresh=true`, { timeout: 60000 }).then(r => {
+            console.debug('[AIInsight] /users/{userId}/dashboard response', { status: r.status, ok: r.status >= 200 && r.status < 300 });
             return r;
           })
         ]);
