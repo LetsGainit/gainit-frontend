@@ -12,11 +12,14 @@ class SignalRService {
     // Initialize connection
     async startConnection() {
         try {
+            console.log('🔗 SignalR: Starting connection...');
+            
             // Get your JWT token (adjust based on how you store it)
             const token = await this.getTokenFromAuthProviderAsync();
+            console.log('🔗 SignalR: Token acquired:', token ? 'Yes' : 'No');
 
             if (!token) {
-                console.warn('No JWT token found for SignalR connection');
+                console.warn('🔗 SignalR: No JWT token found for SignalR connection');
                 return false;
             }
 
@@ -39,15 +42,16 @@ class SignalRService {
             this.setupEventHandlers();
 
             // Start connection
+            console.log('🔗 SignalR: Attempting to start connection...');
             await this.connection.start();
             this.isConnected = true;
             this.reconnectAttempts = 0;
 
-            console.log('SignalR connected successfully');
+            console.log('🔗 SignalR: Connected successfully!');
             return true;
 
         } catch (error) {
-            console.error('SignalR connection failed:', error);
+            console.error('🔗 SignalR: Connection failed:', error);
             this.handleConnectionError(error);
             return false;
         }
@@ -225,27 +229,35 @@ class SignalRService {
 
     // Async version for better token refresh handling
     async getTokenFromAuthProviderAsync() {
+        console.log('🔑 SignalR: Getting token from auth provider...');
+        
         // Try to get token from localStorage first (fallback)
         const token = localStorage.getItem('access_token') || 
                      sessionStorage.getItem('access_token');
         
+        console.log('🔑 SignalR: Stored token found:', token ? 'Yes' : 'No');
+        
         if (token) {
             // Check if token is expired
             if (this.isTokenExpired(token)) {
-                console.warn('Token is expired, removing from storage');
+                console.warn('🔑 SignalR: Token is expired, removing from storage');
                 localStorage.removeItem('access_token');
                 sessionStorage.removeItem('access_token');
             } else {
+                console.log('🔑 SignalR: Using stored token');
                 return token;
             }
         }
 
         // Try to get token from MSAL (Azure B2C)
         try {
+            console.log('🔑 SignalR: Trying MSAL token acquisition...');
             const msalInstance = window.msalInstance || this.msalInstance;
+            console.log('🔑 SignalR: MSAL instance found:', msalInstance ? 'Yes' : 'No');
             
             if (msalInstance) {
                 const account = msalInstance.getActiveAccount();
+                console.log('🔑 SignalR: Active account found:', account ? 'Yes' : 'No');
                 
                 if (account) {
                     // Try to get access token silently (this handles refresh automatically)
@@ -255,21 +267,24 @@ class SignalRService {
                     };
                     
                     try {
+                        console.log('🔑 SignalR: Attempting silent token acquisition...');
                         const response = await msalInstance.acquireTokenSilent(tokenRequest);
                         if (response && response.accessToken) {
+                            console.log('🔑 SignalR: Silent token acquisition successful');
                             return response.accessToken;
                         }
                     } catch (silentError) {
-                        console.warn('Silent token acquisition failed:', silentError);
+                        console.warn('🔑 SignalR: Silent token acquisition failed:', silentError);
                         // Fall back to idToken if silent acquisition fails
                         if (account.idToken) {
+                            console.log('🔑 SignalR: Using idToken as fallback');
                             return account.idToken;
                         }
                     }
                 }
             }
         } catch (error) {
-            console.warn('Could not get token from MSAL:', error);
+            console.warn('🔑 SignalR: Could not get token from MSAL:', error);
         }
         
         return null;
