@@ -97,7 +97,7 @@ function ProjectPage() {
 
   const handleCreateProjectSubmit = async () => {
     try {
-      const response = await api.post('/projects/start-from-template', null, {
+      const response = await api.post('/projects/start-from-template', undefined, {
         params: {
           templateId: projectId,
           userId: userInfo?.userId || "",
