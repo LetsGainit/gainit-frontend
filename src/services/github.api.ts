@@ -152,7 +152,7 @@ export const validateRepoUrl = async (url: string): Promise<ValidateUrlResponse>
 // Link repository to project
 export const linkProjectRepository = async (projectId: string, repositoryUrl: string): Promise<void> => {
   await makeApiCall(`/api/projects/${projectId}/repository`, {
-    method: 'POST',
+    method: 'PUT',
     // Send raw URL as text/plain per backend contract
     body: repositoryUrl,
     headers: {
