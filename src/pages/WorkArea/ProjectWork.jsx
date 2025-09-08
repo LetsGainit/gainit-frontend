@@ -246,22 +246,22 @@ const ProjectWork = () => {
       return null;
     }
 
-    const boardData = kpiStates.progress.data || board || [];
+    const boardData = Array.isArray(kpiStates.progress.data) ? kpiStates.progress.data : (Array.isArray(board) ? board : []);
     
-    // Filter board items to this project if projectId is available
+    // Filter board items to this project if projectId is available - with safety checks
     const projectTasks = boardData.filter(task => 
-      !task.projectId || task.projectId === projectId
+      task && (!task.projectId || task.projectId === projectId)
     );
     
     if (projectTasks.length === 0) {
       // Fallback to my tasks if board doesn't include projectId
-      const myTasksArray = myTasks || [];
+      const myTasksArray = Array.isArray(myTasks) ? myTasks : [];
       const myProjectTasks = myTasksArray.filter(task => 
-        (!task.projectId || task.projectId === projectId) && 
+        task && (!task.projectId || task.projectId === projectId) && 
         task.status !== 'Done'
       );
       const completedMyTasks = myTasksArray.filter(task => 
-        (!task.projectId || task.projectId === projectId) && 
+        task && (!task.projectId || task.projectId === projectId) && 
         task.status === 'Done'
       );
       const totalMyTasks = myProjectTasks.length + completedMyTasks.length;
@@ -269,7 +269,7 @@ const ProjectWork = () => {
     }
 
     const totalTasks = projectTasks.length;
-    const completedTasks = projectTasks.filter(task => task.status === 'Done').length;
+    const completedTasks = projectTasks.filter(task => task && task.status === 'Done').length;
     return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
   };
 
@@ -298,9 +298,9 @@ const ProjectWork = () => {
       return null;
     }
 
-    const tasksData = kpiStates.myOpenTasks.data || myTasks || [];
+    const tasksData = Array.isArray(kpiStates.myOpenTasks.data) ? kpiStates.myOpenTasks.data : (Array.isArray(myTasks) ? myTasks : []);
     const myProjectTasks = tasksData.filter(task => 
-      (!task.projectId || task.projectId === projectId) && 
+      task && (!task.projectId || task.projectId === projectId) && 
       task.status !== 'Done'
     );
     return myProjectTasks.length;
