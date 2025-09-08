@@ -207,7 +207,7 @@ const MyProjects = () => {
       ...(project.technologies || [])
     ];
 
-    return {
+    const mappedProject = {
       id: project.projectId,
       title: project.projectName || "Untitled Project",
       description: project.projectDescription || "No description available",
@@ -218,6 +218,9 @@ const MyProjects = () => {
       status: activeTab,
       projectStatus: project.projectStatus
     };
+
+    console.log('[MyProjects] Mapped project:', mappedProject);
+    return mappedProject;
   };
 
   // Get empty state message
@@ -242,6 +245,14 @@ const MyProjects = () => {
         <p className="page-subtitle">
           Manage your active projects and track your contributions
         </p>
+        {/* TEMPORARY: Test button for temp tasks screen */}
+        <button 
+          className="btn-primary"
+          onClick={() => navigate('/work/tmp/test-project-id')}
+          style={{ marginTop: '10px' }}
+        >
+          Test Temp Tasks Screen
+        </button>
       </div>
 
       {/* Tabs Row */}

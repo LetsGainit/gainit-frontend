@@ -151,16 +151,20 @@ const AIInsight = () => {
     return iconMap[iconName] || Activity;
   };
 
-  // Convert markdown-style bold text (*text*) to HTML bold tags
+  // Convert markdown-style bold text (*text*) to HTML bold tags and handle line breaks
   const formatBoldText = (text) => {
     if (!text) return '';
-    return text.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+    // First convert line breaks to <br> tags
+    let formattedText = text.replace(/\n/g, '<br>');
+    // Then convert *text* to <strong>text</strong>
+    formattedText = formattedText.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+    return formattedText;
   };
 
   // Render formatted text with bold styling
   const renderFormattedText = (text) => {
     const formattedText = formatBoldText(text);
-    return <span dangerouslySetInnerHTML={{ __html: formattedText }} />;
+    return <div dangerouslySetInnerHTML={{ __html: formattedText }} />;
   };
 
   if (loading) {

@@ -15,6 +15,8 @@ const TempTasksScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  console.log('[TempTasksScreen] Component loaded with projectId:', projectId);
+
   // Get query parameters with defaults
   const status = searchParams.get('status') || '';
   const page = parseInt(searchParams.get('page')) || 1;

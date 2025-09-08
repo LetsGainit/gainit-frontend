@@ -37,7 +37,6 @@ function App() {
           <Route path="/search-result" element={<SearchResult />} />
           <Route path="/home-page" element={<HomePage />} />
           <Route path="/work" element={<WorkArea />} />
-          <Route path="/work/tmp/:projectId" element={<TempTasksScreen />} />
           <Route path="/ai-insight" element={<AIInsight />} />
           <Route path="/project/:id" element={<ProjectPage />} />
           <Route path="/profile/:id" element={<ProfilePage />} />
