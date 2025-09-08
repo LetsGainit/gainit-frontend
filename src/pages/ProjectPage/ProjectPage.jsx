@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import api from "../../services/api";
+import { useAuth } from "../../hooks/useAuth";
 import RequestToJoinModal from "../../components/RequestToJoinModal";
 import CreateProjectModal from "../../components/CreateProjectModal";
 import Toast from "../../components/Toast";
@@ -11,6 +12,7 @@ import "../../css/ProjectPage.css";
 function ProjectPage() {
   const navigate = useNavigate();
   const { id: projectId } = useParams();
+  const { userInfo } = useAuth();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -95,8 +97,11 @@ function ProjectPage() {
 
   const handleCreateProjectSubmit = async () => {
     try {
-      const response = await api.post('/start-from-template', {
-        templateProjectId: projectId
+      const response = await api.get('/projects/start-from-template', {
+        params: {
+          templateId: projectId,
+          userId: userInfo?.userId || "",
+        }
       });
       
       setIsCreateModalOpen(false);
@@ -106,12 +111,12 @@ function ProjectPage() {
       });
       
       // Navigate to the new project page
-      const newProjectId = response.data.newProjectId || response.data.projectId || response.data.id;
+      const newProjectId = response.data?.newProjectId || response.data?.projectId || response.data?.id;
       if (newProjectId) {
-        navigate(`/projects/${newProjectId}`);
+        navigate(`/project/${newProjectId}`);
       } else {
         // Fallback: navigate to projects list if no ID returned
-        navigate('/projects');
+        navigate('/search-projects');
       }
     } catch (error) {
       console.error('Failed to create project from template:', error);
