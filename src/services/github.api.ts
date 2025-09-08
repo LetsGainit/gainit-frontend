@@ -156,7 +156,7 @@ export const linkProjectRepository = async (projectId: string, repositoryUrl: st
     // Send raw URL as text/plain per backend contract
     body: repositoryUrl,
     headers: {
-      'Content-Type': 'text/plain',
+      'Content-Type': 'application/json',
     },
   });
   
