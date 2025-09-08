@@ -55,7 +55,7 @@ export async function updateProjectRepository(projectId, repositoryUrl, correlat
 
 // Join Requests API functions
 export async function getJoinRequests(projectId, status = null, correlationId) {
-    const url = status ? `/api/projects/${projectId}/myrequests?status=${status}` : `/api/projects/${projectId}/myrequests`;
+    const url = status ? `/projects/${projectId}/myrequests?status=${status}` : `/projects/${projectId}/myrequests`;
     const response = await api.get(url, {
         headers: {
             ...(correlationId ? { 'X-Correlation-ID': correlationId } : {})
@@ -65,7 +65,7 @@ export async function getJoinRequests(projectId, status = null, correlationId) {
 }
 
 export async function getJoinRequestById(projectId, joinRequestId, correlationId) {
-    const response = await api.get(`/api/projects/${projectId}/joinrequests/${joinRequestId}`, {
+    const response = await api.get(`/projects/${projectId}/joinrequests/${joinRequestId}`, {
         headers: {
             ...(correlationId ? { 'X-Correlation-ID': correlationId } : {})
         }
@@ -74,7 +74,7 @@ export async function getJoinRequestById(projectId, joinRequestId, correlationId
 }
 
 export async function createJoinRequest(projectId, message, requestedRole, correlationId) {
-    const response = await api.post(`/api/projects/${projectId}/createrequest`, {
+    const response = await api.post(`/projects/${projectId}/createrequest`, {
         message: message,
         requestedRole: requestedRole
     }, {
@@ -87,7 +87,7 @@ export async function createJoinRequest(projectId, message, requestedRole, corre
 }
 
 export async function cancelJoinRequest(projectId, joinRequestId, reason = null, correlationId) {
-    const response = await api.post(`/api/projects/${projectId}/joinrequests/${joinRequestId}/cancel`, {
+    const response = await api.post(`/projects/${projectId}/joinrequests/${joinRequestId}/cancel`, {
         reason: reason
     }, {
         headers: {
@@ -99,7 +99,7 @@ export async function cancelJoinRequest(projectId, joinRequestId, reason = null,
 }
 
 export async function decideJoinRequest(projectId, joinRequestId, isApproved, reason, correlationId) {
-    const response = await api.post(`/api/projects/${projectId}/joinrequests/${joinRequestId}/decision`, {
+    const response = await api.post(`/projects/${projectId}/joinrequests/${joinRequestId}/decision`, {
         isApproved: isApproved,
         reason: reason
     }, {

@@ -396,8 +396,8 @@ const NotificationBell = () => {
                 {/* Connection Status Indicator */}
                 <div className={`connection-indicator ${isConnected ? 'connected' : 'disconnected'}`}></div>
                 
-                {/* Unread Count Badge */}
-                {unreadCount > 0 && (
+                {/* Unread Count Badge - Hidden */}
+                {false && unreadCount > 0 && (
                     <span className="unread-badge">
                         {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
