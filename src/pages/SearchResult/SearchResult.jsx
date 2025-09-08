@@ -104,10 +104,9 @@ function SearchResult() {
     const rawStatus = project?.projectStatus || project?.status || "";
     const normalized = String(rawStatus).toLowerCase();
     const isActive = normalized === "pending" || normalized === "inprogress" || normalized === "in_progress";
-
-    // Replace current history entry so URL doesn't include /search-result
-    navigate(`/project/${projectId}`, { replace: true });
-  }, [navigate]);
+    // Navigate to the project page (push to history)
+    navigate(`/project/${projectId}`);
+  }, [navigate, projects, searchTerm]);
 
   // On mount: if coming back via browser back/forward (POP), hydrate from cache
   useEffect(() => {
