@@ -61,9 +61,9 @@ function SearchResult() {
     const isActive = normalized === "pending" || normalized === "inprogress" || normalized === "in_progress";
 
     if (isActive) {
-      navigate(`/projects/${projectId}`);
+      navigate(`/project/${projectId}`);
     } else {
-      navigate(`project/templates/${projectId}`);
+      navigate(`/templates/${projectId}`);
     }
   }, [navigate]);
 
