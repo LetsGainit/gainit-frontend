@@ -231,60 +231,37 @@ class SignalRService {
     async getTokenFromAuthProviderAsync() {
         console.log('🔑 SignalR: Getting token from auth provider...');
         
-        // Try to get token from localStorage first (fallback)
-        const token = localStorage.getItem('access_token') || 
-                     sessionStorage.getItem('access_token');
+        // Use the same token acquisition method as the API service
+        try {
+            const { getAccessToken } = await import('../auth/auth');
+            const token = await getAccessToken();
+            
+            if (token) {
+                console.log('🔑 SignalR: Got token from getAccessToken()');
+                return token;
+            } else {
+                console.warn('🔑 SignalR: getAccessToken() returned no token');
+            }
+        } catch (error) {
+            console.warn('🔑 SignalR: Failed to get token from getAccessToken():', error);
+        }
         
-        console.log('🔑 SignalR: Stored token found:', token ? 'Yes' : 'No');
+        // Fallback: Try to get token from localStorage/sessionStorage
+        const storedToken = localStorage.getItem('access_token') || 
+                           sessionStorage.getItem('access_token');
         
-        if (token) {
+        console.log('🔑 SignalR: Stored token found:', storedToken ? 'Yes' : 'No');
+        
+        if (storedToken) {
             // Check if token is expired
-            if (this.isTokenExpired(token)) {
-                console.warn('🔑 SignalR: Token is expired, removing from storage');
+            if (this.isTokenExpired(storedToken)) {
+                console.warn('🔑 SignalR: Stored token is expired, removing from storage');
                 localStorage.removeItem('access_token');
                 sessionStorage.removeItem('access_token');
             } else {
                 console.log('🔑 SignalR: Using stored token');
-                return token;
+                return storedToken;
             }
-        }
-
-        // Try to get token from MSAL (Azure B2C)
-        try {
-            console.log('🔑 SignalR: Trying MSAL token acquisition...');
-            const msalInstance = window.msalInstance || this.msalInstance;
-            console.log('🔑 SignalR: MSAL instance found:', msalInstance ? 'Yes' : 'No');
-            
-            if (msalInstance) {
-                const account = msalInstance.getActiveAccount();
-                console.log('🔑 SignalR: Active account found:', account ? 'Yes' : 'No');
-                
-                if (account) {
-                    // Try to get access token silently (this handles refresh automatically)
-                    const tokenRequest = {
-                        scopes: ['openid', 'profile', 'email', 'access_as_user'],
-                        account: account
-                    };
-                    
-                    try {
-                        console.log('🔑 SignalR: Attempting silent token acquisition...');
-                        const response = await msalInstance.acquireTokenSilent(tokenRequest);
-                        if (response && response.accessToken) {
-                            console.log('🔑 SignalR: Silent token acquisition successful');
-                            return response.accessToken;
-                        }
-                    } catch (silentError) {
-                        console.warn('🔑 SignalR: Silent token acquisition failed:', silentError);
-                        // Fall back to idToken if silent acquisition fails
-                        if (account.idToken) {
-                            console.log('🔑 SignalR: Using idToken as fallback');
-                            return account.idToken;
-                        }
-                    }
-                }
-            }
-        } catch (error) {
-            console.warn('🔑 SignalR: Could not get token from MSAL:', error);
         }
         
         return null;
