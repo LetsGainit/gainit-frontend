@@ -97,9 +97,11 @@ function ProjectPage() {
 
   const handleCreateProjectSubmit = async () => {
     try {
-      const response = await api.post('/projects/start-from-template', {
-        templateId: projectId,
-        userId: userInfo?.userId || "",
+      const response = await api.post('/projects/start-from-template', null, {
+        params: {
+          templateId: projectId,
+          userId: userInfo?.userId || "",
+        }
       });
       
       setIsCreateModalOpen(false);
