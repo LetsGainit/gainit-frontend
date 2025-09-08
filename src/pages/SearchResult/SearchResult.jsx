@@ -54,14 +54,16 @@ function SearchResult() {
 
   const handleProjectClick = useCallback((project) => {
     const projectId = project?.id || project?.projectId;
+    if (!projectId) return;
+
     const rawStatus = project?.projectStatus || project?.status || "";
     const normalized = String(rawStatus).toLowerCase();
     const isActive = normalized === "pending" || normalized === "inprogress" || normalized === "in_progress";
-    if (!projectId) return;
+
     if (isActive) {
-      navigate(`/project/${projectId}`);
+      navigate(`/projects/${projectId}`);
     } else {
-      navigate(`/templates/${projectId}`);
+      navigate(`project/templates/${projectId}`);
     }
   }, [navigate]);
 
