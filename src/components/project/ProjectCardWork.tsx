@@ -20,9 +20,11 @@ interface ProjectCardWorkProps {
   onCardClick?: (project: any) => void;
   startingId?: string | null;
   onStartProject?: (projectId: string) => void;
+  onConnectRepo?: (projectId: string) => void;
+  hasRepository?: boolean;
 }
 
-const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick, startingId, onStartProject }) => {
+const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick, startingId, onStartProject, onConnectRepo, hasRepository }) => {
   const navigate = useNavigate();
 
   // Normalize data to handle different types and missing fields
@@ -109,7 +111,17 @@ const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick,
 
         {/* CTA Link */}
         <div className="project-card-work__cta">
-          {(normalizedProject.projectStatus === 'Pending' || normalizedProject.projectStatus === 'Requested') && onStartProject ? (
+          {(normalizedProject.projectStatus === 'Pending' || normalizedProject.projectStatus === 'Requested') && onConnectRepo && !hasRepository ? (
+            <button
+              className="btn-primary px-4 py-2 rounded-xl font-medium"
+              onClick={(e) => {
+                e.stopPropagation();
+                onConnectRepo(normalizedProject.id);
+              }}
+            >
+              Connect Repository
+            </button>
+          ) : (normalizedProject.projectStatus === 'Pending' || normalizedProject.projectStatus === 'Requested') && onStartProject ? (
             <button
               className="btn-primary px-4 py-2 rounded-xl font-medium"
               disabled={startingId === normalizedProject.id}

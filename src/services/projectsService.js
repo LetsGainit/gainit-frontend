@@ -41,3 +41,11 @@ export async function startProject(projectId, correlationId) {
     });
     return response.data;
 }
+
+// Update a project's connected repository
+export async function updateProjectRepository(projectId, repositoryUrl, correlationId) {
+    const response = await api.put(`/projects/${projectId}/repository`, { repositoryUrl }, {
+        headers: correlationId ? { 'X-Correlation-ID': correlationId } : undefined
+    });
+    return response.data;
+}
