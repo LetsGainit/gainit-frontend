@@ -72,7 +72,7 @@ const ProjectCardWork: React.FC<ProjectCardWorkProps> = ({ project, onCardClick 
           alt={normalizedProject.title}
           className="project-card-work__image"
         />
-        {normalizedProject.status && (
+        {normalizedProject.status && normalizedProject.status !== 'Requested' && (
           <div className="project-card-work__status-badge">
             {normalizedProject.status}
           </div>
