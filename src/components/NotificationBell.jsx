@@ -16,8 +16,11 @@ const NotificationBell = () => {
     const notificationRef = useRef(null);
 
     useEffect(() => {
+        console.log('🔔 NotificationBell useEffect - Auth state:', { isAuthenticated, loading });
+        
         // Only connect SignalR if user is authenticated
         if (!isAuthenticated || loading) {
+            console.log('🔔 User not authenticated or loading, stopping connection');
             // User not authenticated or still loading, stop any existing connection
             signalRService.stopConnection();
             setIsConnected(false);
@@ -25,19 +28,26 @@ const NotificationBell = () => {
             return;
         }
 
+        console.log('🔔 User is authenticated, starting SignalR connection');
+        
         // User is authenticated, start SignalR connection
         const startConnection = async () => {
             try {
+                console.log('🔔 Attempting to start SignalR connection...');
                 const connected = await signalRService.startConnection();
+                console.log('🔔 SignalR connection result:', connected);
+                
                 if (connected) {
                     setIsConnected(true);
                     setConnectionError(null);
+                    console.log('🔔 SignalR connected successfully!');
                 } else {
                     setIsConnected(false);
                     setConnectionError('Failed to connect to notification service');
+                    console.log('🔔 SignalR connection failed');
                 }
             } catch (error) {
-                console.error('Failed to start SignalR connection:', error);
+                console.error('🔔 Failed to start SignalR connection:', error);
                 setIsConnected(false);
                 setConnectionError('Connection error: ' + error.message);
             }

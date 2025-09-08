@@ -12,11 +12,14 @@ class SignalRService {
     // Initialize connection
     async startConnection() {
         try {
+            console.log('🔗 SignalR: Starting connection...');
+            
             // Get your JWT token (adjust based on how you store it)
             const token = await this.getTokenFromAuthProviderAsync();
+            console.log('🔗 SignalR: Token acquired:', token ? 'Yes' : 'No');
 
             if (!token) {
-                console.warn('No JWT token found for SignalR connection');
+                console.warn('🔗 SignalR: No JWT token found for SignalR connection');
                 return false;
             }
 
@@ -39,15 +42,16 @@ class SignalRService {
             this.setupEventHandlers();
 
             // Start connection
+            console.log('🔗 SignalR: Attempting to start connection...');
             await this.connection.start();
             this.isConnected = true;
             this.reconnectAttempts = 0;
 
-            console.log('SignalR connected successfully');
+            console.log('🔗 SignalR: Connected successfully!');
             return true;
 
         } catch (error) {
-            console.error('SignalR connection failed:', error);
+            console.error('🔗 SignalR: Connection failed:', error);
             this.handleConnectionError(error);
             return false;
         }
@@ -225,51 +229,39 @@ class SignalRService {
 
     // Async version for better token refresh handling
     async getTokenFromAuthProviderAsync() {
-        // Try to get token from localStorage first (fallback)
-        const token = localStorage.getItem('access_token') || 
-                     sessionStorage.getItem('access_token');
+        console.log('🔑 SignalR: Getting token from auth provider...');
         
-        if (token) {
+        // Use the same token acquisition method as the API service
+        try {
+            const { getAccessToken } = await import('../auth/auth');
+            const token = await getAccessToken();
+            
+            if (token) {
+                console.log('🔑 SignalR: Got token from getAccessToken()');
+                return token;
+            } else {
+                console.warn('🔑 SignalR: getAccessToken() returned no token');
+            }
+        } catch (error) {
+            console.warn('🔑 SignalR: Failed to get token from getAccessToken():', error);
+        }
+        
+        // Fallback: Try to get token from localStorage/sessionStorage
+        const storedToken = localStorage.getItem('access_token') || 
+                           sessionStorage.getItem('access_token');
+        
+        console.log('🔑 SignalR: Stored token found:', storedToken ? 'Yes' : 'No');
+        
+        if (storedToken) {
             // Check if token is expired
-            if (this.isTokenExpired(token)) {
-                console.warn('Token is expired, removing from storage');
+            if (this.isTokenExpired(storedToken)) {
+                console.warn('🔑 SignalR: Stored token is expired, removing from storage');
                 localStorage.removeItem('access_token');
                 sessionStorage.removeItem('access_token');
             } else {
-                return token;
+                console.log('🔑 SignalR: Using stored token');
+                return storedToken;
             }
-        }
-
-        // Try to get token from MSAL (Azure B2C)
-        try {
-            const msalInstance = window.msalInstance || this.msalInstance;
-            
-            if (msalInstance) {
-                const account = msalInstance.getActiveAccount();
-                
-                if (account) {
-                    // Try to get access token silently (this handles refresh automatically)
-                    const tokenRequest = {
-                        scopes: ['openid', 'profile', 'email', 'access_as_user'],
-                        account: account
-                    };
-                    
-                    try {
-                        const response = await msalInstance.acquireTokenSilent(tokenRequest);
-                        if (response && response.accessToken) {
-                            return response.accessToken;
-                        }
-                    } catch (silentError) {
-                        console.warn('Silent token acquisition failed:', silentError);
-                        // Fall back to idToken if silent acquisition fails
-                        if (account.idToken) {
-                            return account.idToken;
-                        }
-                    }
-                }
-            }
-        } catch (error) {
-            console.warn('Could not get token from MSAL:', error);
         }
         
         return null;
