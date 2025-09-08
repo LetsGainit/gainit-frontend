@@ -5,6 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { getUserProjects, startProject, updateProjectRepository } from "../../services/projectsService";
 import ProjectCardWork from "../../components/project/ProjectCardWork";
 import JoinRequestsModal from "../../components/JoinRequestsModal";
+import RepositoryModal from "../../components/RepositoryModal";
 import Toast from "../../components/Toast";
 import "./MyProjects.css";
 
@@ -20,8 +21,8 @@ const MyProjects = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("info");
-  const [showRepoModalFor, setShowRepoModalFor] = useState(null);
-  const [repoUrl, setRepoUrl] = useState("");
+  const [showRepositoryModal, setShowRepositoryModal] = useState(false);
+  const [selectedProjectForRepo, setSelectedProjectForRepo] = useState(null);
   const [savingRepo, setSavingRepo] = useState(false);
   const [showJoinRequestsModal, setShowJoinRequestsModal] = useState(false);
   const [selectedProjectForRequests, setSelectedProjectForRequests] = useState(null);
@@ -136,18 +137,30 @@ const MyProjects = () => {
     }
   };
 
-  const handleConnectRepository = async (projectId) => {
-    const isValidRepoUrl = /^https?:\/\/(www\.)?github\.com\/[^\/\s]+\/[^\/\s#]+\/?$/.test(repoUrl);
-    if (!isValidRepoUrl) return;
+  const handleConnectRepository = (projectId) => {
+    const project = allProjects.find(p => p.projectId === projectId);
+    if (project) {
+      setSelectedProjectForRepo({
+        id: projectId,
+        name: project.projectName || 'Unknown Project',
+        currentUrl: project.repositoryUrl || project.repositoryLink || project.RepositoryLink || ''
+      });
+      setShowRepositoryModal(true);
+    }
+  };
+
+  const handleSaveRepository = async (repositoryUrl) => {
+    if (!selectedProjectForRepo) return;
+    
     const correlationId = generateCorrelationId();
     try {
       setSavingRepo(true);
-      await updateProjectRepository(projectId, repoUrl, correlationId);
-      setToastMessage("Repository connected.");
+      await updateProjectRepository(selectedProjectForRepo.id, repositoryUrl, correlationId);
+      setToastMessage("Repository connected successfully.");
       setToastType("success");
       setShowToast(true);
-      setShowRepoModalFor(null);
-      setRepoUrl("");
+      setShowRepositoryModal(false);
+      setSelectedProjectForRepo(null);
       await fetchUserProjects();
     } catch (err) {
       const message = err?.response?.data?.message || "Failed to connect repository.";
@@ -157,6 +170,11 @@ const MyProjects = () => {
     } finally {
       setSavingRepo(false);
     }
+  };
+
+  const handleCloseRepositoryModal = () => {
+    setShowRepositoryModal(false);
+    setSelectedProjectForRepo(null);
   };
 
   const handleViewJoinRequests = (projectId) => {
@@ -381,7 +399,7 @@ const MyProjects = () => {
                 project={mapProjectToCard(project)} 
                 startingId={startingId}
                 onStartProject={handleStartProject}
-                onConnectRepo={(pid) => setShowRepoModalFor(pid)}
+                onConnectRepo={handleConnectRepository}
                 onViewJoinRequests={handleViewJoinRequests}
                 hasRepository={Boolean(project.repositoryUrl || project.repositoryLink || project.RepositoryLink)}
                 isProjectAdmin={project.isAdmin}
@@ -390,34 +408,16 @@ const MyProjects = () => {
           </div>
         )}
       </div>
-      {showRepoModalFor && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-            <h3 className="text-lg font-semibold mb-2">Connect GitHub Repository</h3>
-            <p className="text-sm mb-3">Create a repository on GitHub and paste the URL here.</p>
-            <label className="block text-sm font-medium mb-1">Repository URL (required)</label>
-            <input
-              type="url"
-              value={repoUrl}
-              onChange={(e) => setRepoUrl(e.target.value.trim())}
-              placeholder="https://github.com/owner/repo"
-              className="w-full rounded-lg border px-3 py-2"
-              required
-            />
-            <div className="mt-4 flex gap-2 justify-end">
-              <button className="btn-ghost" onClick={() => { setShowRepoModalFor(null); setRepoUrl(""); }}>
-                Cancel
-              </button>
-              <button
-                className="btn-primary px-4 py-2 rounded-xl font-medium"
-                disabled={!/^https?:\/\/(www\.)?github\.com\/[^\/\s]+\/[^\/\s#]+\/?$/.test(repoUrl) || savingRepo}
-                onClick={() => handleConnectRepository(showRepoModalFor)}
-              >
-                {savingRepo ? 'Connecting…' : 'Create repository connection'}
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Repository Modal */}
+      {showRepositoryModal && selectedProjectForRepo && (
+        <RepositoryModal
+          isOpen={showRepositoryModal}
+          onClose={handleCloseRepositoryModal}
+          projectName={selectedProjectForRepo.name}
+          onSave={handleSaveRepository}
+          loading={savingRepo}
+          currentUrl={selectedProjectForRepo.currentUrl}
+        />
       )}
       {showToast && (
         <Toast
