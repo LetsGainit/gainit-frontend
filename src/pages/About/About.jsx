@@ -1,4 +1,5 @@
 import './About.css';
+import { Link } from 'react-router-dom';
 
 function About(){
     return (
@@ -127,9 +128,9 @@ function About(){
                             place for you here.
                         </p>
                         <div className="about-cta">
-                            <a href="/" className="about-cta-button">
+                            <Link to="/" className="about-cta-button">
                                 Get Started Today
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>
