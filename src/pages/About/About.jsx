@@ -127,7 +127,7 @@ function About(){
                             place for you here.
                         </p>
                         <div className="about-cta">
-                            <a href="/choose-role" className="about-cta-button">
+                            <a href="/" className="about-cta-button">
                                 Get Started Today
                             </a>
                         </div>
