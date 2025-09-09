@@ -196,7 +196,7 @@ const AIInsight = () => {
       <div className="ai-insight-header">
         <div className="header-content">
           <div className="header-icon">
-            <Brain className="w-8 h-8 text-indigo-600" />
+            <Brain />
           </div>
           <div className="header-text">
             <h1 className="page-title">Smart Summary</h1>
