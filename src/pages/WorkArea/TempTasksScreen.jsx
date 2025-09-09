@@ -172,23 +172,76 @@ const TempTasksScreen = () => {
   const statusGroups = Object.entries(groupedTasks).filter(([_, taskList]) => Array.isArray(taskList) && taskList && taskList.length > 0);
 
   return (
-    <div className="my-tasks-container">
-      {/* Add Task Button */}
-      <div className="my-tasks-header">
-        <button 
-          className="add-task-button"
-          onClick={() => {
-            // TODO: Implement add task functionality
-            console.log('Add task clicked');
-          }}
-        >
-          <Plus size={16} />
-          Add Task
-        </button>
+    <div className="temp-tasks-dashboard">
+      {/* Dashboard Header */}
+      <div className="dashboard-header">
+        <div className="header-left">
+          <h1 className="dashboard-title">Task Dashboard</h1>
+          <p className="dashboard-subtitle">Your project tasks at a glance</p>
+        </div>
+        <div className="header-right">
+          <button 
+            className="action-button primary"
+            onClick={() => {
+              // TODO: Implement add task functionality
+              console.log('Add task clicked');
+            }}
+          >
+            <Plus size={18} />
+            New Task
+          </button>
+          <button 
+            className="action-button secondary"
+            onClick={handleRefresh}
+            disabled={loading}
+          >
+            {loading ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
       </div>
 
-      {/* Content */}
-      <div className="my-tasks-content">
+      {/* Dashboard Stats */}
+      <div className="dashboard-stats">
+        <div className="stat-card">
+          <div className="stat-icon todo">
+            <ClipboardList size={24} />
+          </div>
+          <div className="stat-content">
+            <span className="stat-number">{groupedTasks.Todo?.length || 0}</span>
+            <span className="stat-label">To Do</span>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon in-progress">
+            <Loader size={24} />
+          </div>
+          <div className="stat-content">
+            <span className="stat-number">{groupedTasks.InProgress?.length || 0}</span>
+            <span className="stat-label">In Progress</span>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon blocked">
+            <AlertCircle size={24} />
+          </div>
+          <div className="stat-content">
+            <span className="stat-number">{groupedTasks.Blocked?.length || 0}</span>
+            <span className="stat-label">Blocked</span>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon done">
+            <CheckCircle2 size={24} />
+          </div>
+          <div className="stat-content">
+            <span className="stat-number">{groupedTasks.Done?.length || 0}</span>
+            <span className="stat-label">Completed</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Dashboard Content */}
+      <div className="dashboard-content">
         {/* Loading State */}
         {loading && (
           <div className="loading-state">
@@ -238,69 +291,81 @@ const TempTasksScreen = () => {
           </div>
         )}
 
-        {/* Tasks Grid with Status Groups */}
+        {/* Tasks Timeline View */}
         {!loading && !error && safeTasks.length > 0 && (
-          <div className="my-tasks-grid">
-            {statusGroups.map(([status, statusTasks]) => {
-              const config = getStatusGroupConfig(status);
-              return (
-                <div
-                  key={status}
-                  className={`status-group ${config.bgClass}`}
-                >
-                  <div className="status-group-header">
-                    <div className="status-group-title-container">
-                      <config.icon 
-                        size={20} 
-                        className={`status-group-icon ${config.iconColor} ${status === 'InProgress' ? 'animate-spin' : ''}`} 
-                      />
-                      <h3 className="status-group-title">{config.title}</h3>
-                    </div>
-                    <span className="status-group-count">{Array.isArray(statusTasks) ? statusTasks.length : 0}</span>
+          <div className="tasks-timeline">
+            <div className="timeline-header">
+              <h2 className="timeline-title">Task Timeline</h2>
+              <div className="timeline-filters">
+                <span className="filter-badge">All Tasks</span>
+                <span className="filter-badge">Recent</span>
+                <span className="filter-badge">High Priority</span>
+              </div>
+            </div>
+            
+            <div className="timeline-container">
+              {safeTasks.map((task, index) => (
+                <div key={task.taskId} className={`timeline-item ${task.status?.toLowerCase()}`}>
+                  <div className="timeline-marker">
+                    <div className={`marker-dot ${task.priority?.toLowerCase()}`}></div>
+                    {index < safeTasks.length - 1 && <div className="timeline-line"></div>}
                   </div>
-                  <div className="status-group-content">
-                    {Array.isArray(statusTasks) && statusTasks.map((task) => (
-                      <div key={task.taskId} className="task-card">
-                        <div className="task-header">
-                          <h4 className="task-title">{task.title}</h4>
-                          <div className="task-badges">
-                            <span className={`priority-badge priority-${task.priority?.toLowerCase()}`}>
-                              {task.priority}
-                            </span>
-                            <span className={`status-badge status-${task.status?.toLowerCase()}`}>
-                              {task.status}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        {task.description && (
-                          <p className="task-description">
-                            {task.description.length > 100 
-                              ? `${task.description.substring(0, 100)}...` 
-                              : task.description
-                            }
-                          </p>
-                        )}
-                        
-                        <div className="task-meta">
-                          <div className="task-info">
-                            <span className="task-type">{task.type}</span>
+                  
+                  <div className="timeline-content">
+                    <div className="task-card-modern">
+                      <div className="task-header-modern">
+                        <div className="task-title-section">
+                          <h3 className="task-title-modern">{task.title}</h3>
+                          <div className="task-meta-modern">
+                            <span className="task-type-modern">{task.type}</span>
                             {task.milestoneTitle && (
-                              <span className="task-milestone">Milestone: {task.milestoneTitle}</span>
+                              <span className="task-milestone-modern">• {task.milestoneTitle}</span>
                             )}
                           </div>
-                          <div className="task-progress">
-                            <span className="subtask-count">
-                              {task.completedSubtaskCount}/{task.subtaskCount} subtasks
-                            </span>
-                          </div>
+                        </div>
+                        <div className="task-badges-modern">
+                          <span className={`priority-badge-modern ${task.priority?.toLowerCase()}`}>
+                            {task.priority}
+                          </span>
+                          <span className={`status-badge-modern ${task.status?.toLowerCase()}`}>
+                            {task.status}
+                          </span>
                         </div>
                       </div>
-                    ))}
+                      
+                      {task.description && (
+                        <p className="task-description-modern">
+                          {task.description.length > 120 
+                            ? `${task.description.substring(0, 120)}...` 
+                            : task.description
+                          }
+                        </p>
+                      )}
+                      
+                      <div className="task-footer-modern">
+                        <div className="task-progress-modern">
+                          <div className="progress-bar">
+                            <div 
+                              className="progress-fill" 
+                              style={{
+                                width: `${task.subtaskCount > 0 ? (task.completedSubtaskCount / task.subtaskCount) * 100 : 0}%`
+                              }}
+                            ></div>
+                          </div>
+                          <span className="progress-text">
+                            {task.completedSubtaskCount}/{task.subtaskCount} subtasks
+                          </span>
+                        </div>
+                        <div className="task-actions">
+                          <button className="action-btn">View</button>
+                          <button className="action-btn">Edit</button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
         )}
       </div>
