@@ -3,7 +3,7 @@ import { getAccessToken } from '../auth/auth';
 
 const api = axios.create({
   baseURL: 'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api',
-  timeout: 10000, // 10 second timeout
+  timeout: 30000, // 30 second timeout for search operations
 });
 
 // Request interceptor to add Authorization header

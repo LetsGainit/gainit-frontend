@@ -3,7 +3,7 @@ import axios from 'axios';
 // Public API instance without authentication
 const publicApi = axios.create({
   baseURL: 'https://gainitwebapp-dvhfcxbkezgyfwf6.israelcentral-01.azurewebsites.net/api',
-  timeout: 10000, // 10 second timeout
+  timeout: 30000, // 30 second timeout for search operations
 });
 
 // Request interceptor for logging (no auth)
